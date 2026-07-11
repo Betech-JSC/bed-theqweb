@@ -6,7 +6,11 @@ import Image from "@/Components/Image";
 import { PhoneIcon } from "./icons";
 import { Menu, X, ChevronDown } from "lucide-react";
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  forceWhiteBg?: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -47,7 +51,7 @@ export const Header: React.FC = () => {
     return url === href || url.startsWith(href);
   };
 
-  const isWhiteHeader = isSticky || isHovered;
+  const isWhiteHeader = forceWhiteBg || isSticky || isHovered;
 
   return (
     <header className="w-full z-[999] absolute top-0 left-0">
@@ -73,8 +77,8 @@ export const Header: React.FC = () => {
           isSticky
             ? "fixed top-0 left-0 bg-white/95 backdrop-blur-md shadow-md py-3.5 md:py-4 px-4 md:px-[10%] text-dark-bg"
             : `relative py-6 md:py-8 px-4 md:px-[10%] ${
-                isHovered
-                  ? "bg-white/95 backdrop-blur-md shadow-md text-dark-bg"
+                (forceWhiteBg || isHovered)
+                  ? "bg-white border-b border-gray-100 text-dark-bg shadow-sm"
                   : "bg-transparent text-white"
               }`
         }`}
