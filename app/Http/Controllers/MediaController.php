@@ -135,6 +135,32 @@ class MediaController extends Controller
         return response()->json([
             'success' => true
         ]);
+     }
+
+    /**
+     * Delete multiple media files.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:media_files,id'
+        ]);
+
+        foreach ($validated['ids'] as $id) {
+            $file = MediaFile::find($id);
+            if ($file) {
+                $physicalPath = public_path($file->path);
+                if (File::exists($physicalPath)) {
+                    File::delete($physicalPath);
+                }
+                $file->delete();
+            }
+        }
+
+        return response()->json([
+            'success' => true
+        ]);
     }
 
     /**

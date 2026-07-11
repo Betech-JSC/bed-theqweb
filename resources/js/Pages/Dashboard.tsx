@@ -819,6 +819,7 @@ export default function Dashboard({
   const [allMediaFolders, setAllMediaFolders] = useState<any[]>([]);
   const [mediaBreadcrumbs, setMediaBreadcrumbs] = useState<any[]>([]);
   const [mediaSearchQuery, setMediaSearchQuery] = useState("");
+  const [selectedMediaIds, setSelectedMediaIds] = useState<number[]>([]);
   const [mediaLoading, setMediaLoading] = useState(false);
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
@@ -838,6 +839,7 @@ export default function Dashboard({
 
   const fetchMedia = useCallback(async (folderId: number | null) => {
     setMediaLoading(true);
+    setSelectedMediaIds([]);
     try {
       const response = await axios.get(`/admin/media`, {
         params: { folder_id: folderId }
@@ -927,6 +929,22 @@ export default function Dashboard({
     } catch (err) {
       console.error("Lỗi khi xóa tệp:", err);
       alert("Xóa tệp thất bại!");
+    }
+  };
+
+  const handleBulkDeleteMediaFiles = async () => {
+    if (selectedMediaIds.length === 0) return;
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selectedMediaIds.length} tệp đã chọn vĩnh viễn?`)) return;
+    setMediaLoading(true);
+    try {
+      await axios.post('/admin/media/files/bulk-delete', { ids: selectedMediaIds });
+      setSelectedMediaIds([]);
+      fetchMedia(currentFolderId);
+    } catch (err) {
+      console.error("Lỗi khi xóa hàng loạt tệp:", err);
+      alert("Xóa tệp thất bại!");
+    } finally {
+      setMediaLoading(false);
     }
   };
 
@@ -4706,25 +4724,57 @@ export default function Dashboard({
                           .map((file) => (
                             <div
                               key={file.id}
-                              className="group relative border border-gray-150 hover:border-gold/40 rounded-xl overflow-hidden bg-white hover:shadow-md transition-all flex flex-col"
+                              onClick={() => {
+                                setSelectedMediaIds(prev => 
+                                  prev.includes(file.id) 
+                                    ? prev.filter(id => id !== file.id) 
+                                    : [...prev, file.id]
+                                );
+                              }}
+                              className={`group relative border rounded-xl overflow-hidden bg-white hover:shadow-md transition-all flex flex-col cursor-pointer select-none ${
+                                selectedMediaIds.includes(file.id)
+                                  ? "border-gold ring-2 ring-gold/25"
+                                  : "border-gray-150 hover:border-gold/40"
+                              }`}
                             >
+                              {/* Selection Checkbox indicator */}
+                              <div className={`absolute top-2 left-2 z-10 transition-opacity duration-200 ${
+                                selectedMediaIds.includes(file.id) ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                              }`}>
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                                  selectedMediaIds.includes(file.id)
+                                    ? "bg-gold border-gold text-white"
+                                    : "bg-white/85 border-gray-350 hover:border-gold backdrop-blur-sm"
+                                }`}>
+                                  {selectedMediaIds.includes(file.id) && (
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                                      <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                </div>
+                              </div>
+
                               {/* Action buttons inside card */}
-                              <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                 <button
                                   type="button"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     navigator.clipboard.writeText(window.location.origin + file.path);
                                     alert("Đã sao chép đường dẫn hình ảnh!");
                                   }}
-                                  className="p-1 text-gray-700 hover:text-gold rounded bg-white/90 shadow-sm"
+                                  className="p-1 text-gray-700 hover:text-gold rounded bg-white/90 shadow-sm border-0 cursor-pointer animate-fade-in"
                                   title="Sao chép link"
                                 >
                                   <LinkIcon size={12} />
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => handleDeleteMediaFile(file.id)}
-                                  className="p-1 text-gray-700 hover:text-red-500 rounded bg-white/90 shadow-sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteMediaFile(file.id);
+                                  }}
+                                  className="p-1 text-gray-700 hover:text-red-500 rounded bg-white/90 shadow-sm border-0 cursor-pointer animate-fade-in"
                                   title="Xóa tệp"
                                 >
                                   <Trash size={12} />

@@ -225,6 +225,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/admin/media/folder/{folder}', [MediaController::class, 'deleteFolder'])->name('admin.media.folder.destroy');
     Route::post('/admin/media/upload', [MediaController::class, 'upload'])->name('admin.media.upload');
     Route::delete('/admin/media/file/{file}', [MediaController::class, 'destroy'])->name('admin.media.file.destroy');
+    Route::post('/admin/media/files/bulk-delete', [MediaController::class, 'bulkDestroy'])->name('admin.media.files.bulk-delete');
 });
 
 // Profile settings (Laravel default)
