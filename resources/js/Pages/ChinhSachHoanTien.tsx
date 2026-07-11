@@ -1,12 +1,43 @@
 import React from "react";
-import { Link, Head } from "@inertiajs/react";
+import { Link, Head, usePage } from "@inertiajs/react";
 import { Header } from "@/Components/Header";
 import { Footer } from "@/Components/Footer";
 import { ChevronRight } from "lucide-react";
 
-
-
 export default function ChinhSachHoanTienPage() {
+  const { props } = usePage();
+  const settings = (props.settings as Record<string, string>) || {};
+
+  const defaultContent = `<div>
+              <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">1. Nguyên tắc chung</h2>
+              <p class="mb-4">
+                Do đặc thù các dịch vụ tại KT Beauty Medical Centre là dịch vụ chăm sóc sức khỏe và thẩm mỹ được thực hiện trực tiếp, chúng tôi không áp dụng chính sách hoàn trả tiền mặt hoặc hủy ngang đối với các dịch vụ đã được thực hiện xong dựa trên sự đồng ý trước đó của khách hàng.
+              </p>
+            </div>
+
+            <div class="mt-8">
+              <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">2. Các trường hợp được xem xét giải quyết hoàn tiền/đổi dịch vụ</h2>
+              <p class="mb-4">
+                KT Beauty Medical Centre sẽ tiếp nhận và xử lý hoàn tiền hoặc chuyển đổi giá trị dịch vụ tương đương trong các trường hợp đặc biệt sau:
+              </p>
+              <ul class="list-disc list-inside pl-4 space-y-2 text-gray-600">
+                <li><strong class="text-dark-bg">Lỗi giao dịch tài chính:</strong> Khách hàng chuyển khoản thừa, chuyển khoản trùng lặp do lỗi hệ thống ngân hàng hoặc nhầm lẫn trong quá trình thao tác.</li>
+                <li><strong class="text-dark-bg">Lý do bất khả kháng từ phía Trung tâm:</strong> Lịch hẹn bị hủy từ phía trung tâm mà không thể sắp xếp được lịch thay thế phù hợp với khách hàng, hoặc trung tâm không đáp ứng được đúng dịch vụ như đã cam kết trong hợp đồng gói dịch vụ (nếu có).</li>
+                <li><strong class="text-dark-bg">Lý do y khoa từ phía khách hàng:</strong> Khách hàng đã mua gói dịch vụ nhưng phát sinh tình trạng sức khỏe đột xuất (có xác nhận của bác sĩ chuyên khoa) chỉ định không thể tiếp tục sử dụng liệu trình thẩm mỹ đó.</li>
+              </ul>
+            </div>
+
+            <div class="mt-8">
+              <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">3. Quy trình và thời gian xử lý hoàn tiền</h2>
+              <ul class="list-decimal list-inside pl-4 space-y-2 text-gray-600">
+                <li><strong class="text-dark-bg">Bước 1:</strong> Khách hàng gửi yêu cầu hỗ trợ qua Hotline: 19005006 hoặc đến trực tiếp trung tâm để lập biên bản xác nhận.</li>
+                <li><strong class="text-dark-bg">Bước 2:</strong> Bộ phận kế toán và CSKH của KT Beauty Medical Centre sẽ tiến hành xác minh thông tin giao dịch trong vòng 03 đến 05 ngày làm việc.</li>
+                <li><strong class="text-dark-bg">Bước 3:</strong> Nếu yêu cầu hợp lệ, tiền sẽ được hoàn trả lại cho khách hàng thông qua hình thức chuyển khoản ngân hàng trong vòng 07 ngày làm việc tiếp theo.</li>
+              </ul>
+            </div>`;
+
+  const content = settings.policy_chinh_sach_hoan_tien || defaultContent;
+
   return (
     <><Head title="Chính Sách Hoàn Tiền | KT Beauty" />
       <Header />
@@ -30,35 +61,10 @@ export default function ChinhSachHoanTienPage() {
 
         {/* Content Body */}
         <section className="py-16 px-4 md:px-0">
-          <div className="max-w-3xl mx-auto text-left text-gray-700 leading-relaxed font-light text-sm md:text-base space-y-8">
-            <div>
-              <h2 className="text-xl font-serif font-bold text-dark-bg mb-4">1. Nguyên tắc chung</h2>
-              <p>
-                Do đặc thù các dịch vụ tại KT Beauty Medical Centre là dịch vụ chăm sóc sức khỏe và thẩm mỹ được thực hiện trực tiếp, chúng tôi không áp dụng chính sách hoàn trả tiền mặt hoặc hủy ngang đối với các dịch vụ đã được thực hiện xong dựa trên sự đồng ý trước đó của khách hàng.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-xl font-serif font-bold text-dark-bg mb-4">2. Các trường hợp được xem xét giải quyết hoàn tiền/đổi dịch vụ</h2>
-              <p className="mb-4">
-                KT Beauty Medical Centre sẽ tiếp nhận và xử lý hoàn tiền hoặc chuyển đổi giá trị dịch vụ tương đương trong các trường hợp đặc biệt sau:
-              </p>
-              <ul className="list-disc list-inside pl-4 space-y-2 text-gray-600">
-                <li><strong className="text-dark-bg">Lỗi giao dịch tài chính:</strong> Khách hàng chuyển khoản thừa, chuyển khoản trùng lặp do lỗi hệ thống ngân hàng hoặc nhầm lẫn trong quá trình thao tác.</li>
-                <li><strong className="text-dark-bg">Lý do bất khả kháng từ phía Trung tâm:</strong> Lịch hẹn bị hủy từ phía trung tâm mà không thể sắp xếp được lịch thay thế phù hợp với khách hàng, hoặc trung tâm không đáp ứng được đúng dịch vụ như đã cam kết trong hợp đồng gói dịch vụ (nếu có).</li>
-                <li><strong className="text-dark-bg">Lý do y khoa từ phía khách hàng:</strong> Khách hàng đã mua gói dịch vụ nhưng phát sinh tình trạng sức khỏe đột xuất (có xác nhận của bác sĩ chuyên khoa) chỉ định không thể tiếp tục sử dụng liệu trình thẩm mỹ đó.</li>
-              </ul>
-            </div>
-
-            <div>
-              <h2 className="text-xl font-serif font-bold text-dark-bg mb-4">3. Quy trình và thời gian xử lý hoàn tiền</h2>
-              <ul className="list-decimal list-inside pl-4 space-y-2 text-gray-600">
-                <li><strong className="text-dark-bg">Bước 1:</strong> Khách hàng gửi yêu cầu hỗ trợ qua Hotline: 19005006 hoặc đến trực tiếp trung tâm để lập biên bản xác nhận.</li>
-                <li><strong className="text-dark-bg">Bước 2:</strong> Bộ phận kế toán và CSKH của KT Beauty Medical Centre sẽ tiến hành xác minh thông tin giao dịch trong vòng 03 đến 05 ngày làm việc.</li>
-                <li><strong className="text-dark-bg">Bước 3:</strong> Nếu yêu cầu hợp lệ, tiền sẽ được hoàn trả lại cho khách hàng thông qua hình thức chuyển khoản ngân hàng trong vòng 07 ngày làm việc tiếp theo.</li>
-              </ul>
-            </div>
-          </div>
+          <div 
+            className="max-w-3xl mx-auto text-left text-gray-700 leading-relaxed font-light text-sm md:text-base space-y-8 rich-text-content"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
         </section>
       </main>
       <Footer />

@@ -627,8 +627,10 @@ export default function Dashboard({
   const user = (props.auth as any).user;
 
   const [activeTab, setActiveTab] = useState<
-    "overview" | "submissions" | "articles" | "services" | "banners" | "doctors" | "faqs" | "settings" | "realResults" | "media" | "configs" | "intro"
+    "overview" | "submissions" | "articles" | "services" | "banners" | "doctors" | "faqs" | "settings" | "realResults" | "media" | "configs" | "intro" | "policies"
   >("overview");
+
+  const [activePolicyTab, setActivePolicyTab] = useState("dieu-khoan");
 
   // Search States
   const [articleSearchTerm, setArticleSearchTerm] = useState("");
@@ -802,6 +804,11 @@ export default function Dashboard({
       intro_story_image_1: settings.intro_story_image_1 || "/images/Workshop-1.png",
       intro_story_image_2: settings.intro_story_image_2 || "/images/ultherapy-APAC.jpg",
       intro_story_image_3: settings.intro_story_image_3 || "/images/1-size-web.png",
+      policy_dieu_khoan_su_dung: settings.policy_dieu_khoan_su_dung || "",
+      policy_chinh_sach_bao_mat: settings.policy_chinh_sach_bao_mat || "",
+      policy_chinh_sach_thanh_toan: settings.policy_chinh_sach_thanh_toan || "",
+      policy_chinh_sach_hoan_tien: settings.policy_chinh_sach_hoan_tien || "",
+      policy_tuyen_bo_mien_tru_trach_nhiem: settings.policy_tuyen_bo_mien_tru_trach_nhiem || "",
     },
   });
 
@@ -1446,6 +1453,18 @@ export default function Dashboard({
             >
               <Info size={16} />
               <span>Quản lý giới thiệu</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("policies")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                activeTab === "policies"
+                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                  : "hover:bg-white/5 hover:text-white text-gray-400"
+              }`}
+            >
+              <FileText size={16} />
+              <span>Quản lý chính sách</span>
             </button>
 
             <button
@@ -5378,6 +5397,122 @@ export default function Dashboard({
                       className="px-8 py-3 bg-gold hover:bg-gold-dark text-white font-bold rounded text-sm shadow-md transition-colors disabled:opacity-50"
                     >
                       {settingsForm.processing ? "Đang lưu cấu hình..." : "Lưu Cấu Hình Trang Giới Thiệu"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* POLICIES TAB */}
+            {activeTab === "policies" && (
+              <div>
+                <h3 className="text-lg font-bold font-serif text-gray-800 mb-6">Quản Lý Nội Dung Trang Chính Sách</h3>
+                
+                {/* Policy Tabs */}
+                <div className="flex border-b border-gray-200 mb-6 overflow-x-auto gap-2">
+                  {[
+                    { key: "dieu-khoan", label: "Điều khoản sử dụng" },
+                    { key: "bao-mat", label: "Chính sách bảo mật" },
+                    { key: "thanh-toan", label: "Chính sách thanh toán" },
+                    { key: "hoan-tien", label: "Chính sách hoàn tiền" },
+                    { key: "mien-tru", label: "Miễn trừ trách nhiệm" },
+                  ].map((p, idx) => (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={() => setActivePolicyTab(p.key)}
+                      className={`px-4 py-2 text-xs font-semibold whitespace-nowrap border-b-2 transition-all ${
+                        activePolicyTab === p.key
+                          ? "border-gold text-gold"
+                          : "border-transparent text-gray-400 hover:text-gray-600"
+                      }`}
+                    >
+                      {idx + 1}. {p.label}
+                    </button>
+                  ))}
+                </div>
+
+                <form onSubmit={handleSaveSettings} className="max-w-4xl space-y-8 text-left pb-12">
+                  <div className="bg-white border border-gray-150 rounded-xl p-6 shadow-sm space-y-6">
+                    {activePolicyTab === "dieu-khoan" && (
+                      <div className="space-y-4">
+                        <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Nội dung Điều khoản sử dụng</label>
+                        <RichTextEditor
+                          value={settingsForm.data.settings.policy_dieu_khoan_su_dung || ""}
+                          onChange={(html) => settingsForm.setData("settings", {
+                            ...settingsForm.data.settings,
+                            policy_dieu_khoan_su_dung: html
+                          })}
+                          onOpenMediaLibrary={openMediaLibraryForEditor}
+                        />
+                      </div>
+                    )}
+
+                    {activePolicyTab === "bao-mat" && (
+                      <div className="space-y-4">
+                        <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Nội dung Chính sách bảo mật</label>
+                        <RichTextEditor
+                          value={settingsForm.data.settings.policy_chinh_sach_bao_mat || ""}
+                          onChange={(html) => settingsForm.setData("settings", {
+                            ...settingsForm.data.settings,
+                            policy_chinh_sach_bao_mat: html
+                          })}
+                          onOpenMediaLibrary={openMediaLibraryForEditor}
+                        />
+                      </div>
+                    )}
+
+                    {activePolicyTab === "thanh-toan" && (
+                      <div className="space-y-4">
+                        <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Nội dung Chính sách thanh toán</label>
+                        <RichTextEditor
+                          value={settingsForm.data.settings.policy_chinh_sach_thanh_toan || ""}
+                          onChange={(html) => settingsForm.setData("settings", {
+                            ...settingsForm.data.settings,
+                            policy_chinh_sach_thanh_toan: html
+                          })}
+                          onOpenMediaLibrary={openMediaLibraryForEditor}
+                        />
+                      </div>
+                    )}
+
+                    {activePolicyTab === "hoan-tien" && (
+                      <div className="space-y-4">
+                        <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Nội dung Chính sách hoàn tiền</label>
+                        <RichTextEditor
+                          value={settingsForm.data.settings.policy_chinh_sach_hoan_tien || ""}
+                          onChange={(html) => settingsForm.setData("settings", {
+                            ...settingsForm.data.settings,
+                            policy_chinh_sach_hoan_tien: html
+                          })}
+                          onOpenMediaLibrary={openMediaLibraryForEditor}
+                        />
+                      </div>
+                    )}
+
+                    {activePolicyTab === "mien-tru" && (
+                      <div className="space-y-4">
+                        <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Nội dung Tuyên bố miễn trừ trách nhiệm</label>
+                        <RichTextEditor
+                          value={settingsForm.data.settings.policy_tuyen_bo_mien_tru_trach_nhiem || ""}
+                          onChange={(html) => settingsForm.setData("settings", {
+                            ...settingsForm.data.settings,
+                            policy_tuyen_bo_mien_tru_trach_nhiem: html
+                          })}
+                          onOpenMediaLibrary={openMediaLibraryForEditor}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* SAVE BUTTON */}
+                  <div className="flex justify-end pt-4 border-t border-gray-150">
+                    <button
+                      type="submit"
+                      disabled={settingsForm.processing}
+                      className="px-8 py-3 bg-gold hover:bg-gold-dark text-white font-bold rounded text-sm shadow-md transition-colors disabled:opacity-50"
+                    >
+                      {settingsForm.processing ? "Đang lưu cấu hình..." : "Lưu Thay Đổi Chính Sách"}
                     </button>
                   </div>
                 </form>
