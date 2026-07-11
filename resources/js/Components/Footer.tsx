@@ -62,9 +62,9 @@ export const Footer: React.FC = () => {
             Dịch Vụ Phẫu Thuật
           </h4>
           <ul className="space-y-3 text-xs md:text-sm font-light text-gray-400">
-            <li><Link href="/phau-thuat-tham-my" className="hover:text-gold transition-colors">Nâng mũi cấu trúc</Link></li>
-            <li><Link href="/phau-thuat-tham-my" className="hover:text-gold transition-colors">Cắt mí Double Eyeluxe</Link></li>
-            <li><Link href="/phau-thuat-tham-my" className="hover:text-gold transition-colors">Tạo hình môi trái tim</Link></li>
+            <li><Link href="/dich-vu/nang-mui-cau-truc-gold-line" className="hover:text-gold transition-colors">Nâng mũi cấu trúc</Link></li>
+            <li><Link href="/dich-vu/cat-mi-double-eyeluxe" className="hover:text-gold transition-colors">Cắt mí Double Eyeluxe</Link></li>
+            <li><Link href="/dich-vu/tiem-fillerbotox-tao-hinh" className="hover:text-gold transition-colors">Tạo hình môi trái tim</Link></li>
             <li><Link href="/phau-thuat-tham-my" className="hover:text-gold transition-colors">Hạ gò má, độn cằm</Link></li>
           </ul>
         </div>
@@ -75,10 +75,10 @@ export const Footer: React.FC = () => {
             Da Liễu & Trẻ Hóa
           </h4>
           <ul className="space-y-3 text-xs md:text-sm font-light text-gray-400">
-            <li><Link href="#da-lieu" className="hover:text-gold transition-colors">Cấy tinh chất Meso căng bóng</Link></li>
-            <li><Link href="#da-lieu" className="hover:text-gold transition-colors">Nâng cơ trẻ hóa Ultherapy</Link></li>
-            <li><Link href="#da-lieu" className="hover:text-gold transition-colors">Điều trị sẹo rỗ Sylfirm X</Link></li>
-            <li><Link href="#phun-xam" className="hover:text-gold transition-colors">Điêu khắc lông mày vi chạm</Link></li>
+            <li><Link href="/dich-vu/cay-tinh-chat-meso-cang-bong" className="hover:text-gold transition-colors">Cấy tinh chất Meso căng bóng</Link></li>
+            <li><Link href="/dich-vu/nang-co-tre-hoa-ultherapy" className="hover:text-gold transition-colors">Nâng cơ trẻ hóa Ultherapy</Link></li>
+            <li><Link href="/dich-vu/dieu-tri-nam-laser-cong-nghe-cao" className="hover:text-gold transition-colors">Điều trị sẹo rỗ Sylfirm X</Link></li>
+            <li><Link href="/da-lieu-tre-hoa" className="hover:text-gold transition-colors">Điêu khắc lông mày vi chạm</Link></li>
           </ul>
         </div>
 
