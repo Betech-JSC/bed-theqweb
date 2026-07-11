@@ -60,7 +60,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
         style={{ width: `${scrollProgress}%` }}
       />
       
-      <main className="flex-grow font-sans bg-gray-55/30 pt-36 md:pt-44 pb-20">
+      <main className="flex-grow font-sans bg-gray-55/30 pt-44 md:pt-52 pb-20">
         <div className="max-w-[1440px] mx-auto px-4 md:px-12 lg:px-20">
           {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-gray-400 mb-8 font-medium">
