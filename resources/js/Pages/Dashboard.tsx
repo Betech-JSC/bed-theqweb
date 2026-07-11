@@ -5526,27 +5526,30 @@ export default function Dashboard({
 
       {/* BANNER MODAL */}
       {bannerModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 shadow-xl relative text-left">
-            <button
-              onClick={() => setBannerModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-            >
-              <X size={20} />
-            </button>
-            <h3 className="text-lg font-bold font-serif text-gray-800 mb-6">
-              {editingBanner ? "Chỉnh sửa slide banner" : "Thêm slide banner mới"}
-            </h3>
+        <div className="fixed inset-0 bg-black/55 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto transition-opacity duration-300">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative text-left animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+              <h3 className="text-lg font-bold font-serif text-gray-800">
+                {editingBanner ? "Chỉnh sửa slide banner" : "Thêm slide banner mới"}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setBannerModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 hover:bg-gray-50 rounded-lg cursor-pointer bg-transparent border-0"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-            <form onSubmit={handleSaveBanner} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSaveBanner} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Nhãn phụ (Eyebrow)</label>
                   <input
                     type="text"
                     value={bannerForm.data.eyebrow}
                     onChange={(e) => bannerForm.setData("eyebrow", e.target.value)}
-                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
                     placeholder="Ví dụ: KT Beauty Medical Centre"
                   />
                 </div>
@@ -5556,20 +5559,20 @@ export default function Dashboard({
                     type="text"
                     value={bannerForm.data.title}
                     onChange={(e) => bannerForm.setData("title", e.target.value)}
-                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
                     placeholder="Ví dụ: Kiến tạo"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Tiêu đề phụ (Subtitle)</label>
                   <input
                     type="text"
                     value={bannerForm.data.subtitle}
                     onChange={(e) => bannerForm.setData("subtitle", e.target.value)}
-                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
                     placeholder="Ví dụ: Vẻ đẹp độc bản"
                   />
                 </div>
@@ -5579,90 +5582,132 @@ export default function Dashboard({
                     type="text"
                     value={bannerForm.data.description}
                     onChange={(e) => bannerForm.setData("description", e.target.value)}
-                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
                     placeholder="Nhập mô tả tóm tắt"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Desktop Image */}
                 <div>
-                  <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Ảnh PC (Desktop Image) *</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    required={!editingBanner && !bannerForm.data.image_desktop}
-                    onChange={(e) => bannerForm.setData(data => ({
-                      ...data,
-                      image_desktop_file: e.target.files?.[0] || null,
-                      image_desktop: ""
-                    }))}
-                    className="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gold/10 file:text-gold hover:file:bg-gold/20"
-                  />
+                  <label className="text-xs uppercase font-semibold text-gray-500 mb-2 block">
+                    Ảnh PC (Desktop Image) <span className="text-red-500">*</span>
+                  </label>
+                  <div
+                    onClick={() => {
+                      setOnMediaSelect(() => (path: string) => {
+                        bannerForm.setData("image_desktop", path);
+                      });
+                      setMediaSelectorOpen(true);
+                    }}
+                    className="border-2 border-dashed border-gray-250 rounded-2xl p-4 bg-gray-55/5 flex flex-col items-center justify-center min-h-[160px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all duration-300 shadow-sm"
+                  >
+                    {bannerForm.data.image_desktop ? (
+                      <div className="absolute inset-0 w-full h-full animate-fade-in">
+                        <img
+                          src={bannerForm.data.image_desktop}
+                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                          alt="Desktop Banner"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                          <span className="text-xs text-white font-bold bg-black/60 px-4 py-2 rounded-xl backdrop-blur-sm">
+                            Thay đổi hình ảnh
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-gray-400 flex flex-col items-center gap-2">
+                        <div className="p-3 bg-white rounded-full shadow-sm text-gray-400 group-hover:text-gold transition-colors duration-300">
+                          <ImageIcon size={24} className="stroke-1.5" />
+                        </div>
+                        <span className="text-xs font-semibold text-gray-500 mt-1">Chọn ảnh từ thư viện tệp</span>
+                        <span className="text-[10px] text-gray-400 font-light">Tỷ lệ khuyên dùng 16:9</span>
+                      </div>
+                    )}
+                  </div>
                   {bannerForm.data.image_desktop && (
-                    <p className="text-[10px] text-gray-500 truncate mt-1">Đã chọn: {bannerForm.data.image_desktop}</p>
+                    <div className="mt-2 flex justify-between items-center text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                      <span className="truncate max-w-[80%] font-light">{bannerForm.data.image_desktop}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          bannerForm.setData("image_desktop", "");
+                        }}
+                        className="text-red-500 hover:text-red-700 font-bold bg-transparent border-0 cursor-pointer"
+                      >
+                        Xóa
+                      </button>
+                    </div>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOnMediaSelect(() => (path: string) => {
-                        bannerForm.setData(data => ({
-                          ...data,
-                          image_desktop: path,
-                          image_desktop_file: null
-                        }));
-                      });
-                      setMediaSelectorOpen(true);
-                    }}
-                    className="text-[11px] text-gold hover:text-gold-dark font-bold mt-1.5 cursor-pointer block text-left bg-transparent border-0"
-                  >
-                    Chọn từ Thư viện
-                  </button>
                 </div>
+
+                {/* Mobile Image */}
                 <div>
-                  <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Ảnh Mobile (Tùy chọn)</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => bannerForm.setData(data => ({
-                      ...data,
-                      image_mobile_file: e.target.files?.[0] || null,
-                      image_mobile: ""
-                    }))}
-                    className="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gold/10 file:text-gold hover:file:bg-gold/20"
-                  />
-                  {bannerForm.data.image_mobile && (
-                    <p className="text-[10px] text-gray-500 truncate mt-1">Đã chọn: {bannerForm.data.image_mobile}</p>
-                  )}
-                  <button
-                    type="button"
+                  <label className="text-xs uppercase font-semibold text-gray-500 mb-2 block">
+                    Ảnh Mobile (Tùy chọn)
+                  </label>
+                  <div
                     onClick={() => {
                       setOnMediaSelect(() => (path: string) => {
-                        bannerForm.setData(data => ({
-                          ...data,
-                          image_mobile: path,
-                          image_mobile_file: null
-                        }));
+                        bannerForm.setData("image_mobile", path);
                       });
                       setMediaSelectorOpen(true);
                     }}
-                    className="text-[11px] text-gold hover:text-gold-dark font-bold mt-1.5 cursor-pointer block text-left bg-transparent border-0"
+                    className="border-2 border-dashed border-gray-250 rounded-2xl p-4 bg-gray-55/5 flex flex-col items-center justify-center min-h-[160px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all duration-300 shadow-sm"
                   >
-                    Chọn từ Thư viện
-                  </button>
+                    {bannerForm.data.image_mobile ? (
+                      <div className="absolute inset-0 w-full h-full animate-fade-in">
+                        <img
+                          src={bannerForm.data.image_mobile}
+                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                          alt="Mobile Banner"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
+                          <span className="text-xs text-white font-bold bg-black/60 px-4 py-2 rounded-xl backdrop-blur-sm">
+                            Thay đổi hình ảnh
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-gray-400 flex flex-col items-center gap-2">
+                        <div className="p-3 bg-white rounded-full shadow-sm text-gray-400 group-hover:text-gold transition-colors duration-300">
+                          <ImageIcon size={24} className="stroke-1.5" />
+                        </div>
+                        <span className="text-xs font-semibold text-gray-500 mt-1">Chọn ảnh từ thư viện tệp</span>
+                        <span className="text-[10px] text-gray-400 font-light">Tỷ lệ khuyên dùng 4:5 hoặc 9:16</span>
+                      </div>
+                    )}
+                  </div>
+                  {bannerForm.data.image_mobile && (
+                    <div className="mt-2 flex justify-between items-center text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                      <span className="truncate max-w-[80%] font-light">{bannerForm.data.image_mobile}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          bannerForm.setData("image_mobile", "");
+                        }}
+                        className="text-red-500 hover:text-red-700 font-bold bg-transparent border-0 cursor-pointer"
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="border-t border-gray-50 pt-3">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Nút liên kết chính (Primary CTA)</h4>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="border-t border-gray-100 pt-5 mt-5">
+                <h4 className="text-xs font-bold text-gold uppercase tracking-wider mb-4">Nút liên kết chính (Primary CTA)</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Chữ hiển thị</label>
                     <input
                       type="text"
                       value={bannerForm.data.button_primary_text}
                       onChange={(e) => bannerForm.setData("button_primary_text", e.target.value)}
-                      className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                      className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none"
                       placeholder="Đăng Ký Tư Vấn"
                     />
                   </div>
@@ -5672,23 +5717,23 @@ export default function Dashboard({
                       type="text"
                       value={bannerForm.data.button_primary_url}
                       onChange={(e) => bannerForm.setData("button_primary_url", e.target.value)}
-                      className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                      className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none"
                       placeholder="#consult"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="border-t border-gray-50 pt-3">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Nút liên kết phụ (Secondary CTA)</h4>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="border-t border-gray-100 pt-5 mt-5">
+                <h4 className="text-xs font-bold text-gold uppercase tracking-wider mb-4">Nút liên kết phụ (Secondary CTA)</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Chữ hiển thị</label>
                     <input
                       type="text"
                       value={bannerForm.data.button_secondary_text}
                       onChange={(e) => bannerForm.setData("button_secondary_text", e.target.value)}
-                      className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                      className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none"
                       placeholder="Tìm Hiểu Dịch Vụ"
                     />
                   </div>
@@ -5698,21 +5743,21 @@ export default function Dashboard({
                       type="text"
                       value={bannerForm.data.button_secondary_url}
                       onChange={(e) => bannerForm.setData("button_secondary_url", e.target.value)}
-                      className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                      className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none"
                       placeholder="#services"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 border-t border-gray-50 pt-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-100 pt-5 mt-5">
                 <div>
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Thứ tự hiển thị (Order)</label>
                   <input
                     type="number"
                     value={bannerForm.data.order}
                     onChange={(e) => bannerForm.setData("order", parseInt(e.target.value) || 0)}
-                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none"
                   />
                 </div>
                 <div>
@@ -5720,7 +5765,7 @@ export default function Dashboard({
                   <select
                     value={bannerForm.data.is_active}
                     onChange={(e) => bannerForm.setData("is_active", parseInt(e.target.value))}
-                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none text-gray-600"
+                    className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none text-gray-600"
                   >
                     <option value={1}>Kích hoạt</option>
                     <option value={0}>Tạm ẩn</option>
@@ -5728,18 +5773,18 @@ export default function Dashboard({
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-6">
                 <button
                   type="button"
                   onClick={() => setBannerModalOpen(false)}
-                  className="px-4 py-2 border border-gray-200 text-gray-500 hover:bg-gray-50 rounded text-sm transition-colors"
+                  className="px-6 py-2.5 border border-gray-250 text-gray-500 hover:bg-gray-50 rounded-xl text-sm font-semibold transition-all duration-200"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={bannerForm.processing}
-                  className="px-5 py-2 bg-gold hover:bg-gold-dark text-white font-bold rounded text-sm shadow-sm transition-colors disabled:opacity-50"
+                  className="px-6 py-2.5 bg-gold hover:bg-gold-dark text-white font-bold rounded-xl text-sm shadow-md transition-all duration-200 disabled:opacity-50"
                 >
                   {bannerForm.processing ? "Đang xử lý..." : "Lưu lại"}
                 </button>
