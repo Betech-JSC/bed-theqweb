@@ -104,7 +104,7 @@ export const Header: React.FC = () => {
                   <div key={link.name} className="group static flex items-center">
                     <Link
                       href={link.href}
-                      className={`flex items-center gap-1 relative py-1 transition-colors duration-200 focus:outline-none translate-y-[3px] ${
+                      className={`flex items-center gap-1 relative py-1 transition-colors duration-200 focus:outline-none ${
                         isServicesActive
                           ? "text-gold"
                           : isWhiteHeader
