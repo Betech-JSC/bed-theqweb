@@ -34,6 +34,23 @@ export const RealResults: React.FC<RealResultsProps> = ({ results = [] }) => {
 
   const filteredResults = results.filter((item) => item.category === activeTab);
 
+  const getServiceLink = (category: string) => {
+    switch (category.toLowerCase()) {
+      case "eyeluxe":
+        return "/dich-vu/cat-mi-double-eyeluxe";
+      case "sylfirm":
+        return "/dich-vu/dieu-tri-nam-laser-cong-nghe-cao";
+      case "meso":
+        return "/dich-vu/cay-tinh-chat-meso-cang-bong";
+      case "pro-lift":
+        return "/dich-vu/nang-co-tre-hoa-ultherapy";
+      case "hya":
+        return "/dich-vu/tiem-fillerbotox-tao-hinh";
+      default:
+        return "/dich-vu";
+    }
+  };
+
   return (
     <section className="bg-light-bg py-16 md:py-20 px-4 md:px-[10%] font-sans">
       <div className="max-w-7xl mx-auto">
@@ -70,58 +87,74 @@ export const RealResults: React.FC<RealResultsProps> = ({ results = [] }) => {
 
         {/* Results Cards Grid */}
         <div className="grid grid-cols-12 gap-8 min-h-[400px]">
-          {filteredResults.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => {
-                if (item.is_video && item.video) {
-                  setActiveVideo(item.video);
-                }
-              }}
-              className={`col-span-12 md:col-span-6 lg:col-span-4 bg-white rounded-2xl overflow-hidden border border-beige-bg/40 shadow-sm flex flex-col group hover:-translate-y-1.5 hover:shadow-md hover:border-gold/30 transition-all duration-300 ${
-                item.is_video ? "cursor-pointer" : ""
-              }`}
-            >
-              {/* Image Container with Before/After tags */}
-              <div className="relative w-full aspect-square overflow-hidden bg-gray-100 p-1 bg-white">
-                <div className="relative w-full h-full rounded-xl overflow-hidden">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  />
-                </div>
-
-                {/* Video Play Overlay */}
-                {(item.is_video || item.isVideo) && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/40 transition-colors z-10 rounded-xl m-1">
-                    <div className="bg-white/95 text-gold p-3.5 rounded-full shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                      <PlayIcon size={32} />
-                    </div>
+          {filteredResults.map((item) => {
+            const isVideoCard = !!(item.is_video && item.video);
+            
+            const cardContent = (
+              <>
+                {/* Image Container with Before/After tags */}
+                <div className="relative w-full aspect-square overflow-hidden bg-gray-100 p-1 bg-white">
+                  <div className="relative w-full h-full rounded-xl overflow-hidden">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    />
                   </div>
-                )}
 
-                {/* Left/Right Overlays */}
-                <div className="absolute top-5 left-5 bg-black/60 text-white font-bold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md z-20">
-                  Trước
-                </div>
-                <div className="absolute top-5 right-5 bg-gold/90 text-white font-bold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md z-20">
-                  Sau
-                </div>
-              </div>
+                  {/* Video Play Overlay */}
+                  {(item.is_video || item.isVideo) && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/40 transition-colors z-10 rounded-xl m-1">
+                      <div className="bg-white/95 text-gold p-3.5 rounded-full shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                        <PlayIcon size={32} />
+                      </div>
+                    </div>
+                  )}
 
-              {/* Description Details */}
-              <div className="p-6 text-left flex flex-col flex-grow">
-                <h3 className="text-lg font-serif font-bold text-dark-bg mb-2 group-hover:text-gold transition-colors duration-250">
-                  {item.title}
-                </h3>
-                <p className="text-xs md:text-sm text-gray-500 font-light leading-relaxed">
-                  {item.detail}
-                </p>
-              </div>
-            </div>
-          ))}
+                  {/* Left/Right Overlays */}
+                  <div className="absolute top-5 left-5 bg-black/60 text-white font-bold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md z-20">
+                    Trước
+                  </div>
+                  <div className="absolute top-5 right-5 bg-gold/90 text-white font-bold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md z-20">
+                    Sau
+                  </div>
+                </div>
+
+                {/* Description Details */}
+                <div className="p-6 text-left flex flex-col flex-grow">
+                  <h3 className="text-lg font-serif font-bold text-dark-bg mb-2 group-hover:text-gold transition-colors duration-250">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs md:text-sm text-gray-500 font-light leading-relaxed">
+                    {item.detail}
+                  </p>
+                </div>
+              </>
+            );
+
+            if (isVideoCard) {
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => setActiveVideo(item.video || null)}
+                  className="col-span-12 md:col-span-6 lg:col-span-4 bg-white rounded-2xl overflow-hidden border border-beige-bg/40 shadow-sm flex flex-col group hover:-translate-y-1.5 hover:shadow-md hover:border-gold/30 transition-all duration-300 cursor-pointer text-left"
+                >
+                  {cardContent}
+                </div>
+              );
+            }
+
+            return (
+              <Link
+                key={item.id}
+                href={getServiceLink(item.category)}
+                className="col-span-12 md:col-span-6 lg:col-span-4 bg-white rounded-2xl overflow-hidden border border-beige-bg/40 shadow-sm flex flex-col group hover:-translate-y-1.5 hover:shadow-md hover:border-gold/30 transition-all duration-300 cursor-pointer text-left"
+              >
+                {cardContent}
+              </Link>
+            );
+          })}
         </div>
 
         {/* View More Button */}
