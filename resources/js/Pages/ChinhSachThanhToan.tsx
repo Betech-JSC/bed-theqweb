@@ -12,7 +12,7 @@ export default function ChinhSachThanhToanPage() {
       <Header />
       <main className="flex-grow font-sans bg-white">
         {/* Banner/Hero */}
-        <section className="relative w-full h-[30vh] min-h-[220px] flex items-center bg-dark-bg text-white overflow-hidden pt-20">
+        <section className="relative w-full flex items-center bg-dark-bg text-white overflow-hidden pt-44 md:pt-52 pb-16 md:pb-20">
           <div className="absolute inset-0 bg-gradient-to-r from-dark-bg via-dark-bg/95 to-gold/10 z-10" />
           <div className="relative z-20 max-w-4xl mx-auto px-4 w-full text-center">
             {/* Breadcrumb */}
