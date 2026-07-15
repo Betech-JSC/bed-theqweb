@@ -5396,7 +5396,12 @@ export default function Dashboard({
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-1.5 block">Ảnh Đại Diện Giới Thiệu</label>
+                        <label className="text-xs uppercase font-bold text-gray-500 tracking-wider mb-1 block">
+                          Ảnh Đại Diện Phần Giới Thiệu (Ảnh lớn trang chủ)
+                        </label>
+                        <span className="text-[10px] text-gray-400 font-normal block mb-2 leading-relaxed">
+                          Ảnh hiển thị bên trái khối giới thiệu "KT BEAUTY MEDICAL CENTRE" tại trang chủ (Ảnh người đàn ông đeo đồng hồ). Tỷ lệ khuyên dùng: 1:1 (Hình vuông, ví dụ 800x800px).
+                        </span>
                         <div
                           onClick={() => {
                             setOnMediaSelect(() => (path: string) => {
