@@ -389,7 +389,13 @@ class ContentController extends Controller
         ]);
 
         foreach ($validated['settings'] as $key => $value) {
-            \App\Models\Setting::where('key', $key)->update(['value' => $value]);
+            \App\Models\Setting::updateOrCreate(
+                ['key' => $key],
+                [
+                    'value' => $value,
+                    'label' => \App\Models\Setting::where('key', $key)->value('label') ?? ucwords(str_replace('_', ' ', $key))
+                ]
+            );
         }
 
         return back()->with('success', 'Cập nhật cấu hình hệ thống thành công.');

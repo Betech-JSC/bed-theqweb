@@ -58,7 +58,7 @@ export const Introduction: React.FC = () => {
         <div className="col-span-12 lg:col-span-5 relative w-full aspect-square md:aspect-[4/3] lg:aspect-square max-w-lg mx-auto p-3">
           <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-gray-200/20">
             <Image
-              src={settings.intro_image || "/images/574583363_122251875866080096_1777622189448333941_n-1.jpg"}
+              src={settings.intro_image || ""}
               alt="KT Beauty Medical Centre Interior"
               fill
               className="object-cover hover:scale-105 transition-transform duration-700"

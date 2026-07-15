@@ -781,6 +781,10 @@ export default function Dashboard({
       site_hotline: settings.site_hotline || "19005006",
       site_email: settings.site_email || "info@ktbeauty.vn",
       site_address: settings.site_address || "",
+      site_logo_dark: settings.site_logo_dark || "",
+      site_logo_light: settings.site_logo_light || "",
+      site_logo_square: settings.site_logo_square || "",
+      site_logo_square_light: settings.site_logo_square_light || "",
       facebook_url: settings.facebook_url || "",
       zalo_url: settings.zalo_url || "",
       youtube_url: settings.youtube_url || "",
@@ -795,15 +799,15 @@ export default function Dashboard({
       intro_stats_customers_manual: settings.intro_stats_customers_manual || "10k+",
       system_status: settings.system_status || "active",
       maintenance_message: settings.maintenance_message || "Hệ thống đang bảo trì định kỳ. Quý khách vui lòng quay lại sau ít phút!",
-      intro_image: settings.intro_image || "/images/574583363_122251875866080096_1777622189448333941_n-1.jpg",
+      intro_image: settings.intro_image || "",
       intro_story_title: settings.intro_story_title || "Triết Lý Làm Đẹp Chuẩn Y Khoa & Vẻ Đẹp Độc Bản",
       intro_story_desc_1: settings.intro_story_desc_1 || "",
       intro_story_desc_2: settings.intro_story_desc_2 || "",
       intro_story_quote: settings.intro_story_quote || "",
       intro_story_quote_author: settings.intro_story_quote_author || "",
-      intro_story_image_1: settings.intro_story_image_1 || "/images/Workshop-1.png",
-      intro_story_image_2: settings.intro_story_image_2 || "/images/ultherapy-APAC.jpg",
-      intro_story_image_3: settings.intro_story_image_3 || "/images/1-size-web.png",
+      intro_story_image_1: settings.intro_story_image_1 || "",
+      intro_story_image_2: settings.intro_story_image_2 || "",
+      intro_story_image_3: settings.intro_story_image_3 || "",
       policy_dieu_khoan_su_dung: settings.policy_dieu_khoan_su_dung || "",
       policy_chinh_sach_bao_mat: settings.policy_chinh_sach_bao_mat || "",
       policy_chinh_sach_thanh_toan: settings.policy_chinh_sach_thanh_toan || "",
@@ -1333,6 +1337,12 @@ export default function Dashboard({
     e.preventDefault();
     settingsForm.post(route("admin.settings.update"), {
       preserveScroll: true,
+      onSuccess: () => {
+        alert("Cập nhật cấu hình hệ thống thành công!");
+      },
+      onError: (errors) => {
+        alert("Có lỗi xảy ra khi lưu cấu hình: " + Object.values(errors).join("\n"));
+      }
     });
   };
 
@@ -1345,9 +1355,19 @@ export default function Dashboard({
         <aside className="w-64 bg-[#171717] text-gray-300 flex flex-col flex-shrink-0 border-r border-gold/15 select-none z-45">
           {/* Brand Header */}
           <div className="p-6 border-b border-white/10 flex items-center gap-2.5">
-            <div className="p-1.5 bg-gold/10 rounded-lg border border-gold/30">
-              <Sparkles className="text-gold w-6 h-6" />
-            </div>
+            { (settings.site_logo_square_light || settings.site_logo_square) ? (
+              <div className="w-8 h-8 relative rounded overflow-hidden flex items-center justify-center bg-white/5 border border-white/10">
+                <img
+                  src={settings.site_logo_square_light || settings.site_logo_square}
+                  className="object-contain w-full h-full max-h-full max-w-full p-0.5"
+                  alt="KT Logo"
+                />
+              </div>
+            ) : (
+              <div className="p-1.5 bg-gold/10 rounded-lg border border-gold/30">
+                <Sparkles className="text-gold w-6 h-6" />
+              </div>
+            )}
             <div className="text-left">
               <h2 className="font-serif font-bold text-white text-sm tracking-widest uppercase">KT+ BEAUTY</h2>
               <span className="text-[9px] text-gold tracking-widest uppercase font-semibold">Medical Centre</span>
@@ -2811,7 +2831,20 @@ export default function Dashboard({
                                         className="border border-dashed border-gray-200 hover:border-gold/50 bg-gray-50/50 rounded-lg p-2 flex flex-col items-center justify-center h-20 text-center cursor-pointer relative overflow-hidden transition-colors"
                                       >
                                         {p.img ? (
-                                          <img src={p.img} className="object-cover w-full h-full absolute inset-0" alt="Bước" />
+                                          <>
+                                            <img src={p.img} className="object-cover w-full h-full absolute inset-0" alt="Bước" />
+                                            <button
+                                              type="button"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                updatePillar(idx, "img", "");
+                                              }}
+                                              className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 text-white rounded shadow-md transition-all z-20 hover:scale-105 duration-200"
+                                              title="Xóa ảnh"
+                                            >
+                                              <Trash size={10} />
+                                            </button>
+                                          </>
                                         ) : (
                                           <span className="text-[10px] text-gray-400">Chọn ảnh minh họa</span>
                                         )}
@@ -2910,7 +2943,20 @@ export default function Dashboard({
                                           className="border border-dashed border-gray-250 hover:border-gold/50 bg-gray-50/50 rounded-lg p-2 flex flex-col items-center justify-center h-24 text-center cursor-pointer relative overflow-hidden transition-colors"
                                         >
                                           {ba.before ? (
-                                            <img src={ba.before} className="object-cover w-full h-full absolute inset-0" alt="Trước" />
+                                            <>
+                                              <img src={ba.before} className="object-cover w-full h-full absolute inset-0" alt="Trước" />
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  updateBeforeAfter(idx, "before", "");
+                                                }}
+                                                className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 text-white rounded shadow-md transition-all z-20 hover:scale-105 duration-200"
+                                                title="Xóa ảnh"
+                                              >
+                                                <Trash size={10} />
+                                              </button>
+                                            </>
                                           ) : (
                                             <span className="text-[9px] text-gray-400">Chọn ảnh Trước</span>
                                           )}
@@ -2929,7 +2975,20 @@ export default function Dashboard({
                                           className="border border-dashed border-gray-250 hover:border-gold/50 bg-gray-50/50 rounded-lg p-2 flex flex-col items-center justify-center h-24 text-center cursor-pointer relative overflow-hidden transition-colors"
                                         >
                                           {ba.after ? (
-                                            <img src={ba.after} className="object-cover w-full h-full absolute inset-0" alt="Sau" />
+                                            <>
+                                              <img src={ba.after} className="object-cover w-full h-full absolute inset-0" alt="Sau" />
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  updateBeforeAfter(idx, "after", "");
+                                                }}
+                                                className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 text-white rounded shadow-md transition-all z-20 hover:scale-105 duration-200"
+                                                title="Xóa ảnh"
+                                              >
+                                                <Trash size={10} />
+                                              </button>
+                                            </>
                                           ) : (
                                             <span className="text-[9px] text-gray-400">Chọn ảnh Sau</span>
                                           )}
@@ -4993,6 +5052,215 @@ export default function Dashboard({
                   </div>
 
                   <div className="border-t border-gray-100 pt-6">
+                    <h4 className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-4">Logo thương hiệu</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {/* Logo tối màu (nền sáng) */}
+                      <div>
+                        <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Logo tối màu (Dùng cho nền sáng/trắng)</label>
+                        <div
+                          onClick={() => {
+                            setOnMediaSelect(() => (path: string) => {
+                              settingsForm.setData("settings", {
+                                ...settingsForm.data.settings,
+                                site_logo_dark: path
+                              });
+                            });
+                            setMediaSelectorOpen(true);
+                          }}
+                          className="border border-dashed border-gray-250 rounded-xl p-3 bg-gray-50 flex flex-col items-center justify-center min-h-[120px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
+                        >
+                          {settingsForm.data.settings.site_logo_dark ? (
+                            <>
+                              <div className="absolute inset-0 w-full h-full p-4 bg-white flex items-center justify-center">
+                                <img
+                                  src={settingsForm.data.settings.site_logo_dark}
+                                  className="object-contain max-h-full max-w-full"
+                                  alt="Logo tối màu"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                  <span className="text-[10px] text-white font-bold bg-black/60 px-2.5 py-1 rounded">Thay đổi logo</span>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  settingsForm.setData("settings", {
+                                    ...settingsForm.data.settings,
+                                    site_logo_dark: ""
+                                  });
+                                }}
+                                className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-650 text-white rounded-lg shadow-md transition-all z-20 hover:scale-105 duration-200"
+                                title="Xóa logo"
+                              >
+                                <Trash size={12} />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center gap-1.5 text-gray-400">
+                              <ImageIcon size={20} className="stroke-1" />
+                              <span className="text-[10px] font-medium">Chọn logo từ thư viện</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Logo sáng màu (nền tối) */}
+                      <div>
+                        <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Logo sáng màu (Dùng cho nền tối/trong suốt)</label>
+                        <div
+                          onClick={() => {
+                            setOnMediaSelect(() => (path: string) => {
+                              settingsForm.setData("settings", {
+                                ...settingsForm.data.settings,
+                                site_logo_light: path
+                              });
+                            });
+                            setMediaSelectorOpen(true);
+                          }}
+                          className="border border-dashed border-gray-250 rounded-xl p-3 bg-[#232323] flex flex-col items-center justify-center min-h-[120px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
+                        >
+                          {settingsForm.data.settings.site_logo_light ? (
+                            <>
+                              <div className="absolute inset-0 w-full h-full p-4 bg-[#171717] flex items-center justify-center">
+                                <img
+                                  src={settingsForm.data.settings.site_logo_light}
+                                  className="object-contain max-h-full max-w-full"
+                                  alt="Logo sáng màu"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                  <span className="text-[10px] text-white font-bold bg-black/60 px-2.5 py-1 rounded">Thay đổi logo</span>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  settingsForm.setData("settings", {
+                                    ...settingsForm.data.settings,
+                                    site_logo_light: ""
+                                  });
+                                }}
+                                className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-650 text-white rounded-lg shadow-md transition-all z-20 hover:scale-105 duration-200"
+                                title="Xóa logo"
+                              >
+                                <Trash size={12} />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center gap-1.5 text-gray-400">
+                              <ImageIcon size={20} className="stroke-1" />
+                              <span className="text-[10px] font-medium">Chọn logo từ thư viện</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Logo vuông (Favicon) */}
+                      <div>
+                        <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Logo vuông (Favicon / Icon đại diện)</label>
+                        <div
+                          onClick={() => {
+                            setOnMediaSelect(() => (path: string) => {
+                              settingsForm.setData("settings", {
+                                ...settingsForm.data.settings,
+                                site_logo_square: path
+                              });
+                            });
+                            setMediaSelectorOpen(true);
+                          }}
+                          className="border border-dashed border-gray-250 rounded-xl p-3 bg-gray-50 flex flex-col items-center justify-center min-h-[120px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
+                        >
+                          {settingsForm.data.settings.site_logo_square ? (
+                            <>
+                              <div className="absolute inset-0 w-full h-full p-4 bg-white flex items-center justify-center border border-gray-100 rounded-lg">
+                                <img
+                                  src={settingsForm.data.settings.site_logo_square}
+                                  className="object-contain max-h-full max-w-full"
+                                  alt="Logo vuông"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                  <span className="text-[10px] text-white font-bold bg-black/60 px-2.5 py-1 rounded">Thay đổi logo</span>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  settingsForm.setData("settings", {
+                                    ...settingsForm.data.settings,
+                                    site_logo_square: ""
+                                  });
+                                }}
+                                className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-655 text-white rounded-lg shadow-md transition-all z-20 hover:scale-105 duration-200"
+                                title="Xóa logo"
+                              >
+                                <Trash size={12} />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center gap-1.5 text-gray-400">
+                              <ImageIcon size={20} className="stroke-1" />
+                              <span className="text-[10px] font-medium">Chọn logo từ thư viện</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Logo vuông sáng màu (nền tối) */}
+                      <div>
+                        <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Logo vuông sáng màu (Dùng cho nền tối)</label>
+                        <div
+                          onClick={() => {
+                            setOnMediaSelect(() => (path: string) => {
+                              settingsForm.setData("settings", {
+                                ...settingsForm.data.settings,
+                                site_logo_square_light: path
+                              });
+                            });
+                            setMediaSelectorOpen(true);
+                          }}
+                          className="border border-dashed border-gray-250 rounded-xl p-3 bg-[#232323] flex flex-col items-center justify-center min-h-[120px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
+                        >
+                          {settingsForm.data.settings.site_logo_square_light ? (
+                            <>
+                              <div className="absolute inset-0 w-full h-full p-4 bg-[#171717] flex items-center justify-center border border-white/10 rounded-lg">
+                                <img
+                                  src={settingsForm.data.settings.site_logo_square_light}
+                                  className="object-contain max-h-full max-w-full"
+                                  alt="Logo vuông sáng màu"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                  <span className="text-[10px] text-white font-bold bg-black/60 px-2.5 py-1 rounded">Thay đổi logo</span>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  settingsForm.setData("settings", {
+                                    ...settingsForm.data.settings,
+                                    site_logo_square_light: ""
+                                  });
+                                }}
+                                className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-655 text-white rounded-lg shadow-md transition-all z-20 hover:scale-105 duration-200"
+                                title="Xóa logo"
+                              >
+                                <Trash size={12} />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center gap-1.5 text-gray-400">
+                              <ImageIcon size={20} className="stroke-1" />
+                              <span className="text-[10px] font-medium">Chọn logo từ thư viện</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-6">
                     <h4 className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-4">Mạng xã hội & Hỗ trợ trực tuyến</h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
@@ -5141,17 +5409,33 @@ export default function Dashboard({
                           }}
                           className="border border-dashed border-gray-250 rounded-xl p-3 bg-gray-50 flex flex-col items-center justify-center min-h-[220px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
                         >
-                          {settingsForm.data.settings.intro_image ? (
-                            <div className="absolute inset-0 w-full h-full">
-                              <img
-                                src={settingsForm.data.settings.intro_image}
-                                className="object-cover w-full h-full"
-                                alt="Preview Intro Image"
-                              />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                <span className="text-[10px] text-white font-bold bg-black/60 px-2.5 py-1 rounded">Thay đổi ảnh</span>
+                           {settingsForm.data.settings.intro_image ? (
+                            <>
+                              <div className="absolute inset-0 w-full h-full">
+                                <img
+                                  src={settingsForm.data.settings.intro_image}
+                                  className="object-cover w-full h-full"
+                                  alt="Preview Intro Image"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                  <span className="text-[10px] text-white font-bold bg-black/60 px-2.5 py-1 rounded">Thay đổi ảnh</span>
+                                </div>
                               </div>
-                            </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  settingsForm.setData("settings", {
+                                    ...settingsForm.data.settings,
+                                    intro_image: ""
+                                  });
+                                }}
+                                className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition-all z-20 hover:scale-105 duration-200"
+                                title="Xóa ảnh"
+                              >
+                                <Trash size={14} />
+                              </button>
+                            </>
                           ) : (
                             <div className="flex flex-col items-center gap-1.5 text-gray-400">
                               <ImageIcon size={24} className="stroke-1" />
@@ -5346,16 +5630,32 @@ export default function Dashboard({
                             className="border border-dashed border-gray-250 rounded-xl p-2 bg-gray-55/10 flex flex-col items-center justify-center min-h-[140px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
                           >
                             {settingsForm.data.settings.intro_story_image_1 ? (
-                              <div className="absolute inset-0 w-full h-full">
-                                <img
-                                  src={settingsForm.data.settings.intro_story_image_1}
-                                  className="object-cover w-full h-full"
-                                  alt="Story 1"
-                                />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                  <span className="text-[9px] text-white font-bold bg-black/60 px-2 py-0.5 rounded">Thay đổi</span>
+                              <>
+                                <div className="absolute inset-0 w-full h-full">
+                                  <img
+                                    src={settingsForm.data.settings.intro_story_image_1}
+                                    className="object-cover w-full h-full"
+                                    alt="Story 1"
+                                  />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <span className="text-[9px] text-white font-bold bg-black/60 px-2 py-0.5 rounded">Thay đổi</span>
+                                  </div>
                                 </div>
-                              </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    settingsForm.setData("settings", {
+                                      ...settingsForm.data.settings,
+                                      intro_story_image_1: ""
+                                    });
+                                  }}
+                                  className="absolute top-1.5 right-1.5 p-1 bg-red-500 hover:bg-red-600 text-white rounded-md shadow transition-all z-20 hover:scale-105 duration-200"
+                                  title="Xóa ảnh"
+                                >
+                                  <Trash size={10} />
+                                </button>
+                              </>
                             ) : (
                               <div className="text-gray-400 flex flex-col items-center gap-1">
                                 <ImageIcon size={20} className="stroke-1" />
@@ -5381,16 +5681,32 @@ export default function Dashboard({
                             className="border border-dashed border-gray-250 rounded-xl p-2 bg-gray-55/10 flex flex-col items-center justify-center min-h-[140px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
                           >
                             {settingsForm.data.settings.intro_story_image_2 ? (
-                              <div className="absolute inset-0 w-full h-full">
-                                <img
-                                  src={settingsForm.data.settings.intro_story_image_2}
-                                  className="object-cover w-full h-full"
-                                  alt="Story 2"
-                                />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                  <span className="text-[9px] text-white font-bold bg-black/60 px-2 py-0.5 rounded">Thay đổi</span>
+                              <>
+                                <div className="absolute inset-0 w-full h-full">
+                                  <img
+                                    src={settingsForm.data.settings.intro_story_image_2}
+                                    className="object-cover w-full h-full"
+                                    alt="Story 2"
+                                  />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <span className="text-[9px] text-white font-bold bg-black/60 px-2 py-0.5 rounded">Thay đổi</span>
+                                  </div>
                                 </div>
-                              </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    settingsForm.setData("settings", {
+                                      ...settingsForm.data.settings,
+                                      intro_story_image_2: ""
+                                    });
+                                  }}
+                                  className="absolute top-1.5 right-1.5 p-1 bg-red-500 hover:bg-red-600 text-white rounded-md shadow transition-all z-20 hover:scale-105 duration-200"
+                                  title="Xóa ảnh"
+                                >
+                                  <Trash size={10} />
+                                </button>
+                              </>
                             ) : (
                               <div className="text-gray-400 flex flex-col items-center gap-1">
                                 <ImageIcon size={20} className="stroke-1" />
@@ -5416,16 +5732,32 @@ export default function Dashboard({
                             className="border border-dashed border-gray-250 rounded-xl p-2 bg-gray-55/10 flex flex-col items-center justify-center min-h-[140px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
                           >
                             {settingsForm.data.settings.intro_story_image_3 ? (
-                              <div className="absolute inset-0 w-full h-full">
-                                <img
-                                  src={settingsForm.data.settings.intro_story_image_3}
-                                  className="object-cover w-full h-full"
-                                  alt="Story 3"
-                                />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                  <span className="text-[9px] text-white font-bold bg-black/60 px-2 py-0.5 rounded">Thay đổi</span>
+                              <>
+                                <div className="absolute inset-0 w-full h-full">
+                                  <img
+                                    src={settingsForm.data.settings.intro_story_image_3}
+                                    className="object-cover w-full h-full"
+                                    alt="Story 3"
+                                  />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <span className="text-[9px] text-white font-bold bg-black/60 px-2 py-0.5 rounded">Thay đổi</span>
+                                  </div>
                                 </div>
-                              </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    settingsForm.setData("settings", {
+                                      ...settingsForm.data.settings,
+                                      intro_story_image_3: ""
+                                    });
+                                  }}
+                                  className="absolute top-1.5 right-1.5 p-1 bg-red-500 hover:bg-red-600 text-white rounded-md shadow transition-all z-20 hover:scale-105 duration-200"
+                                  title="Xóa ảnh"
+                                >
+                                  <Trash size={10} />
+                                </button>
+                              </>
                             ) : (
                               <div className="text-gray-400 flex flex-col items-center gap-1">
                                 <ImageIcon size={20} className="stroke-1" />
@@ -5569,15 +5901,13 @@ export default function Dashboard({
               </div>
             )}
           </div>
-
-
-
-
+        </main>
+      </div>
 
       {/* BANNER MODAL */}
       {bannerModalOpen && (
-        <div className="fixed inset-0 bg-black/55 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto transition-opacity duration-300">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative text-left animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-black/55 backdrop-blur-sm flex items-start justify-center z-50 p-4 md:p-6 overflow-y-auto transition-opacity duration-300 pt-8 md:pt-16 pb-8">
+          <div className="bg-white rounded-2xl max-w-4xl w-full p-6 md:p-8 shadow-2xl relative text-left animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
               <h3 className="text-lg font-bold font-serif text-gray-800">
                 {editingBanner ? "Chỉnh sửa slide banner" : "Thêm slide banner mới"}
@@ -5591,9 +5921,9 @@ export default function Dashboard({
               </button>
             </div>
 
-            <form onSubmit={handleSaveBanner} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+             <form onSubmit={handleSaveBanner} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                <div className="min-w-0">
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Nhãn phụ (Eyebrow)</label>
                   <input
                     type="text"
@@ -5603,7 +5933,7 @@ export default function Dashboard({
                     placeholder="Ví dụ: KT Beauty Medical Centre"
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Tiêu đề chính (Title)</label>
                   <input
                     type="text"
@@ -5615,8 +5945,8 @@ export default function Dashboard({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                <div className="min-w-0">
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Tiêu đề phụ (Subtitle)</label>
                   <input
                     type="text"
@@ -5626,7 +5956,7 @@ export default function Dashboard({
                     placeholder="Ví dụ: Vẻ đẹp độc bản"
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Mô tả (Subheading)</label>
                   <input
                     type="text"
@@ -5638,9 +5968,9 @@ export default function Dashboard({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                 {/* Desktop Image */}
-                <div>
+                <div className="min-w-0">
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-2 block">
                     Ảnh PC (Desktop Image) <span className="text-red-500">*</span>
                   </label>
@@ -5651,7 +5981,7 @@ export default function Dashboard({
                       });
                       setMediaSelectorOpen(true);
                     }}
-                    className="border-2 border-dashed border-gray-250 rounded-2xl p-4 bg-gray-55/5 flex flex-col items-center justify-center min-h-[160px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all duration-300 shadow-sm"
+                    className="w-full border-2 border-dashed border-gray-250 rounded-2xl p-4 bg-gray-50/5 flex flex-col items-center justify-center min-h-[160px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all duration-300 shadow-sm"
                   >
                     {bannerForm.data.image_desktop ? (
                       <div className="absolute inset-0 w-full h-full animate-fade-in">
@@ -5677,7 +6007,7 @@ export default function Dashboard({
                     )}
                   </div>
                   {bannerForm.data.image_desktop && (
-                    <div className="mt-2 flex justify-between items-center text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                    <div className="mt-2 flex justify-between items-center text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 w-full min-w-0">
                       <span className="truncate max-w-[80%] font-light">{bannerForm.data.image_desktop}</span>
                       <button
                         type="button"
@@ -5694,7 +6024,7 @@ export default function Dashboard({
                 </div>
 
                 {/* Mobile Image */}
-                <div>
+                <div className="min-w-0">
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-2 block">
                     Ảnh Mobile (Tùy chọn)
                   </label>
@@ -5705,7 +6035,7 @@ export default function Dashboard({
                       });
                       setMediaSelectorOpen(true);
                     }}
-                    className="border-2 border-dashed border-gray-250 rounded-2xl p-4 bg-gray-55/5 flex flex-col items-center justify-center min-h-[160px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all duration-300 shadow-sm"
+                    className="w-full border-2 border-dashed border-gray-250 rounded-2xl p-4 bg-gray-50/5 flex flex-col items-center justify-center min-h-[160px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all duration-300 shadow-sm"
                   >
                     {bannerForm.data.image_mobile ? (
                       <div className="absolute inset-0 w-full h-full animate-fade-in">
@@ -5731,7 +6061,7 @@ export default function Dashboard({
                     )}
                   </div>
                   {bannerForm.data.image_mobile && (
-                    <div className="mt-2 flex justify-between items-center text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                    <div className="mt-2 flex justify-between items-center text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 w-full min-w-0">
                       <span className="truncate max-w-[80%] font-light">{bannerForm.data.image_mobile}</span>
                       <button
                         type="button"
@@ -5750,8 +6080,8 @@ export default function Dashboard({
 
               <div className="border-t border-gray-100 pt-5 mt-5">
                 <h4 className="text-xs font-bold text-gold uppercase tracking-wider mb-4">Nút liên kết chính (Primary CTA)</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                  <div className="min-w-0">
                     <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Chữ hiển thị</label>
                     <input
                       type="text"
@@ -5761,7 +6091,7 @@ export default function Dashboard({
                       placeholder="Đăng Ký Tư Vấn"
                     />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Đường dẫn liên kết</label>
                     <input
                       type="text"
@@ -5776,8 +6106,8 @@ export default function Dashboard({
 
               <div className="border-t border-gray-100 pt-5 mt-5">
                 <h4 className="text-xs font-bold text-gold uppercase tracking-wider mb-4">Nút liên kết phụ (Secondary CTA)</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                  <div className="min-w-0">
                     <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Chữ hiển thị</label>
                     <input
                       type="text"
@@ -5787,7 +6117,7 @@ export default function Dashboard({
                       placeholder="Tìm Hiểu Dịch Vụ"
                     />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Đường dẫn liên kết</label>
                     <input
                       type="text"
@@ -5800,8 +6130,8 @@ export default function Dashboard({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-100 pt-5 mt-5">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-100 pt-5 mt-5 w-full">
+                <div className="min-w-0">
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Thứ tự hiển thị (Order)</label>
                   <input
                     type="number"
@@ -5810,7 +6140,7 @@ export default function Dashboard({
                     className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none"
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Hiển thị ngay</label>
                   <select
                     value={bannerForm.data.is_active}
@@ -5845,7 +6175,7 @@ export default function Dashboard({
       )}
       {/* DOCTOR MODAL */}
       {doctorModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 md:p-6 overflow-y-auto pt-8 md:pt-16 pb-8">
           <div className="bg-white rounded-lg max-w-xl w-full p-6 shadow-xl relative text-left">
             <button
               onClick={() => setDoctorModalOpen(false)}
@@ -5939,7 +6269,7 @@ export default function Dashboard({
 
       {/* FAQ MODAL */}
       {faqModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 md:p-6 overflow-y-auto pt-8 md:pt-16 pb-8">
           <div className="bg-white rounded-lg max-w-xl w-full p-6 shadow-xl relative text-left">
             <button
               onClick={() => setFaqModalOpen(false)}
@@ -6009,7 +6339,7 @@ export default function Dashboard({
 
       {/* GLOBAL MEDIA SELECTOR MODAL */}
       {mediaSelectorOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99] p-4" onClick={() => setMediaSelectorOpen(false)}>
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-[99] p-4 md:p-6 overflow-y-auto pt-8 md:pt-16 pb-8" onClick={() => setMediaSelectorOpen(false)}>
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[85vh] flex flex-col text-left" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center pb-4 border-b border-gray-150 mb-4">
               <div>
@@ -6148,9 +6478,6 @@ export default function Dashboard({
           </div>
         </div>
       )}
-
-        </main>
-      </div>
     </AuthenticatedLayout>
   );
 }

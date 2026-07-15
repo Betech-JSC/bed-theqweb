@@ -30,9 +30,9 @@ export default function GioiThieu({ doctors = [] }: GioiThieuProps) {
   const storyDesc2 = settings.intro_story_desc_2 || "Được thành lập bởi đội ngũ bác sĩ chuyên khoa I, KT Beauty đã không ngừng nâng cấp hệ thống phòng khám, chuyển giao độc quyền các công nghệ từ Hàn Quốc, Mỹ và châu Âu. Chúng tôi coi sự an toàn và hiệu quả thực tế của khách hàng là kim chỉ nam tối thượng.";
   const storyQuote = settings.intro_story_quote || "Chúng tôi không thay đổi diện mạo của bạn, chúng tôi tôn vinh và khôi phục những nét đẹp độc bản tự nhiên nhất.";
   const storyQuoteAuthor = settings.intro_story_quote_author || "CEO Khánh Tôn";
-  const storyImage1 = settings.intro_story_image_1 || "/images/Workshop-1.png";
-  const storyImage2 = settings.intro_story_image_2 || "/images/ultherapy-APAC.jpg";
-  const storyImage3 = settings.intro_story_image_3 || "/images/1-size-web.png";
+  const storyImage1 = settings.intro_story_image_1 || "";
+  const storyImage2 = settings.intro_story_image_2 || "";
+  const storyImage3 = settings.intro_story_image_3 || "";
   const coreValues = [
     {
       icon: <Award className="w-8 h-8 text-gold" />,

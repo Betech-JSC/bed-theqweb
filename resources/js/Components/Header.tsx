@@ -85,18 +85,20 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
       >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo */}
-          <Link href="/" className="relative block h-16 w-56 md:w-72">
-            <Image
-              src={
-                isWhiteHeader
-                  ? "/images/LOGO-KT-NGANG-DEN-BAN-MOI-NHAT-07-2-1.png"
-                  : "/images/LOGO-KT-NGANG-WHITE-BAN-MOI-NHAT-05-1-2048x541-1.png"
-              }
-              alt="KT Beauty Logo"
-              fill
-              className="object-contain object-left"
-              priority
-            />
+          <Link href="/" className="relative block h-16 w-56 md:w-72 flex items-center">
+            {((isWhiteHeader ? settings.site_logo_dark : settings.site_logo_light)) ? (
+              <Image
+                src={isWhiteHeader ? settings.site_logo_dark : settings.site_logo_light}
+                alt="KT Beauty Logo"
+                fill
+                className="object-contain object-left"
+                priority
+              />
+            ) : (
+              <span className="font-serif font-bold text-lg md:text-xl text-gold uppercase tracking-wider">
+                KT+ Beauty
+              </span>
+            )}
           </Link>
 
           {/* Desktop Navigation */}

@@ -14,13 +14,19 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
         {/* Brand Column */}
         <div className="flex flex-col items-start">
-          <div className="relative h-10 w-44 mb-6">
-            <Image
-              src="/images/LOGO-KT-NGANG-WHITE-BAN-MOI-NHAT-05-1-2048x541-1.png"
-              alt="KT Beauty Logo"
-              fill
-              className="object-contain"
-            />
+          <div className="relative h-10 w-44 mb-6 flex items-center">
+            {settings.site_logo_light ? (
+              <Image
+                src={settings.site_logo_light}
+                alt="KT Beauty Logo"
+                fill
+                className="object-contain"
+              />
+            ) : (
+              <span className="font-serif font-bold text-lg text-gold uppercase tracking-wider">
+                KT+ Beauty
+              </span>
+            )}
           </div>
           <p className="text-xs md:text-sm text-gray-400 font-light leading-relaxed mb-6">
             KT Beauty Medical Centre mang đến các liệu trình làm đẹp chuẩn y khoa, giúp bạn sở hữu vẻ đẹp độc bản, chuẩn tỷ lệ vàng và an toàn tuyệt đối.

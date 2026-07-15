@@ -8,6 +8,8 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 export default function Image({ src, alt, fill, priority, className, ...props }: ImageProps) {
+  if (!src) return null;
+
   const fillClasses = fill
     ? `absolute inset-0 w-full h-full ${className?.includes("object-") ? "" : "object-cover"}`
     : "";
