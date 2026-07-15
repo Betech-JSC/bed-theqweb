@@ -12,38 +12,46 @@ export default function VerifyEmail({ status }: { status?: string }) {
         post(route('verification.send'));
     };
 
+    const isLinkSent = status === 'verification-link-sent';
+
     return (
         <GuestLayout>
-            <Head title="Email Verification" />
+            <Head title="Xác thực Email" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                Thanks for signing up! Before getting started, could you verify
-                your email address by clicking on the link we just emailed to
-                you? If you didn't receive the email, we will gladly send you
-                another.
+            <div className="mb-6">
+                <h2 className="font-serif text-2xl md:text-3xl text-dark-bg font-semibold tracking-wide">
+                    Xác thực Email
+                </h2>
+                <p className="mt-2 text-sm text-gray-500 font-light leading-relaxed">
+                    Cảm ơn bạn đã đăng ký! Trước khi bắt đầu, vui lòng xác nhận địa chỉ email của bạn bằng cách nhấp vào liên kết chúng tôi vừa gửi qua email.
+                </p>
             </div>
 
-            {status === 'verification-link-sent' && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+            {isLinkSent && (
+                <div className="mb-6 rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-sm font-medium text-emerald-800 animate-fadeIn">
+                    Một liên kết xác thực mới đã được gửi đến địa chỉ email bạn đã cung cấp khi đăng ký.
                 </div>
             )}
 
-            <form onSubmit={submit}>
-                <div className="mt-4 flex items-center justify-between">
-                    <PrimaryButton disabled={processing}>
-                        Resend Verification Email
-                    </PrimaryButton>
-
+            <form onSubmit={submit} className="space-y-5">
+                <div className="flex items-center justify-between pt-2">
                     <Link
                         href={route('logout')}
                         method="post"
                         as="button"
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="text-sm text-gray-500 hover:text-dark-bg transition-colors font-light hover:underline focus:outline-none cursor-pointer"
                     >
-                        Log Out
+                        Đăng xuất
                     </Link>
+                </div>
+
+                <div className="pt-2">
+                    <PrimaryButton 
+                        className="w-full justify-center rounded-xl bg-dark-bg hover:bg-dark-bg/90 active:bg-black border-none text-white py-4 px-6 font-semibold uppercase tracking-wider text-xs shadow-md transition-all duration-300 hover:shadow-lg focus:ring-gold focus:ring-offset-2 select-none cursor-pointer flex items-center gap-2 hover:-translate-y-0.5 relative overflow-hidden shimmer-container"
+                        disabled={processing}
+                    >
+                        {processing ? 'Đang gửi lại...' : 'Gửi lại Email xác thực'}
+                    </PrimaryButton>
                 </div>
             </form>
         </GuestLayout>
