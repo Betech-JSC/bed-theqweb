@@ -150,10 +150,10 @@ export default function PhauThuatThamMyPage({ doctors = [], services = [] }: Pha
 
                   {/* Booking CTA */}
                   <a
-                    href="#consult"
+                    href="/dat-lich"
                     className="flex items-center gap-2 text-gold hover:text-gold-dark font-bold text-xs uppercase tracking-wider mt-auto"
                   >
-                    <span>Liên Hệ Tư Vấn</span>
+                    <span>Đặt Lịch Khám</span>
                     <ArrowIcon size={18} className="transform group-hover:translate-x-1.5 transition-transform duration-300" />
                   </a>
                 </div>
@@ -222,10 +222,10 @@ export default function PhauThuatThamMyPage({ doctors = [], services = [] }: Pha
                           </Link>
                           
                           <a
-                            href={`#consult`}
+                            href="/dat-lich"
                             className="px-4 py-2 border border-gold/40 hover:bg-gold hover:text-white text-gold text-xs uppercase font-bold rounded-lg transition-all duration-300 shadow-sm"
                           >
-                            Đăng ký tư vấn
+                            Đặt lịch khám
                           </a>
                         </div>
                       </div>

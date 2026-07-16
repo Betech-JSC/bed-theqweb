@@ -32,10 +32,10 @@ export const MidCTA: React.FC = () => {
         </div>
         <div className="col-span-12 lg:col-span-4 flex lg:justify-end">
           <a
-            href="#consult"
+            href="/dat-lich"
             className="bg-gold hover:bg-gold-dark text-white font-bold text-lg px-10 py-4 rounded transition-colors duration-300 shadow-xl"
           >
-            Liên Hệ Tư Vấn Ngay
+            Đặt Lịch Khám Ngay
           </a>
         </div>
       </div>

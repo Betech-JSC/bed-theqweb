@@ -19,18 +19,28 @@ export const Introduction: React.FC = () => {
 
   // Dynamic Badges calculation
   const showDoctorsMode = settings.intro_stats_doctors_mode || "auto";
-  const doctorsDisplay = showDoctorsMode === "auto" 
-    ? `${doctorsCount}+` 
-    : `${settings.intro_stats_doctors_manual || "5"}+`;
+  let doctorsDisplay = "";
+  if (showDoctorsMode === "auto") {
+    doctorsDisplay = `${doctorsCount}+`;
+  } else {
+    const manualDoctors = settings.intro_stats_doctors_manual !== undefined && settings.intro_stats_doctors_manual !== "" 
+      ? settings.intro_stats_doctors_manual 
+      : "5";
+    doctorsDisplay = `${manualDoctors}+`;
+  }
 
   const showCustomersMode = settings.intro_stats_customers_mode || "crm_auto";
   let customersDisplay = "";
   if (showCustomersMode === "crm_auto") {
-    const base = parseInt(settings.intro_stats_customers_base || "10000") || 10000;
+    const parsedBase = parseInt(settings.intro_stats_customers_base ?? "");
+    const base = isNaN(parsedBase) ? 10000 : parsedBase;
     const total = base + crmSubmissionsCount;
     customersDisplay = `${total.toLocaleString("vi-VN")}+`;
   } else {
-    customersDisplay = settings.intro_stats_customers_manual || "10k+";
+    const manualCustomers = settings.intro_stats_customers_manual !== undefined && settings.intro_stats_customers_manual !== ""
+      ? settings.intro_stats_customers_manual
+      : "10k+";
+    customersDisplay = `${manualCustomers}+`;
   }
 
   const pillars = [

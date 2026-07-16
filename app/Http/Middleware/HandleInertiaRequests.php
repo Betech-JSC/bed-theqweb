@@ -41,6 +41,10 @@ class HandleInertiaRequests extends Middleware
             'settings' => \App\Models\Setting::pluck('value', 'key')->toArray(),
             'doctors_count' => \App\Models\Doctor::count(),
             'crm_submissions_count' => \App\Models\Submission::where('status', 'Đã liên hệ')->count(),
+            'doctors' => \App\Models\Doctor::where('is_active', true)->orderBy('order')->get(),
+            'authors' => \App\Models\Author::orderBy('name')->get(),
+            'doctor_shifts' => $request->user() ? \App\Models\DoctorShift::with('doctor')->get() : [],
+            'service_reviews' => $request->user() ? \App\Models\ServiceReview::with('service')->latest()->get() : [],
         ];
     }
 }

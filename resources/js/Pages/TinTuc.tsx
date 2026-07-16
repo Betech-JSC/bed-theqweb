@@ -13,7 +13,8 @@ interface DbArticle {
   description?: string;
   image?: string;
   published_date?: string;
-  author?: string;
+  author?: any;
+  legacy_author?: string | null;
   category?: string;
 }
 
@@ -85,15 +86,25 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
   ];
 
   const articles = (initialArticles && initialArticles.length > 0)
-    ? initialArticles.map(a => ({
-        title: a.title,
-        desc: a.description || "",
-        img: a.image || "/images/default-blog.jpg",
-        date: a.published_date || "",
-        author: a.author || "KT Beauty",
-        slug: a.slug || "",
-        category: a.category || "Chuyên môn",
-      }))
+    ? initialArticles.map(a => {
+        let displayAuthor = "KT Beauty";
+        if (a.author && typeof a.author === "object") {
+          displayAuthor = a.author.name || "KT Beauty";
+        } else if (typeof a.author === "string" && a.author.trim() !== "") {
+          displayAuthor = a.author;
+        } else if (a.legacy_author) {
+          displayAuthor = a.legacy_author;
+        }
+        return {
+          title: a.title,
+          desc: a.description || "",
+          img: a.image || "/images/default-blog.jpg",
+          date: a.published_date || "",
+          author: displayAuthor,
+          slug: a.slug || "",
+          category: a.category || "Chuyên môn",
+        };
+      })
     : staticArticles.map((s, idx) => ({
         title: s.title,
         desc: s.desc,

@@ -16,7 +16,8 @@ class ContentController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'content' => 'required|string',
-            'author' => 'required|string|max:255',
+            'legacy_author' => 'nullable|string|max:255',
+            'author_id' => 'nullable|exists:authors,id',
             'published_date' => 'required|string|max:100',
             'category' => 'required|string|max:255',
             'image_file' => 'nullable|image|max:2048',
@@ -29,6 +30,7 @@ class ContentController extends Controller
             'meta_robots' => 'nullable|string|max:255',
             'canonical_link' => 'nullable|string|max:255',
             'meta_image' => 'nullable|string|max:255',
+            'schema' => 'nullable|string',
         ]);
 
         $imagePath = '/images/default-blog.jpg';
@@ -48,7 +50,8 @@ class ContentController extends Controller
             'slug' => $slug,
             'description' => $validated['description'],
             'content' => $validated['content'],
-            'author' => $validated['author'],
+            'legacy_author' => $validated['legacy_author'] ?? 'KT Beauty',
+            'author_id' => $validated['author_id'] ?? null,
             'published_date' => $validated['published_date'],
             'category' => $validated['category'],
             'image' => $imagePath,
@@ -59,6 +62,7 @@ class ContentController extends Controller
             'meta_robots' => $validated['meta_robots'] ?? null,
             'canonical_link' => $validated['canonical_link'] ?? null,
             'meta_image' => $validated['meta_image'] ?? null,
+            'schema' => $validated['schema'] ?? null,
         ]);
 
         return back()->with('success', 'Thêm bài viết mới thành công.');
@@ -70,7 +74,8 @@ class ContentController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'content' => 'required|string',
-            'author' => 'required|string|max:255',
+            'legacy_author' => 'nullable|string|max:255',
+            'author_id' => 'nullable|exists:authors,id',
             'published_date' => 'required|string|max:100',
             'category' => 'required|string|max:255',
             'image_file' => 'nullable|image|max:2048',
@@ -83,6 +88,7 @@ class ContentController extends Controller
             'meta_robots' => 'nullable|string|max:255',
             'canonical_link' => 'nullable|string|max:255',
             'meta_image' => 'nullable|string|max:255',
+            'schema' => 'nullable|string',
         ]);
 
         $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['title']);
@@ -92,7 +98,8 @@ class ContentController extends Controller
             'slug' => $slug,
             'description' => $validated['description'],
             'content' => $validated['content'],
-            'author' => $validated['author'],
+            'legacy_author' => $validated['legacy_author'] ?? 'KT Beauty',
+            'author_id' => $validated['author_id'] ?? null,
             'published_date' => $validated['published_date'],
             'category' => $validated['category'],
             'is_highlight' => $request->boolean('is_highlight'),
@@ -102,6 +109,7 @@ class ContentController extends Controller
             'meta_robots' => $validated['meta_robots'] ?? null,
             'canonical_link' => $validated['canonical_link'] ?? null,
             'meta_image' => $validated['meta_image'] ?? null,
+            'schema' => $validated['schema'] ?? null,
         ];
 
         if ($request->hasFile('image_file')) {
@@ -153,6 +161,7 @@ class ContentController extends Controller
             'pillars' => 'nullable|array',
             'reviews' => 'nullable|array',
             'before_after' => 'nullable|array',
+            'schema' => 'nullable|string',
         ]);
 
         $imagePath = '/images/default-service.jpg';
@@ -185,6 +194,7 @@ class ContentController extends Controller
             'pillars' => $validated['pillars'] ?? null,
             'reviews' => $validated['reviews'] ?? null,
             'before_after' => $validated['before_after'] ?? null,
+            'schema' => $validated['schema'] ?? null,
         ]);
 
         return back()->with('success', 'Thêm dịch vụ thành công.');
@@ -211,6 +221,7 @@ class ContentController extends Controller
             'pillars' => 'nullable|array',
             'reviews' => 'nullable|array',
             'before_after' => 'nullable|array',
+            'schema' => 'nullable|string',
         ]);
 
         $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['name']);
@@ -232,6 +243,7 @@ class ContentController extends Controller
             'pillars' => $validated['pillars'] ?? null,
             'reviews' => $validated['reviews'] ?? null,
             'before_after' => $validated['before_after'] ?? null,
+            'schema' => $validated['schema'] ?? null,
         ];
 
         if ($request->hasFile('image_file')) {
@@ -309,8 +321,8 @@ class ContentController extends Controller
             'description' => $validated['description'],
             'image_desktop' => $desktopPath,
             'image_mobile' => $mobilePath,
-            'button_primary_text' => $validated['button_primary_text'] ?? 'Đăng Ký Tư Vấn',
-            'button_primary_url' => $validated['button_primary_url'] ?? '#consult',
+            'button_primary_text' => $validated['button_primary_text'] ?? 'Đặt Lịch Khám Ngay',
+            'button_primary_url' => $validated['button_primary_url'] ?? '/dat-lich',
             'button_secondary_text' => $validated['button_secondary_text'] ?? 'Tìm Hiểu Dịch Vụ',
             'button_secondary_url' => $validated['button_secondary_url'] ?? '#services',
             'order' => $validated['order'],
@@ -344,8 +356,8 @@ class ContentController extends Controller
             'title' => $validated['title'],
             'subtitle' => $validated['subtitle'],
             'description' => $validated['description'],
-            'button_primary_text' => $validated['button_primary_text'] ?? 'Đăng Ký Tư Vấn',
-            'button_primary_url' => $validated['button_primary_url'] ?? '#consult',
+            'button_primary_text' => $validated['button_primary_text'] ?? 'Đặt Lịch Khám Ngay',
+            'button_primary_url' => $validated['button_primary_url'] ?? '/dat-lich',
             'button_secondary_text' => $validated['button_secondary_text'] ?? 'Tìm Hiểu Dịch Vụ',
             'button_secondary_url' => $validated['button_secondary_url'] ?? '#services',
             'order' => $validated['order'],
@@ -682,6 +694,109 @@ class ContentController extends Controller
         return back()->with('success', 'Xóa kết quả thành công.');
     }
 
+    // Author CRUD
+    public function storeAuthor(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'avatar_file' => 'nullable|image|max:2048',
+            'avatar' => 'nullable|string|max:255',
+            'role' => 'nullable|string|max:255',
+            'bio' => 'nullable|string',
+            'description' => 'nullable|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string|max:255',
+            'meta_robots' => 'nullable|string|max:255',
+            'canonical_link' => 'nullable|string|max:255',
+            'meta_image' => 'nullable|string|max:255',
+        ]);
+
+        $avatarPath = '/images/default-avatar.png';
+        if ($request->hasFile('avatar_file')) {
+            $file = $request->file('avatar_file');
+            $filename = time() . '_author_' . $file->getClientOriginalName();
+            $file->move(public_path('images'), $filename);
+            $avatarPath = '/images/' . $filename;
+        } elseif ($request->filled('avatar')) {
+            $avatarPath = $request->input('avatar');
+        }
+
+        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['name']);
+
+        \App\Models\Author::create([
+            'name' => $validated['name'],
+            'slug' => $slug,
+            'avatar' => $avatarPath,
+            'role' => $validated['role'] ?? null,
+            'bio' => $validated['bio'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'meta_title' => $validated['meta_title'] ?? null,
+            'meta_description' => $validated['meta_description'] ?? null,
+            'meta_keywords' => $validated['meta_keywords'] ?? null,
+            'meta_robots' => $validated['meta_robots'] ?? null,
+            'canonical_link' => $validated['canonical_link'] ?? null,
+            'meta_image' => $validated['meta_image'] ?? null,
+        ]);
+
+        return back()->with('success', 'Thêm tác giả thành công.');
+    }
+
+    public function updateAuthor(Request $request, \App\Models\Author $author)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'avatar_file' => 'nullable|image|max:2048',
+            'avatar' => 'nullable|string|max:255',
+            'role' => 'nullable|string|max:255',
+            'bio' => 'nullable|string',
+            'description' => 'nullable|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string|max:255',
+            'meta_robots' => 'nullable|string|max:255',
+            'canonical_link' => 'nullable|string|max:255',
+            'meta_image' => 'nullable|string|max:255',
+        ]);
+
+        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['name']);
+
+        $data = [
+            'name' => $validated['name'],
+            'slug' => $slug,
+            'role' => $validated['role'] ?? null,
+            'bio' => $validated['bio'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'meta_title' => $validated['meta_title'] ?? null,
+            'meta_description' => $validated['meta_description'] ?? null,
+            'meta_keywords' => $validated['meta_keywords'] ?? null,
+            'meta_robots' => $validated['meta_robots'] ?? null,
+            'canonical_link' => $validated['canonical_link'] ?? null,
+            'meta_image' => $validated['meta_image'] ?? null,
+        ];
+
+        if ($request->hasFile('avatar_file')) {
+            $file = $request->file('avatar_file');
+            $filename = time() . '_author_' . $file->getClientOriginalName();
+            $file->move(public_path('images'), $filename);
+            $data['avatar'] = '/images/' . $filename;
+        } elseif ($request->filled('avatar')) {
+            $data['avatar'] = $request->input('avatar');
+        }
+
+        $author->update($data);
+
+        return back()->with('success', 'Cập nhật tác giả thành công.');
+    }
+
+    public function destroyAuthor(\App\Models\Author $author)
+    {
+        $author->delete();
+        return back()->with('success', 'Xóa tác giả thành công.');
+    }
+
     public function uploadImage(Request $request)
     {
         $request->validate([
@@ -697,5 +812,53 @@ class ContentController extends Controller
         }
 
         return response()->json(['error' => 'File not found'], 400);
+    }
+
+    /**
+     * Store a new doctor shift.
+     */
+    public function storeDoctorShift(Request $request)
+    {
+        $validated = $request->validate([
+            'doctor_id' => 'required|exists:doctors,id',
+            'day_of_week' => 'required|integer|min:1|max:7',
+            'start_time' => 'required|string|max:50',
+            'end_time' => 'required|string|max:50',
+            'branch' => 'nullable|string|max:255',
+        ]);
+
+        \App\Models\DoctorShift::create($validated);
+
+        return back()->with('success', 'Thêm lịch trực bác sĩ thành công.');
+    }
+
+    /**
+     * Delete a doctor shift.
+     */
+    public function destroyDoctorShift(\App\Models\DoctorShift $shift)
+    {
+        $shift->delete();
+        return back()->with('success', 'Xóa lịch trực bác sĩ thành công.');
+    }
+
+    /**
+     * Toggle the approval status of a service review.
+     */
+    public function toggleReviewApproval(Request $request, \App\Models\ServiceReview $review)
+    {
+        $review->update([
+            'is_approved' => !$review->is_approved
+        ]);
+
+        return back()->with('success', 'Cập nhật trạng thái duyệt đánh giá thành công.');
+    }
+
+    /**
+     * Delete a review.
+     */
+    public function destroyReview(\App\Models\ServiceReview $review)
+    {
+        $review->delete();
+        return back()->with('success', 'Xóa đánh giá thành công.');
     }
 }

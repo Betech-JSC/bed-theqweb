@@ -47,10 +47,15 @@ export const HighlightServices: React.FC<HighlightServicesProps> = ({ services =
     };
   });
 
-  // Duplicate items to ensure a seamless infinite sliding transition
-  const displayItems = [...items, ...items];
+  // Calculate optimal even N multiplier so that total width is large enough to prevent gaps on all monitors
+  const getMultiplier = (count: number) => {
+    if (count === 0) return 2;
+    const minN = Math.ceil(18 / count); // Target total width approx 6500px+
+    const evenN = minN % 2 === 0 ? minN : minN + 1;
+    return Math.max(2, evenN);
+  };
 
-  return (
+  const displayItems = Array(getMultiplier(items.length)).fill(items).flat();  return (
     <section id="services" className="bg-white py-20 font-sans overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-[10%]">
         {/* Section Header */}

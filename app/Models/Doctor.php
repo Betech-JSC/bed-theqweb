@@ -23,4 +23,12 @@ class Doctor extends Model
         'order' => 'integer',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Get shifts for the doctor.
+     */
+    public function shifts()
+    {
+        return $this->hasMany(DoctorShift::class);
+    }
 }

@@ -50,8 +50,11 @@ Route::get('/da-lieu-tre-hoa', function () {
 
 Route::get('/cay-toc-y-khoa', function () {
     $service = \App\Models\Service::where('slug', 'cay-toc-y-khoa')->firstOrFail();
+    $reviews = $service->serviceReviews()->where('is_approved', true)->latest()->get();
     return Inertia::render('DichVuDetail', [
-        'service' => $service
+        'service' => array_merge($service->toArray(), [
+            'db_reviews' => $reviews
+        ])
     ]);
 });
 
@@ -118,8 +121,11 @@ Route::get('/tin-tuc/{slug}', function ($slug) {
 
 Route::get('/dich-vu/{slug}', function ($slug) {
     $service = Service::where('slug', $slug)->firstOrFail();
+    $reviews = $service->serviceReviews()->where('is_approved', true)->latest()->get();
     return Inertia::render('DichVuDetail', [
-        'service' => $service
+        'service' => array_merge($service->toArray(), [
+            'db_reviews' => $reviews
+        ])
     ]);
 })->name('dich-vu.detail');
 
@@ -135,6 +141,24 @@ Route::get('/tuyen-bo-mien-tru-trach-nhiem', function () { return Inertia::rende
 
 // Consultation signup POST route
 Route::post('/consult', [ConsultController::class, 'store'])->name('consult.store');
+Route::get('/api/booked-slots', [ConsultController::class, 'getBookedSlots'])->name('api.booked-slots');
+Route::post('/api/reviews', [ConsultController::class, 'storeReview'])->name('api.reviews.store');
+Route::get('/api/doctor-schedule', [ConsultController::class, 'getDoctorSchedule'])->name('api.doctor-schedule');
+
+Route::get('/tac-gia/{slug}', function ($slug) {
+    $author = \App\Models\Author::where('slug', $slug)->firstOrFail();
+    $articles = Article::where('author_id', $author->id)->latest()->get();
+    return Inertia::render('TacGiaDetail', [
+        'author' => $author,
+        'articles' => $articles
+    ]);
+})->name('author.detail');
+
+Route::get('/dat-lich', function () {
+    return Inertia::render('DatLich', [
+        'doctors' => \App\Models\Doctor::where('is_active', true)->orderBy('order')->get(),
+    ]);
+})->name('booking.page');
 
 // 2. Admin CMS Dashboard Routes (Protected)
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -170,6 +194,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'doctors' => \App\Models\Doctor::orderBy('order')->get(),
             'faqs' => \App\Models\Faq::orderBy('order')->get(),
             'realResults' => \App\Models\RealResult::orderBy('order')->get(),
+            'authors' => \App\Models\Author::latest()->get(),
             'analytics' => [
                 'daily_trends' => $chartData,
             ],
@@ -178,6 +203,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Consult Submission management
     Route::patch('/admin/submissions/{submission}/status', [ConsultController::class, 'updateStatus'])->name('admin.submissions.status');
+    Route::patch('/admin/submissions/{submission}', [ConsultController::class, 'update'])->name('admin.submissions.update');
     Route::delete('/admin/submissions/{submission}', [ConsultController::class, 'destroy'])->name('admin.submissions.destroy');
     Route::get('/admin/submissions/export', [ContentController::class, 'exportSubmissionsCsv'])->name('admin.submissions.export');
 
@@ -216,6 +242,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // System Settings management
     Route::post('/admin/settings', [ContentController::class, 'updateSettings'])->name('admin.settings.update');
 
+    // Author management CRUD
+    Route::post('/admin/authors', [ContentController::class, 'storeAuthor'])->name('admin.authors.store');
+    Route::post('/admin/authors/{author}', [ContentController::class, 'updateAuthor'])->name('admin.authors.update');
+    Route::delete('/admin/authors/{author}', [ContentController::class, 'destroyAuthor'])->name('admin.authors.destroy');
+
     // Editor Image Upload
     Route::post('/admin/upload-image', [ContentController::class, 'uploadImage'])->name('admin.upload-image');
 
@@ -226,6 +257,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/media/upload', [MediaController::class, 'upload'])->name('admin.media.upload');
     Route::delete('/admin/media/file/{file}', [MediaController::class, 'destroy'])->name('admin.media.file.destroy');
     Route::post('/admin/media/files/bulk-delete', [MediaController::class, 'bulkDestroy'])->name('admin.media.files.bulk-delete');
+
+    // Doctor Shifts CRUD
+    Route::post('/admin/doctor-shifts', [ContentController::class, 'storeDoctorShift'])->name('admin.doctor-shifts.store');
+    Route::delete('/admin/doctor-shifts/{shift}', [ContentController::class, 'destroyDoctorShift'])->name('admin.doctor-shifts.destroy');
+
+    // Review moderation CRUD
+    Route::post('/admin/reviews/{review}/toggle-approval', [ContentController::class, 'toggleReviewApproval'])->name('admin.reviews.toggle-approval');
+    Route::delete('/admin/reviews/{review}', [ContentController::class, 'destroyReview'])->name('admin.reviews.destroy');
 });
 
 // Profile settings (Laravel default)

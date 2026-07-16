@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
       {/* Top Announcement Bar */}
       <div className="w-full bg-[#b09a7a] text-white flex justify-center items-center py-2 px-4 text-sm md:text-base font-sans tracking-wide">
         <div className="flex items-center gap-3 font-semibold">
-          <span className="text-white tracking-wide text-xs md:text-sm">Đặt lịch tư vấn ngay</span>
+          <span className="text-white tracking-wide text-xs md:text-sm">Đặt lịch khám ngay</span>
           <a
             href={`tel:${hotline}`}
             className="inline-flex items-center gap-1.5 bg-[#4d443c] text-white px-3 py-1 md:py-1.5 rounded-[8px] border border-white text-xs md:text-sm font-bold hover:bg-[#3d362f] transition-colors shadow-sm"

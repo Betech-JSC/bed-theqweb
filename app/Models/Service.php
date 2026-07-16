@@ -24,6 +24,7 @@ class Service extends Model
         'pillars',
         'reviews',
         'before_after',
+        'schema',
     ];
 
     protected $casts = [
@@ -32,4 +33,12 @@ class Service extends Model
         'reviews' => 'array',
         'before_after' => 'array',
     ];
+
+    /**
+     * Get reviews for the service.
+     */
+    public function serviceReviews()
+    {
+        return $this->hasMany(ServiceReview::class);
+    }
 }

@@ -5,6 +5,15 @@ import { Footer } from "@/Components/Footer";
 import { ChevronRight, Calendar, User, ArrowLeft, Link as LinkIcon, List } from "lucide-react";
 import Image from "@/Components/Image";
 
+interface AuthorItem {
+  id: number;
+  name: string;
+  slug: string;
+  avatar: string | null;
+  role: string | null;
+  bio: string | null;
+}
+
 interface ArticleItem {
   id: number;
   title: string;
@@ -12,9 +21,11 @@ interface ArticleItem {
   description: string | null;
   content: string | null;
   image: string | null;
-  author: string | null;
+  author: AuthorItem | null;
+  legacy_author: string | null;
   published_date: string | null;
   category: string;
+  schema: string | null;
 }
 
 interface TinTucDetailProps {
@@ -49,9 +60,32 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
       .catch(() => alert("Sao chép liên kết thất bại."));
   };
 
+  const domain = typeof window !== "undefined" ? window.location.origin : "https://ktbeauty.vn";
+  const defaultNewsSchema = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": article.title,
+    "description": article.description || "",
+    "image": [
+      article.image ? (article.image.startsWith("http") ? article.image : `${domain}${article.image}`) : `${domain}/images/default-blog.jpg`
+    ],
+    "datePublished": article.published_date || new Date().toISOString(),
+    "author": [{
+      "@type": "Person",
+      "name": article.author?.name || article.legacy_author || "KT Beauty",
+      "url": article.author ? `${domain}/tac-gia/${article.author.slug}` : undefined
+    }]
+  };
+
   return (
     <>
-      <Head title={`${article.title} | KT Beauty`} />
+      <Head title={`${article.title} | KT Beauty`}>
+        {article.schema ? (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: article.schema }} />
+        ) : (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(defaultNewsSchema) }} />
+        )}
+      </Head>
       <Header forceWhiteBg={true} />
 
       {/* Reading Progress Indicator */}
@@ -81,7 +115,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
               </span>
 
               {/* Title - Large Format */}
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-gray-805 mb-8 leading-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-gray-850 mb-8 leading-tight">
                 {article.title}
               </h1>
 
@@ -94,7 +128,16 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                   </div>
                   <div className="flex items-center gap-1.5">
                     <User size={16} className="text-gold" />
-                    <span>Tác giả: {article.author || "KT Beauty"}</span>
+                    <span>
+                      Tác giả:{" "}
+                      {article.author ? (
+                        <Link href={`/tac-gia/${article.author.slug}`} className="text-gold hover:underline font-semibold">
+                          {article.author.name}
+                        </Link>
+                      ) : (
+                        article.legacy_author || "KT Beauty"
+                      )}
+                    </span>
                   </div>
                 </div>
 
@@ -189,6 +232,41 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                 dangerouslySetInnerHTML={{ __html: article.content || "" }}
               />
 
+              {/* Author Bio Box */}
+              {(article.author || article.legacy_author) && (
+                <div className="mt-16 p-6 md:p-8 bg-gradient-to-br from-gold/5 to-gold/15 rounded-3xl border border-gold/20 flex flex-col md:flex-row gap-6 items-center md:items-start text-left">
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-gold/30 shadow-sm flex-shrink-0 bg-gray-50">
+                    <Image
+                      src={article.author?.avatar || "/images/default-avatar.png"}
+                      alt={article.author?.name || article.legacy_author || "KT Beauty"}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-grow space-y-2">
+                    <span className="text-gold text-[10px] uppercase font-bold tracking-wider block">Tác giả bài viết</span>
+                    {article.author ? (
+                      <Link
+                        href={`/tac-gia/${article.author.slug}`}
+                        className="font-serif font-bold text-gray-800 text-lg md:text-xl hover:text-gold transition-colors block"
+                      >
+                        {article.author.name}
+                      </Link>
+                    ) : (
+                      <span className="font-serif font-bold text-gray-800 text-lg md:text-xl block">
+                        {article.legacy_author}
+                      </span>
+                    )}
+                    {article.author?.role && (
+                      <span className="text-gray-500 text-xs font-semibold block">{article.author.role}</span>
+                    )}
+                    <p className="text-xs md:text-sm text-gray-650 font-light leading-relaxed">
+                      {article.author?.bio || "Đội ngũ biên tập viên và hội đồng y khoa KT Beauty chịu trách nhiệm kiểm duyệt nội dung, mang lại các thông tin làm đẹp chuẩn y khoa, an toàn và hiệu quả."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Back Button */}
               <div className="mt-16 pt-8 border-t border-gray-100">
                 <Link
@@ -243,13 +321,13 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
               <div className="bg-gradient-to-br from-dark-bg to-gray-850 text-white rounded-[32px] p-8 border border-gold/20 shadow-xl text-center relative overflow-hidden">
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-gold/10 rounded-full blur-2xl" />
                 <h3 className="font-serif font-bold text-xl mb-3 text-white">
-                  Đăng Ký Tư Vấn Miễn Phí
+                  Đặt Lịch Hẹn Khám
                 </h3>
                 <p className="text-xs text-gray-300 font-light leading-relaxed mb-6">
                   Liên hệ ngay với hội đồng bác sĩ chuyên gia tại KT Beauty để đặt lịch hẹn khám trực tiếp.
                 </p>
                 <Link
-                  href="/lien-he"
+                  href="/dat-lich"
                   className="inline-block w-full bg-gold hover:bg-gold-dark text-white font-bold py-3 rounded-xl transition-all duration-300 text-xs uppercase tracking-widest shadow-md text-center"
                 >
                   Đặt lịch hẹn ngay

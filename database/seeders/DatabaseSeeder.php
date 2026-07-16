@@ -111,7 +111,7 @@ class DatabaseSeeder extends Seeder
                     'content' => $art['content'],
                     'image' => $art['image'],
                     'published_date' => $art['published_date'],
-                    'author' => $art['author'],
+                    'legacy_author' => $art['author'],
                     'category' => $art['category'],
                     'is_highlight' => $idx < 3,
                 ]
@@ -476,8 +476,8 @@ class DatabaseSeeder extends Seeder
                 'description' => 'KT Beauty Medical Centre mang đến dịch vụ thẩm mỹ chuẩn y khoa hàng đầu Việt Nam, giúp bạn tự tin sở hữu vẻ đẹp độc bản, chuẩn tự nhiên.',
                 'image_desktop' => '/images/Ban-banner-web-3-1.png',
                 'image_mobile' => '/images/size-4x5-phone-1-1.png',
-                'button_primary_text' => 'Đăng Ký Tư Vấn',
-                'button_primary_url' => '#consult',
+                'button_primary_text' => 'Đặt Lịch Khám Ngay',
+                'button_primary_url' => '/dat-lich',
                 'button_secondary_text' => 'Tìm Hiểu Dịch Vụ',
                 'button_secondary_url' => '#services',
                 'order' => 0,
@@ -622,6 +622,67 @@ class DatabaseSeeder extends Seeder
                     'order' => $faq['order'],
                 ]
             );
+        }
+
+        // 8. Seed Authors
+        $authors = [
+            [
+                'name' => 'Bác Sĩ CKI Ngọc Nữ',
+                'slug' => 'dr-ngoc-nu',
+                'role' => 'Bác sĩ chuyên khoa I Da liễu',
+                'bio' => 'Bác sĩ Ngọc Nữ có hơn 10 năm kinh nghiệm trong lĩnh vực trẻ hóa da và thẩm mỹ nội khoa.',
+                'description' => 'Bác sĩ Chuyên khoa I Ngọc Nữ tốt nghiệp Đại học Y Dược TP.HCM, là chuyên gia hàng đầu về phác đồ cá nhân hóa trẻ hóa da bằng công nghệ cao tại Việt Nam.',
+                'avatar' => '/images/Bs-Nga-Aurora-1.png',
+            ],
+            [
+                'name' => 'Ths. Bác sĩ CKI Hoàng Nga',
+                'slug' => 'dr-hoang-nga',
+                'role' => 'Thạc sĩ - Bác sĩ Thẩm mỹ',
+                'bio' => 'Bác sĩ Hoàng Nga chuyên sâu về tạo hình mí mắt và điêu khắc chân mày vi chạm.',
+                'description' => 'Bác sĩ Hoàng Nga sở hữu nhiều chứng chỉ đào tạo thẩm mỹ quốc tế tại Hàn Quốc, Pháp và là thành viên hội phẫu thuật thẩm mỹ châu Á.',
+                'avatar' => '/images/Anh-dai-dien-BS-Nga-Aurora-1.png',
+            ],
+        ];
+
+        foreach ($authors as $auth) {
+            \App\Models\Author::updateOrCreate(
+                ['slug' => $auth['slug']],
+                $auth
+            );
+        }
+
+        // Link existing articles to seeded authors
+        $authorNu = \App\Models\Author::where('slug', 'dr-ngoc-nu')->first();
+        if ($authorNu) {
+            Article::where('legacy_author', 'like', '%Ngọc Nữ%')->update(['author_id' => $authorNu->id]);
+        }
+
+        // 9. Seed Doctor Shifts
+        $docNu = \App\Models\Doctor::where('name', 'like', '%Ngọc Nữ%')->first();
+        if ($docNu) {
+            \App\Models\DoctorShift::updateOrCreate(
+                ['doctor_id' => $docNu->id, 'day_of_week' => 1],
+                ['start_time' => '08:30', 'end_time' => '17:30', 'branch' => 'KT Beauty - Sài Gòn']
+            );
+            \App\Models\DoctorShift::updateOrCreate(
+                ['doctor_id' => $docNu->id, 'day_of_week' => 3],
+                ['start_time' => '08:30', 'end_time' => '17:30', 'branch' => 'KT Beauty - Sài Gòn']
+            );
+            \App\Models\DoctorShift::updateOrCreate(
+                ['doctor_id' => $docNu->id, 'day_of_week' => 5],
+                ['start_time' => '08:30', 'end_time' => '17:30', 'branch' => 'KT Beauty - Sài Gòn']
+            );
+        }
+
+        $docTrinh = \App\Models\Doctor::where('name', 'like', '%Việt Trinh%')->first();
+        if ($docTrinh) {
+            \App\Models\DoctorShift::updateOrCreate(
+                ['doctor_id' => $docTrinh->id, 'day_of_week' => 2],
+                ['start_time' => '08:30', 'end_time' => '17:30', 'branch' => 'KT Beauty - Sài Gòn']
+            );
+            \App\Models\DoctorShift::updateOrCreate(
+                ['doctor_id' => $docTrinh->id, 'day_of_week' => 4],
+                ['start_time' => '08:30', 'end_time' => '17:30', 'branch' => 'KT Beauty - Sài Gòn']
         }
     }
 }

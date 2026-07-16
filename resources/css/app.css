@@ -204,7 +204,7 @@
 }
 
 @utility animate-marquee-loop {
-  animation: marquee 35s linear infinite;
+  animation: marquee 55s linear infinite;
 }
 
 .marquee-pause-hover:hover .animate-marquee-loop {

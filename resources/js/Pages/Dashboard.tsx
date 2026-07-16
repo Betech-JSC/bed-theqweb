@@ -5,6 +5,7 @@ import axios from "axios";
 import {
   Plus,
   Trash,
+  MessageSquare,
   Edit,
   CheckCircle,
   Clock,
@@ -47,6 +48,47 @@ interface Submission {
   note: string | null;
   status: string;
   created_at: string;
+  booking_date?: string | null;
+  booking_time?: string | null;
+  doctor_id?: number | null;
+  doctor?: { name: string; role: string } | null;
+}
+
+interface Author {
+  id: number;
+  name: string;
+  slug: string;
+  avatar?: string | null;
+  role?: string | null;
+  bio?: string | null;
+  description?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  meta_keywords?: string | null;
+  meta_robots?: string | null;
+  canonical_link?: string | null;
+  meta_image?: string | null;
+}
+
+interface DoctorShift {
+  id: number;
+  doctor_id: number;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  branch: string | null;
+  doctor?: Doctor;
+}
+
+interface ServiceReview {
+  id: number;
+  service_id: number;
+  name: string;
+  rating: number;
+  comment: string | null;
+  is_approved: boolean | number;
+  created_at: string;
+  service?: Service;
 }
 
 interface Article {
@@ -56,7 +98,9 @@ interface Article {
   description: string | null;
   content: string | null;
   image: string | null;
-  author: string | null;
+  author: any | null;
+  author_id?: number | null;
+  legacy_author?: string | null;
   published_date: string | null;
   category: string;
   is_highlight?: boolean | number;
@@ -66,6 +110,7 @@ interface Article {
   meta_robots?: string;
   canonical_link?: string;
   meta_image?: string;
+  schema?: string | null;
 }
 
 interface Service {
@@ -151,6 +196,9 @@ interface DashboardProps {
   doctors: Doctor[];
   faqs: Faq[];
   realResults: RealResult[];
+  authors: Author[];
+  doctor_shifts: DoctorShift[];
+  service_reviews: ServiceReview[];
   analytics?: {
     daily_trends?: { date: string; count: number }[];
   };
@@ -610,6 +658,39 @@ const FolderTree: React.FC<FolderTreeProps> = ({ folders, currentFolderId, onSel
   );
 };
 
+const TIME_SLOTS = [
+  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+  "11:00", "11:30", "13:00", "13:30", "14:00", "14:30",
+  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
+  "18:00", "18:30", "19:00", "19:30", "20:00"
+];
+
+const slugify = (text: string) => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove Vietnamese accents
+    .replace(/[đĐ]/g, "d")            // Handle letter "đ"
+    .replace(/[^a-z0-9\s-]/g, "")    // Remove invalid characters
+    .trim()
+    .replace(/\s+/g, "-")            // Replace spaces with dash
+    .replace(/-+/g, "-");            // Collapse multiple dashes
+};
+
+const getMetaTitleStatus = (len: number) => {
+  if (len === 0) return { text: "Trống", color: "text-gray-400 bg-gray-50 border-gray-150" };
+  if (len < 50) return { text: "Quá ngắn (< 50 KT)", color: "text-amber-600 bg-amber-50 border-amber-200" };
+  if (len <= 60) return { text: "Tối ưu (50 - 60 KT)", color: "text-green-700 bg-green-50 border-green-200 font-extrabold" };
+  return { text: "Quá dài (> 60 KT)", color: "text-red-650 bg-red-50 border-red-200" };
+};
+
+const getMetaDescStatus = (len: number) => {
+  if (len === 0) return { text: "Trống", color: "text-gray-400 bg-gray-50 border-gray-150" };
+  if (len < 150) return { text: "Quá ngắn (< 150 KT)", color: "text-amber-600 bg-amber-50 border-amber-200" };
+  if (len <= 160) return { text: "Tối ưu (150 - 160 KT)", color: "text-green-700 bg-green-50 border-green-200 font-extrabold" };
+  return { text: "Quá dài (> 160 KT)", color: "text-red-650 bg-red-50 border-red-200" };
+};
+
 // ────────────────────────────────────────────────────────────────────────────────
 
 export default function Dashboard({
@@ -620,6 +701,9 @@ export default function Dashboard({
   doctors = [],
   faqs = [],
   realResults = [],
+  authors = [],
+  doctor_shifts = [],
+  service_reviews = [],
   analytics,
 }: DashboardProps) {
   const { props } = usePage();
@@ -627,19 +711,38 @@ export default function Dashboard({
   const user = (props.auth as any).user;
 
   const [activeTab, setActiveTab] = useState<
-    "overview" | "submissions" | "articles" | "services" | "banners" | "doctors" | "faqs" | "settings" | "realResults" | "media" | "configs" | "intro" | "policies"
+    "overview" | "submissions" | "bookings" | "articles" | "services" | "banners" | "doctors" | "faqs" | "settings" | "realResults" | "media" | "configs" | "intro" | "policies" | "authors" | "reviews" | "shifts"
   >("overview");
 
   const [activePolicyTab, setActivePolicyTab] = useState("dieu-khoan");
 
   // Search States
   const [articleSearchTerm, setArticleSearchTerm] = useState("");
+  const [articleCurrentPage, setArticleCurrentPage] = useState(1);
+  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
   const [serviceSearchTerm, setServiceSearchTerm] = useState("");
   const [doctorSearchTerm, setDoctorSearchTerm] = useState("");
   const [faqSearchTerm, setFaqSearchTerm] = useState("");
   const [realResultSearchTerm, setRealResultSearchTerm] = useState("");
+  const [submissionSearchTerm, setSubmissionSearchTerm] = useState("");
+  const [submissionStatusFilter, setSubmissionStatusFilter] = useState("all");
+  const [bookingSearchTerm, setBookingSearchTerm] = useState("");
+  const [bookingStatusFilter, setBookingStatusFilter] = useState("all");
+  const [calendarViewDate, setCalendarViewDate] = useState(new Date());
+  const [selectedCalendarDateStr, setSelectedCalendarDateStr] = useState(() => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  });
+  const [daySearchQuery, setDaySearchQuery] = useState("");
 
   // Modal States
+  const [showCreateBookingModal, setShowCreateBookingModal] = useState(false);
+  const [showEditBookingModal, setShowEditBookingModal] = useState(false);
+  const [editingBooking, setEditingBooking] = useState<Submission | null>(null);
+
   const [articleModalOpen, setArticleModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [articleViewMode, setArticleViewMode] = useState<"list" | "edit" | "create">("list");
@@ -664,6 +767,12 @@ export default function Dashboard({
   const [editingRealResult, setEditingRealResult] = useState<RealResult | null>(null);
   const [realResultViewMode, setRealResultViewMode] = useState<"list" | "edit" | "create">("list");
   const [advancedRealResultOpen, setAdvancedRealResultOpen] = useState(false);
+
+  // Author States
+  const [editingAuthor, setEditingAuthor] = useState<Author | null>(null);
+  const [authorViewMode, setAuthorViewMode] = useState<"list" | "edit" | "create">("list");
+  const [authorSearchTerm, setAuthorSearchTerm] = useState("");
+  const [advancedAuthorOpen, setAdvancedAuthorOpen] = useState(false);
 
   const execFormat = (command: string, value?: string) => {
     document.execCommand(command, false, value);
@@ -706,6 +815,7 @@ export default function Dashboard({
     description: "",
     content: "",
     author: "",
+    author_id: "" as string | number,
     published_date: "",
     category: "Chuyên môn",
     image_file: null as File | null,
@@ -718,6 +828,7 @@ export default function Dashboard({
     meta_robots: "",
     canonical_link: "",
     meta_image: "",
+    schema: "",
   });
 
   const serviceForm = useForm({
@@ -816,6 +927,56 @@ export default function Dashboard({
     },
   });
 
+  const authorForm = useForm({
+    name: "",
+    slug: "",
+    avatar_file: null as File | null,
+    avatar: "",
+    role: "",
+    bio: "",
+    description: "",
+    meta_title: "",
+    meta_description: "",
+    meta_keywords: "",
+    meta_robots: "",
+    canonical_link: "",
+    meta_image: "",
+  });
+
+  const shiftForm = useForm({
+    doctor_id: "" as string | number,
+    day_of_week: 1 as number,
+    start_time: "08:00",
+    end_time: "17:00",
+    branch: "Hà Nội",
+  });
+
+  const manualBookingForm = useForm({
+    name: "",
+    phone: "",
+    email: "",
+    service: "",
+    branch: "",
+    booking_date: "",
+    booking_time: "",
+    doctor_id: "" as string | number,
+    note: "",
+  });
+
+  const editBookingForm = useForm({
+    id: null as number | null,
+    name: "",
+    phone: "",
+    email: "",
+    service: "",
+    branch: "",
+    booking_date: "",
+    booking_time: "",
+    doctor_id: "" as string | number,
+    note: "",
+    status: "",
+  });
+
   // Media Manager States
   const [currentFolderId, setCurrentFolderId] = useState<number | null>(null);
   const [mediaFolders, setMediaFolders] = useState<any[]>([]);
@@ -828,6 +989,7 @@ export default function Dashboard({
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [mediaUploadLoading, setMediaUploadLoading] = useState(false);
+  const [isMediaDragging, setIsMediaDragging] = useState(false);
   const mediaFileInputRef = useRef<HTMLInputElement>(null);
 
   // Global Media Selector Modal States
@@ -899,8 +1061,7 @@ export default function Dashboard({
     }
   };
 
-  const handleUploadMediaFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const uploadMediaFiles = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
 
     setMediaUploadLoading(true);
@@ -921,7 +1082,43 @@ export default function Dashboard({
       alert("Tải tệp lên thất bại!");
     } finally {
       setMediaUploadLoading(false);
+    }
+  };
+
+  const handleUploadMediaFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      await uploadMediaFiles(files);
       if (e.target) e.target.value = "";
+    }
+  };
+
+  const handleMediaDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleMediaDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsMediaDragging(true);
+  };
+
+  const handleMediaDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsMediaDragging(false);
+  };
+
+  const handleMediaDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsMediaDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const imageFiles = Array.from(files).filter(file => file.type.startsWith("image/"));
+      if (imageFiles.length > 0) {
+        await uploadMediaFiles(imageFiles);
+      } else {
+        alert("Chỉ hỗ trợ tải lên các tệp tin hình ảnh!");
+      }
     }
   };
 
@@ -957,14 +1154,84 @@ export default function Dashboard({
     router.patch(
       route("admin.submissions.status", id),
       { status },
-      { preserveScroll: true }
+      { 
+        preserveScroll: true,
+        preserveState: true
+      }
     );
   };
 
   const handleDeleteSubmission = (id: number) => {
     if (confirm("Bạn có chắc chắn muốn xóa lượt đăng ký này?")) {
-      router.delete(route("admin.submissions.destroy", id), { preserveScroll: true });
+      router.delete(
+        route("admin.submissions.destroy", id),
+        { 
+          preserveScroll: true,
+          preserveState: true
+        }
+      );
     }
+  };
+
+  const getDoctorShiftAndConflictStatus = (
+    doctorId: string | number,
+    bookingDate: string,
+    bookingTime: string,
+    excludeSubmissionId?: number | null
+  ) => {
+    if (!doctorId || !bookingDate) return { hasShift: true, isConflicting: false };
+
+    // Calculate day of week (1 = Monday, ..., 7 = Sunday)
+    const dateObj = new Date(bookingDate);
+    const jsDay = dateObj.getDay();
+    const dbDayOfWeek = jsDay === 0 ? 7 : jsDay;
+
+    // 1. Check Shift
+    const doctorShiftsList = doctor_shifts.filter(
+      (sh) => String(sh.doctor_id) === String(doctorId)
+    );
+    
+    let hasShift = true;
+    if (doctorShiftsList.length > 0) {
+      hasShift = doctorShiftsList.some((sh) => sh.day_of_week === dbDayOfWeek);
+    }
+
+    // 2. Check Conflict
+    const isConflicting = submissions.some(
+      (sub) =>
+        String(sub.doctor_id) === String(doctorId) &&
+        sub.booking_date === bookingDate &&
+        sub.booking_time === bookingTime &&
+        sub.id !== excludeSubmissionId &&
+        sub.status !== "Đã hủy"
+    );
+
+    return { hasShift, isConflicting };
+  };
+
+  const handleCreateBooking = (e: React.FormEvent) => {
+    e.preventDefault();
+    manualBookingForm.post(route("consult.store"), {
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => {
+        setShowCreateBookingModal(false);
+        manualBookingForm.reset();
+      },
+    });
+  };
+
+  const handleEditBooking = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editBookingForm.data.id) return;
+    editBookingForm.patch(route("admin.submissions.update", editBookingForm.data.id), {
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => {
+        setShowEditBookingModal(false);
+        editBookingForm.reset();
+      },
+    });
   };
 
   // Article Actions
@@ -980,7 +1247,8 @@ export default function Dashboard({
       title: art.title,
       description: art.description || "",
       content: art.content || "",
-      author: art.author || "",
+      author: art.author ? (typeof art.author === "object" ? art.author.name : art.author) : (art.legacy_author || ""),
+      author_id: art.author_id || "",
       published_date: art.published_date || "",
       category: art.category,
       image_file: null,
@@ -993,6 +1261,7 @@ export default function Dashboard({
       meta_robots: art.meta_robots || "",
       canonical_link: art.canonical_link || "",
       meta_image: art.meta_image || "",
+      schema: art.schema || "",
     });
     setArticleViewMode("edit");
   };
@@ -1026,6 +1295,87 @@ export default function Dashboard({
 
   const handleToggleHighlightArticle = (id: number) => {
     router.patch(route("admin.articles.toggle-highlight", id), {}, { preserveScroll: true });
+  };
+
+  // Author Actions
+  const handleOpenAddAuthor = () => {
+    setEditingAuthor(null);
+    authorForm.reset();
+    setAuthorViewMode("create");
+  };
+
+  const handleOpenEditAuthor = (aut: Author) => {
+    setEditingAuthor(aut);
+    authorForm.setData({
+      name: aut.name,
+      slug: aut.slug || "",
+      avatar_file: null,
+      avatar: aut.avatar || "",
+      role: aut.role || "",
+      bio: aut.bio || "",
+      description: aut.description || "",
+      meta_title: aut.meta_title || "",
+      meta_description: aut.meta_description || "",
+      meta_keywords: aut.meta_keywords || "",
+      meta_robots: aut.meta_robots || "",
+      canonical_link: aut.canonical_link || "",
+      meta_image: aut.meta_image || "",
+    });
+    setAuthorViewMode("edit");
+  };
+
+  const handleSaveAuthor = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingAuthor) {
+      authorForm.post(route("admin.authors.update", editingAuthor.id), {
+        forceFormData: true,
+        onSuccess: () => {
+          setAuthorViewMode("list");
+          authorForm.reset();
+        },
+      });
+    } else {
+      authorForm.post(route("admin.authors.store"), {
+        forceFormData: true,
+        onSuccess: () => {
+          setAuthorViewMode("list");
+          authorForm.reset();
+        },
+      });
+    }
+  };
+
+  const handleDeleteAuthor = (id: number) => {
+    if (confirm("Bạn có chắc chắn muốn xóa tác giả này?")) {
+      router.delete(route("admin.authors.destroy", id), { preserveScroll: true });
+    }
+  };
+
+  // Review Actions
+  const handleToggleReviewApproval = (id: number) => {
+    router.post(route("admin.reviews.toggle-approval", id), {}, { preserveScroll: true });
+  };
+
+  const handleDeleteReview = (id: number) => {
+    if (confirm("Bạn có chắc chắn muốn xóa đánh giá này?")) {
+      router.delete(route("admin.reviews.destroy", id), { preserveScroll: true });
+    }
+  };
+
+  // Doctor Shift Actions
+  const handleSaveDoctorShift = (e: React.FormEvent) => {
+    e.preventDefault();
+    shiftForm.post(route("admin.doctor-shifts.store"), {
+      onSuccess: () => {
+        shiftForm.reset("start_time", "end_time");
+      },
+    });
+  };
+
+  const handleDeleteDoctorShift = (id: number) => {
+    if (confirm("Bạn có chắc chắn muốn xóa ca trực này?")) {
+      router.delete(route("admin.doctor-shifts.destroy", id), { preserveScroll: true });
+    }
   };
 
   // Service Actions
@@ -1410,6 +1760,27 @@ export default function Dashboard({
             </button>
 
             <button
+              onClick={() => setActiveTab("bookings")}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                activeTab === "bookings"
+                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                  : "hover:bg-white/5 hover:text-white text-gray-400"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Calendar size={16} />
+                <span>Lịch hẹn trực tuyến</span>
+              </div>
+              {submissions.filter(sub => sub.booking_date || sub.booking_time).length > 0 && (
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                  activeTab === "bookings" ? "bg-white text-gold" : "bg-gold/15 text-gold"
+                }`}>
+                  {submissions.filter(sub => sub.booking_date || sub.booking_time).length}
+                </span>
+              )}
+            </button>
+
+            <button
               onClick={() => setActiveTab("articles")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "articles"
@@ -1422,6 +1793,18 @@ export default function Dashboard({
             </button>
 
             <button
+              onClick={() => setActiveTab("authors")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                activeTab === "authors"
+                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                  : "hover:bg-white/5 hover:text-white text-gray-400"
+              }`}
+            >
+              <Users size={16} />
+              <span>Tác giả bài viết</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab("services")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "services"
@@ -1431,6 +1814,18 @@ export default function Dashboard({
             >
               <Sparkles size={16} />
               <span>Danh mục dịch vụ</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("reviews")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                activeTab === "reviews"
+                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                  : "hover:bg-white/5 hover:text-white text-gray-400"
+              }`}
+            >
+              <MessageSquare size={16} />
+              <span>Quản lý đánh giá</span>
             </button>
 
             <button
@@ -1455,6 +1850,18 @@ export default function Dashboard({
             >
               <Users size={16} />
               <span>Đội ngũ bác sĩ</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("shifts")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                activeTab === "shifts"
+                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                  : "hover:bg-white/5 hover:text-white text-gray-400"
+              }`}
+            >
+              <Calendar size={16} />
+              <span>Lịch trực bác sĩ</span>
             </button>
 
             <button
@@ -1678,88 +2085,209 @@ export default function Dashboard({
                 </div>
 
                 {/* Submissions Trend Chart */}
-                {analytics?.daily_trends && (
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                      <div className="text-left">
-                        <h3 className="text-base font-bold font-serif text-gray-800 flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse"></span>
-                          Biểu Đồ Xu Hướng Đăng Ký
-                        </h3>
-                        <p className="text-xs text-gray-400 font-light mt-0.5">Số lượng khách hàng đăng ký tư vấn trong 7 ngày gần nhất</p>
+                {/* Submissions Trend Chart (Premium Glassmorphic Column Chart) */}
+                {analytics?.daily_trends && (() => {
+                  const trends = analytics.daily_trends || [];
+                  const totalRegistrations = trends.reduce((sum, item) => sum + item.count, 0);
+                  const maxVal = Math.max(...trends.map(d => d.count), 5); // Fallback to 5 to avoid extremely short charts
+
+                  return (
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 text-left">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-gray-50 pb-4">
+                        <div>
+                          <h3 className="text-base font-bold font-serif text-gray-800 flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse"></span>
+                            Biểu Đồ Xu Hướng Đăng Ký (7 ngày qua)
+                          </h3>
+                          <p className="text-xs text-gray-400 font-light mt-0.5">
+                            Tổng cộng có <span className="font-bold text-gold">{totalRegistrations}</span> lượt đăng ký tư vấn mới
+                          </p>
+                        </div>
+
+                        <a
+                          href={route("admin.submissions.export")}
+                          className="group inline-flex items-center gap-2 bg-gradient-to-r from-gold to-gold/90 hover:from-gold-dark hover:to-gold text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-gold/10 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                        >
+                          <svg className="w-3.5 h-3.5 mr-0.5 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                          </svg>
+                          Xuất dữ liệu Excel (CSV)
+                        </a>
                       </div>
 
-                      <a
-                        href={route("admin.submissions.export")}
-                        className="inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-white font-bold px-4 py-2.5 rounded-lg text-xs transition-all shadow-sm hover:shadow-gold/15"
-                      >
-                        Xuất file dữ liệu CSV (Excel)
-                      </a>
+                      {/* SVG Canvas for Glassmorphic Columns */}
+                      <div className="w-full h-56 relative bg-gradient-to-b from-gray-50/10 to-gray-50/40 rounded-2xl border border-gray-100/70 p-4">
+                        <svg className="w-full h-full overflow-visible" viewBox="0 0 700 180" preserveAspectRatio="none">
+                          {/* Horizontal Grid lines */}
+                          <line x1="50" y1="30" x2="650" y2="30" stroke="#f1f3f6" strokeWidth="1.2" strokeDasharray="3 3" />
+                          <line x1="50" y1="85" x2="650" y2="85" stroke="#f1f3f6" strokeWidth="1.2" strokeDasharray="3 3" />
+                          <line x1="50" y1="140" x2="650" y2="140" stroke="#f1f3f6" strokeWidth="1.2" strokeDasharray="3 3" />
+
+                          {/* Y-axis Labels on Left */}
+                          <text x="38" y="33" textAnchor="end" fill="#9ca3af" className="text-[9.5px] font-bold select-none">{maxVal}</text>
+                          <text x="38" y="88" textAnchor="end" fill="#9ca3af" className="text-[9.5px] font-bold select-none">{Math.round(maxVal / 2)}</text>
+                          <text x="38" y="143" textAnchor="end" fill="#9ca3af" className="text-[9.5px] font-bold select-none">0</text>
+
+                          {/* Columns Map */}
+                          {(() => {
+                            const points = trends.map((item, i) => {
+                              const x = (i / 6) * 560 + 75; // spaced across 560px, starting from x=75
+                              const barHeight = (item.count / maxVal) * 110; // max height of 110px
+                              const y = 140 - barHeight;
+                              return { x, y, barHeight, ...item };
+                            });
+
+                            return (
+                              <>
+                                {points.map((p, i) => {
+                                  const isHovered = hoveredBarIndex === i;
+                                  return (
+                                    <g key={i} className="group">
+                                      {/* Background Track Column */}
+                                      <rect
+                                        x={p.x - 14}
+                                        y="30"
+                                        width="28"
+                                        height="110"
+                                        rx="6"
+                                        fill="#eef0f3"
+                                        opacity="0.55"
+                                        className="transition-colors duration-200"
+                                      />
+
+                                      {/* Active Data Column Rect */}
+                                      {p.barHeight > 0 && (
+                                        <rect
+                                          x={p.x - 14}
+                                          y={p.y}
+                                          width="28"
+                                          height={p.barHeight}
+                                          rx="6"
+                                          fill="url(#barGrad)"
+                                          className={`transition-all duration-300 ${
+                                            isHovered ? "brightness-110 filter drop-shadow-[0_4px_8px_rgba(197,168,128,0.35)]" : ""
+                                          }`}
+                                        />
+                                      )}
+
+                                      {/* Static Indicator dot if registration > 0 but not hovered */}
+                                      {p.count > 0 && !isHovered && (
+                                        <circle
+                                          cx={p.x}
+                                          cy={p.y}
+                                          r="3.5"
+                                          fill="#ffffff"
+                                          stroke="#c5a880"
+                                          strokeWidth="2"
+                                          className="pointer-events-none"
+                                        />
+                                      )}
+
+                                      {/* Static labels showing daily numbers */}
+                                      <text
+                                        x={p.x}
+                                        y={p.y - 8}
+                                        textAnchor="middle"
+                                        fill={p.count > 0 ? "#c5a880" : "#babcbf"}
+                                        className={`text-[10px] font-bold select-none transition-all duration-200 ${
+                                          p.count > 0 ? "opacity-100 font-extrabold" : "opacity-45"
+                                        } ${isHovered ? "opacity-0 scale-75" : ""}`}
+                                      >
+                                        {p.count}
+                                      </text>
+
+                                      {/* X Axis Dates */}
+                                      <text
+                                        x={p.x}
+                                        y="160"
+                                        textAnchor="middle"
+                                        fill="#6b7280"
+                                        className={`text-[10px] font-bold tracking-tight select-none transition-colors duration-250 ${
+                                          isHovered ? "fill-gold font-black scale-105" : ""
+                                        }`}
+                                      >
+                                        {p.date}
+                                      </text>
+
+                                      {/* Hit Box / Trigger Rect */}
+                                      <rect
+                                        x={p.x - 20}
+                                        y="20"
+                                        width="40"
+                                        height="150"
+                                        fill="transparent"
+                                        className="cursor-pointer"
+                                        onMouseEnter={() => setHoveredBarIndex(i)}
+                                        onMouseLeave={() => setHoveredBarIndex(null)}
+                                      />
+                                    </g>
+                                  );
+                                })}
+
+                                {/* Hover Tooltip Popup Card */}
+                                {hoveredBarIndex !== null && points[hoveredBarIndex] && (() => {
+                                  const hp = points[hoveredBarIndex];
+                                  const boxW = 120;
+                                  const boxH = 48;
+                                  const rx = hp.x;
+                                  const tx = Math.max(boxW / 2 + 10, Math.min(700 - boxW / 2 - 10, rx));
+                                  const ty = Math.max(8, hp.y - boxH - 12);
+                                  return (
+                                    <g className="pointer-events-none transition-all duration-200 ease-out">
+                                      {/* Soft dark box */}
+                                      <rect
+                                        x={tx - boxW / 2}
+                                        y={ty}
+                                        width={boxW}
+                                        height={boxH}
+                                        rx="7"
+                                        fill="#111827"
+                                        opacity="0.96"
+                                      />
+                                      {/* Arrow */}
+                                      <polygon
+                                        points={`${rx - 6},${ty + boxH} ${rx + 6},${ty + boxH} ${rx},${ty + boxH + 4}`}
+                                        fill="#111827"
+                                        opacity="0.96"
+                                      />
+                                      {/* Tooltip Content */}
+                                      <text
+                                        x={tx}
+                                        y={ty + 17}
+                                        textAnchor="middle"
+                                        fill="#9ca3af"
+                                        className="text-[9.5px] font-semibold font-sans tracking-wide"
+                                      >
+                                        Ngày {hp.date}
+                                      </text>
+                                      <text
+                                        x={tx}
+                                        y={ty + 33}
+                                        textAnchor="middle"
+                                        fill="#ffffff"
+                                        className="text-[11.5px] font-black font-sans"
+                                      >
+                                        {hp.count} lượt đăng ký
+                                      </text>
+                                    </g>
+                                  );
+                                })()}
+                              </>
+                            );
+                          })()}
+
+                          {/* Gradient Definitions */}
+                          <defs>
+                            <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#c5a880" />
+                              <stop offset="100%" stopColor="#c5a880" stopOpacity="0.1" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                      </div>
                     </div>
-
-                    {/* SVG Chart */}
-                    <div className="w-full h-44 relative pt-4">
-                      <svg className="w-full h-full" viewBox="0 0 700 150" preserveAspectRatio="none">
-                        {/* Grid lines */}
-                        <line x1="0" y1="20" x2="700" y2="20" stroke="#f5f5f5" strokeWidth="1" />
-                        <line x1="0" y1="65" x2="700" y2="65" stroke="#f5f5f5" strokeWidth="1" />
-                        <line x1="0" y1="110" x2="700" y2="110" stroke="#f5f5f5" strokeWidth="1" />
-                        
-                        {/* Draw Line / Area Path */}
-                        {(() => {
-                          const trends = analytics.daily_trends || [];
-                          const maxVal = Math.max(...trends.map(d => d.count), 5);
-                          const points = trends.map((d, i) => {
-                            const x = (i / 6) * 650 + 25;
-                            const y = 120 - (d.count / maxVal) * 90;
-                            return { x, y, ...d };
-                          });
-
-                          if (points.length === 0) return null;
-
-                          const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-                          const areaPath = `${linePath} L ${points[points.length-1].x} 120 L ${points[0].x} 120 Z`;
-
-                          return (
-                            <>
-                              {/* Shaded Area under curve */}
-                              <path d={areaPath} fill="url(#chartGrad)" opacity="0.15" />
-                              
-                              {/* Main line */}
-                              <path d={linePath} fill="none" stroke="#d2bfa7" strokeWidth="3" strokeLinecap="round" />
-                              
-                              {/* Data points & labels */}
-                              {points.map((p, i) => (
-                                <g key={i} className="group cursor-pointer">
-                                  <circle cx={p.x} cy={p.y} r="5" fill="#ffffff" stroke="#d2bfa7" strokeWidth="2.5" />
-                                  <circle cx={p.x} cy={p.y} r="8" fill="#d2bfa7" opacity="0" className="hover:opacity-20 transition-opacity" />
-                                  
-                                  {/* Value label */}
-                                  <text x={p.x} y={p.y - 12} textAnchor="middle" fill="#d2bfa7" className="text-[10px] font-bold">
-                                    {p.count}
-                                  </text>
-                                  
-                                  {/* X axis dates */}
-                                  <text x={p.x} y="138" textAnchor="middle" fill="#9ca3af" className="text-[10px] font-medium">
-                                    {p.date}
-                                  </text>
-                                </g>
-                              ))}
-                            </>
-                          );
-                        })()}
-                        
-                        {/* Gradient definitions */}
-                        <defs>
-                          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#d2bfa7" />
-                            <stop offset="100%" stopColor="#d2bfa7" stopOpacity="0" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Lower Row: Split boxes matching target layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
@@ -1856,76 +2384,558 @@ export default function Dashboard({
             )}
 
             {/* SUBMISSIONS TAB */}
-            {activeTab === "submissions" && (
-              <div className="overflow-x-auto">
-                <h3 className="text-lg font-bold font-serif text-gray-800 mb-6">Danh Sách Khách Hàng Đăng Ký</h3>
-                {submissions.length === 0 ? (
-                  <p className="text-gray-400 text-center py-12 font-light">Chưa có lượt đăng ký tư vấn nào.</p>
-                ) : (
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-gray-100 text-xs font-semibold uppercase text-gray-400 tracking-wider">
-                        <th className="py-4 px-4">Tên khách hàng</th>
-                        <th className="py-4 px-4">Số điện thoại</th>
-                        <th className="py-4 px-4">Dịch vụ</th>
-                        <th className="py-4 px-4">Ngày đăng ký</th>
-                        <th className="py-4 px-4 text-center">Trạng thái</th>
-                        <th className="py-4 px-4 text-right">Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50 text-sm text-gray-600">
-                      {submissions.map((sub) => (
-                        <tr key={sub.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="py-4 px-4">
-                            <div className="font-bold text-gray-800">{sub.name}</div>
-                            {sub.email && <div className="text-xs text-gray-400 font-light mt-0.5">{sub.email}</div>}
-                          </td>
-                          <td className="py-4 px-4">
-                            <a href={`tel:${sub.phone}`} className="hover:underline font-semibold text-gold">
-                              {sub.phone}
-                            </a>
-                          </td>
-                          <td className="py-4 px-4">
-                            <span className="bg-gray-100 px-2.5 py-1 rounded text-xs text-gray-500 font-medium">
-                              {sub.service || "Chưa chọn"}
-                            </span>
-                          </td>
-                          <td className="py-4 px-4 text-gray-400 text-xs">
-                            {new Date(sub.created_at).toLocaleString("vi-VN")}
-                          </td>
-                          <td className="py-4 px-4 text-center">
-                            <select
-                              value={sub.status}
-                              onChange={(e) => handleUpdateStatus(sub.id, e.target.value)}
-                              className={`text-xs font-bold rounded px-3 py-1.5 focus:outline-none border-none cursor-pointer ${
-                                sub.status === "Chờ liên hệ"
-                                  ? "bg-amber-100 text-amber-700"
-                                  : sub.status === "Đã liên hệ"
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-red-100 text-red-700"
-                              }`}
-                            >
-                              <option value="Chờ liên hệ">Chờ liên hệ</option>
-                              <option value="Đã liên hệ">Đã liên hệ</option>
-                              <option value="Đã hủy">Đã hủy</option>
-                            </select>
-                          </td>
-                          <td className="py-4 px-4 text-right">
+            {activeTab === "submissions" && (() => {
+              const filteredSubmissions = submissions.filter((sub) => {
+                const matchSearch =
+                  sub.name.toLowerCase().includes(submissionSearchTerm.toLowerCase()) ||
+                  sub.phone.includes(submissionSearchTerm) ||
+                  (sub.email && sub.email.toLowerCase().includes(submissionSearchTerm.toLowerCase()));
+                const matchStatus =
+                  submissionStatusFilter === "all" || sub.status === submissionStatusFilter;
+                return matchSearch && matchStatus;
+              });
+
+              return (
+                <div>
+                  {/* Breadcrumb path */}
+                  <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-6 font-semibold select-none text-left">
+                    <span className="cursor-pointer hover:text-gold transition-colors flex items-center gap-1" onClick={() => setActiveTab("overview")}>
+                      <LayoutDashboard size={12} />
+                      <span>Tổng quan</span>
+                    </span>
+                    <span className="text-gray-300">/</span>
+                    <span className="text-gray-600">Danh Sách Đăng Ký</span>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-gray-150/60 mb-6" />
+
+                  {/* Header Row */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <h3 className="text-base font-bold font-serif text-gray-800 text-left">
+                      Danh Sách Đăng Ký Tư Vấn & Đặt Lịch
+                    </h3>
+
+                    {/* Filter & Search Bar */}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                      {/* Search bar */}
+                      <div className="relative w-full sm:w-64">
+                        <input
+                          type="text"
+                          placeholder="Tìm tên, SĐT..."
+                          value={submissionSearchTerm}
+                          onChange={(e) => setSubmissionSearchTerm(e.target.value)}
+                          className="w-full border border-gray-200 focus:border-gold px-4 py-2 pr-10 rounded-xl text-xs focus:outline-none placeholder-gray-400 font-light text-gray-700 bg-white shadow-sm"
+                        />
+                        <svg
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+
+                      {/* Status Filter */}
+                      <div className="relative w-full sm:w-40">
+                        <select
+                          value={submissionStatusFilter}
+                          onChange={(e) => setSubmissionStatusFilter(e.target.value)}
+                          className="w-full border border-gray-200 focus:border-gold px-4 py-2 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm appearance-none cursor-pointer"
+                        >
+                          <option value="all">Tất cả trạng thái</option>
+                          <option value="Chờ liên hệ">Chờ liên hệ</option>
+                          <option value="Đã liên hệ">Đã liên hệ</option>
+                          <option value="Đã hủy">Đã hủy</option>
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[9px]">
+                          ▼
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {filteredSubmissions.length === 0 ? (
+                    <p className="text-gray-400 text-center py-12 font-light">Chưa có lượt đăng ký nào phù hợp.</p>
+                  ) : (
+                    <div className="overflow-x-auto border border-gray-100 rounded-2xl shadow-sm">
+                      <table className="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                          <tr className="border-b border-gray-150 text-[10px] font-bold uppercase text-gray-400 tracking-wider bg-gray-50/75 select-none">
+                            <th className="py-3.5 px-4">Khách Hàng</th>
+                            <th className="py-3.5 px-4">Số Điện Thoại</th>
+                            <th className="py-3.5 px-4">Ngày Đăng Ký</th>
+                            <th className="py-3.5 px-4 text-center">Trạng Thái</th>
+                            <th className="py-3.5 px-4 text-right">Thao Tác</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 text-xs text-gray-600 bg-white">
+                          {filteredSubmissions.map((sub) => {
+                            return (
+                              <tr key={sub.id} className="hover:bg-gray-50/50 transition-colors">
+                                {/* Customer Info */}
+                                <td className="py-4 px-4">
+                                  <div className="font-bold text-gray-800 text-sm">{sub.name}</div>
+                                  {sub.email && <div className="text-[10px] text-gray-400 font-light mt-0.5">{sub.email}</div>}
+                                </td>
+
+                                {/* Phone */}
+                                <td className="py-4 px-4">
+                                  <a href={`tel:${sub.phone}`} className="hover:underline font-bold text-gold text-sm">
+                                    {sub.phone}
+                                  </a>
+                                </td>
+
+                                {/* Submission Time */}
+                                <td className="py-4 px-4 text-gray-400 font-medium">
+                                  {new Date(sub.created_at).toLocaleString("vi-VN", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                  })}
+                                </td>
+
+                                {/* Status */}
+                                <td className="py-4 px-4 text-center">
+                                  <select
+                                    value={sub.status}
+                                    onChange={(e) => handleUpdateStatus(sub.id, e.target.value)}
+                                    className={`text-[10px] font-black rounded-lg px-2.5 py-1.5 focus:outline-none border cursor-pointer transition-colors ${
+                                      sub.status === "Chờ liên hệ"
+                                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                                        : sub.status === "Đã liên hệ"
+                                        ? "bg-green-50 text-green-700 border-green-200"
+                                        : "bg-red-50 text-red-700 border-red-200"
+                                    }`}
+                                  >
+                                    <option value="Chờ liên hệ">Chờ liên hệ</option>
+                                    <option value="Đã liên hệ">Đã liên hệ</option>
+                                    {sub.status === "Đã hủy" && (
+                                      <option value="Đã hủy">Đã hủy</option>
+                                    )}
+                                  </select>
+                                </td>
+
+                                {/* Actions */}
+                                <td className="py-4 px-4 text-right">
+                                  <button
+                                    onClick={() => handleDeleteSubmission(sub.id)}
+                                    className="text-red-500 hover:text-red-750 p-1.5 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                                    title="Xóa lượt đăng ký"
+                                  >
+                                    <Trash size={15} />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* BOOKINGS TAB */}
+            {activeTab === "bookings" && (() => {
+              const WEEKDAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+              
+              const formatDateStr = (date: Date) => {
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+              };
+
+              const getBookingsForDate = (dateStr: string) => {
+                return submissions.filter(sub => sub.booking_date === dateStr);
+              };
+
+              const prevMonth = () => {
+                setCalendarViewDate(new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() - 1, 1));
+              };
+
+              const nextMonth = () => {
+                setCalendarViewDate(new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() + 1, 1));
+              };
+
+              // Generate calendar days
+              const year = calendarViewDate.getFullYear();
+              const month = calendarViewDate.getMonth();
+              const firstDayOfMonth = new Date(year, month, 1);
+              let startDayOfWeek = firstDayOfMonth.getDay();
+              // Adjust Sunday (0) to index 6, Monday (1) to index 0, etc.
+              startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+              const totalDays = new Date(year, month + 1, 0).getDate();
+
+              const calendarDays: (Date | null)[] = [];
+              for (let i = 0; i < startDayOfWeek; i++) {
+                calendarDays.push(null);
+              }
+              for (let d = 1; d <= totalDays; d++) {
+                calendarDays.push(new Date(year, month, d));
+              }
+
+              // Selected date bookings
+              const dayBookings = getBookingsForDate(selectedCalendarDateStr);
+
+              // Filtered Selected date bookings based on local day search
+              const filteredDayBookings = dayBookings.filter(sub => {
+                return sub.name.toLowerCase().includes(daySearchQuery.toLowerCase()) ||
+                       sub.phone.includes(daySearchQuery) ||
+                       (sub.service && sub.service.toLowerCase().includes(daySearchQuery.toLowerCase())) ||
+                       (sub.doctor && sub.doctor.name.toLowerCase().includes(daySearchQuery.toLowerCase()));
+              });
+
+              // Status Summary Count
+              const pendingCount = dayBookings.filter(s => s.status === 'Chờ liên hệ').length;
+              const contactedCount = dayBookings.filter(s => s.status === 'Đã liên hệ').length;
+              const cancelledCount = dayBookings.filter(s => s.status === 'Đã hủy').length;
+
+              return (
+                <div>
+                  {/* Breadcrumb path */}
+                  <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-6 font-semibold select-none text-left">
+                    <span className="cursor-pointer hover:text-gold transition-colors flex items-center gap-1" onClick={() => setActiveTab("overview")}>
+                      <LayoutDashboard size={12} />
+                      <span>Tổng quan</span>
+                    </span>
+                    <span className="text-gray-300">/</span>
+                    <span className="text-gray-600">Lịch Hẹn Trực Tuyến</span>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-gray-150/60 mb-6" />
+
+                  {/* Split Layout Container */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    
+                    {/* Left: Calendar Month view */}
+                    <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                      {/* Calendar Navigation Header */}
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div>
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-base font-bold text-gray-800 font-serif">
+                              Lịch Hẹn Trực Tuyến
+                            </h3>
                             <button
-                              onClick={() => handleDeleteSubmission(sub.id)}
-                              className="text-red-500 hover:text-red-750 p-1.5 hover:bg-red-50 rounded transition-colors"
-                              title="Xóa lượt đăng ký"
+                              onClick={() => {
+                                manualBookingForm.reset();
+                                manualBookingForm.setData({
+                                  name: "",
+                                  phone: "",
+                                  email: "",
+                                  service: "",
+                                  branch: "",
+                                  booking_date: selectedCalendarDateStr,
+                                  booking_time: "",
+                                  doctor_id: "",
+                                  note: "",
+                                });
+                                setShowCreateBookingModal(true);
+                              }}
+                              className="bg-gold hover:bg-gold/90 text-white font-bold px-3 py-1.5 rounded-xl text-[10.5px] cursor-pointer transition-colors flex items-center gap-1 shadow-sm font-sans"
                             >
-                              <Trash size={16} />
+                              <Plus size={11} strokeWidth={3} />
+                              <span>Tạo lịch hẹn</span>
                             </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            )}
+                          </div>
+                          <p className="text-[11px] text-gray-400 font-medium mt-0.5">Quản lý và điều phối lịch trình chăm sóc da & thẩm mỹ</p>
+                        </div>
+                        
+                        <div className="flex items-center gap-3.5 bg-gray-55 px-3 py-1.5 rounded-xl border border-gray-100">
+                          <button
+                            onClick={prevMonth}
+                            className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors cursor-pointer flex items-center justify-center"
+                            title="Tháng trước"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <span className="text-xs font-bold text-gray-700 min-w-[100px] text-center select-none font-mono">
+                            THÁNG {month + 1} / {year}
+                          </span>
+                          <button
+                            onClick={nextMonth}
+                            className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors cursor-pointer flex items-center justify-center"
+                            title="Tháng sau"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Weekday Names Header */}
+                      <div className="grid grid-cols-7 text-center text-xs font-bold text-gray-400 py-2.5 bg-gray-50/50 rounded-xl mb-3 select-none">
+                        {WEEKDAYS.map(day => (
+                          <div key={day} className={day === 'CN' ? 'text-red-500' : ''}>
+                            {day}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Days Grid */}
+                      <div className="grid grid-cols-7 gap-2">
+                        {calendarDays.map((date, idx) => {
+                          if (!date) {
+                            return <div key={`empty-${idx}`} className="aspect-square bg-gray-50/10 rounded-xl" />;
+                          }
+
+                          const dateStr = formatDateStr(date);
+                          const bookings = getBookingsForDate(dateStr);
+                          const isSelected = selectedCalendarDateStr === dateStr;
+                          const isToday = formatDateStr(new Date()) === dateStr;
+                          const dayNum = date.getDate();
+                          const isOverloaded = bookings.length >= 5;
+
+                          return (
+                            <button
+                              key={dateStr}
+                              onClick={() => {
+                                setSelectedCalendarDateStr(dateStr);
+                                setDaySearchQuery(""); // clear local query
+                              }}
+                              className={`aspect-square rounded-xl p-2 flex flex-col items-start justify-between border transition-all cursor-pointer select-none group relative ${
+                                isSelected
+                                  ? isOverloaded
+                                    ? 'border-red-500 bg-red-50 shadow-sm'
+                                    : 'border-gold bg-gold/5 shadow-sm'
+                                  : isOverloaded
+                                  ? 'border-red-200 bg-red-50/50 hover:bg-red-50'
+                                  : isToday
+                                  ? 'border-gray-900 bg-gray-50'
+                                  : 'border-gray-100 hover:border-gold/30 hover:bg-gold/5/5 bg-white'
+                              }`}
+                              title={isOverloaded ? "Ngày quá tải lịch hẹn (>= 5 ca)" : undefined}
+                            >
+                              {/* Day number */}
+                              <span className={`text-xs font-bold ${
+                                isSelected 
+                                  ? isOverloaded ? 'text-red-600 font-black' : 'text-gold' 
+                                  : isOverloaded
+                                  ? 'text-red-650'
+                                  : isToday 
+                                  ? 'text-gray-900' 
+                                  : 'text-gray-700'
+                              }`}>
+                                {dayNum}
+                              </span>
+
+                              {/* Booking count dot/badge */}
+                              {bookings.length > 0 && (
+                                <span className={`absolute bottom-2 right-2 text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full text-center border ${
+                                  isOverloaded
+                                    ? 'bg-red-600 text-white border-red-600 animate-pulse'
+                                    : isSelected
+                                    ? 'bg-gold text-white border-gold'
+                                    : 'bg-gold/10 text-gold border-gold/20'
+                                }`}>
+                                  {bookings.length}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Right: Selected Date Bookings list */}
+                    <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col min-h-[500px]">
+                      {/* Pane Header */}
+                      <div className="border-b border-gray-100 pb-4 mb-4">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider select-none">BẢNG PHÂN PHỐI LỊCH</h4>
+                            <h3 className="text-sm font-bold text-gray-800 mt-1 select-none flex items-center gap-1.5 font-mono">
+                              <Calendar size={14} className="text-gold" />
+                              {selectedCalendarDateStr.split('-').reverse().join('/')}
+                            </h3>
+                          </div>
+                          <span className="bg-gold text-white text-xs font-black px-2.5 py-1 rounded-lg select-none">
+                            {dayBookings.length} LỊCH
+                          </span>
+                        </div>
+
+                        {/* Status Summary chips */}
+                        {dayBookings.length > 0 && (
+                          <div className="flex gap-1.5 text-[9.5px] text-gray-500 mt-2 select-none flex-wrap">
+                            <span className="bg-amber-50 text-amber-600 px-2 py-0.5 rounded border border-amber-100 font-semibold">Chờ liên hệ: {pendingCount}</span>
+                            <span className="bg-green-50 text-green-600 px-2 py-0.5 rounded border border-green-100 font-semibold">Đã liên hệ: {contactedCount}</span>
+                            {cancelledCount > 0 && (
+                              <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded border border-red-100 font-semibold">Đã hủy: {cancelledCount}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Day Search input */}
+                      {dayBookings.length > 0 && (
+                        <div className="relative mb-3">
+                          <input
+                            type="text"
+                            placeholder="Tìm khách hàng, bác sĩ..."
+                            value={daySearchQuery}
+                            onChange={(e) => setDaySearchQuery(e.target.value)}
+                            className="w-full border border-gray-200 focus:border-gold px-3.5 py-2 pr-9 rounded-xl text-xs focus:outline-none placeholder-gray-400 font-light text-gray-700 bg-white shadow-sm"
+                          />
+                          <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Pane Content */}
+                      <div className="flex-grow space-y-4 overflow-y-auto max-h-[460px] pr-1">
+                        {dayBookings.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-24 text-center text-gray-400">
+                            <svg className="w-8 h-8 text-gray-300 mb-3" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                            <p className="text-xs font-semibold text-gray-400">Không có lịch hẹn nào</p>
+                            <p className="text-[10px] text-gray-350 mt-0.5">Không tìm thấy yêu cầu đặt lịch hẹn cho ngày này.</p>
+                          </div>
+                        ) : filteredDayBookings.length === 0 ? (
+                          <p className="text-gray-400 text-center py-12 text-xs font-light">Không tìm thấy kết quả phù hợp với từ khóa.</p>
+                        ) : (
+                          filteredDayBookings.map((sub) => (
+                            <div
+                              key={sub.id}
+                              className="relative pl-4 border-l-2 border-gold/30 py-1 bg-white hover:bg-gold/5/5 transition-all"
+                            >
+                              {/* Header Inside Card */}
+                              <div className="flex justify-between items-start gap-2">
+                                <div className="flex flex-wrap gap-1.5 items-center">
+                                  <span className="bg-gold/5 border border-gold/15 text-gold text-[9.5px] font-black px-2 py-0.5 rounded-md flex items-center gap-1 font-mono">
+                                    <Clock size={10} />
+                                    {sub.booking_time}
+                                  </span>
+                                  {sub.service && (
+                                    <span className="bg-gray-100 text-gray-650 text-[9.5px] font-bold px-2 py-0.5 rounded-md">
+                                      {sub.service}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => {
+                                      editBookingForm.reset();
+                                      editBookingForm.setData({
+                                        id: sub.id,
+                                        name: sub.name,
+                                        phone: sub.phone,
+                                        email: sub.email || "",
+                                        service: sub.service || "",
+                                        branch: sub.branch || "",
+                                        booking_date: sub.booking_date || "",
+                                        booking_time: sub.booking_time || "",
+                                        doctor_id: sub.doctor_id || "",
+                                        note: sub.note || "",
+                                        status: sub.status,
+                                      });
+                                      setShowEditBookingModal(true);
+                                    }}
+                                    className="text-gray-400 hover:text-gold p-1 hover:bg-gray-50 rounded transition-colors cursor-pointer"
+                                    title="Chỉnh sửa lịch hẹn"
+                                  >
+                                    <Edit size={13} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteSubmission(sub.id)}
+                                    className="text-red-500 hover:text-red-750 p-1 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                                    title="Xóa lịch hẹn"
+                                  >
+                                    <Trash size={13} />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Customer Details */}
+                              <div className="mt-1 text-xs text-gray-600 space-y-1">
+                                <div className="font-bold text-gray-800 text-sm">{sub.name}</div>
+                                <div className="flex items-center gap-3 text-xs text-gray-500 mt-1 flex-wrap font-medium">
+                                  <a href={`tel:${sub.phone}`} className="text-gold font-bold hover:underline flex items-center gap-1">
+                                    <Phone size={10} />
+                                    {sub.phone}
+                                  </a>
+                                  {sub.branch && (
+                                    <span className="flex items-center gap-1">
+                                      <MapPin size={10} />
+                                      {sub.branch}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {sub.doctor && (
+                                  <div className="mt-1.5 flex items-center gap-1 text-[10.5px] font-semibold text-gray-700 bg-gray-50/70 border border-gray-100 px-2 py-1 rounded w-fit select-none">
+                                    <Users size={10} className="text-gold" />
+                                    Bác sĩ: <span className="text-gold font-bold">{sub.doctor.name}</span>
+                                  </div>
+                                )}
+                                
+                                {sub.note && (
+                                  <div className="mt-2 bg-gray-50/50 border border-gray-100 p-2 rounded-lg text-gray-500 text-[10.5px] leading-relaxed italic">
+                                    "{sub.note}"
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Status Dropdown footer */}
+                              <div className="mt-3 flex justify-between items-center pt-2.5 border-t border-gray-50/50">
+                                <span className="text-[9px] text-gray-400 font-light font-mono">
+                                  Đăng ký: {new Date(sub.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                                </span>
+                                {sub.status === "Chờ liên hệ" ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <button
+                                      onClick={() => handleUpdateStatus(sub.id, "Đã liên hệ")}
+                                      className="bg-green-600 hover:bg-green-750 text-white font-bold px-2 py-1 rounded text-[9px] cursor-pointer transition-colors"
+                                    >
+                                      Xác nhận
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdateStatus(sub.id, "Đã hủy")}
+                                      className="bg-red-50 hover:bg-red-100 text-red-655 font-bold px-2 py-1 rounded text-[9px] cursor-pointer transition-colors"
+                                    >
+                                      Hủy bỏ
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
+                                      sub.status === "Đã liên hệ" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                                    }`}>
+                                      {sub.status === "Đã liên hệ" ? "Đã xác nhận" : "Đã hủy"}
+                                    </span>
+                                    <button
+                                      onClick={() => handleUpdateStatus(sub.id, "Chờ liên hệ")}
+                                      className="text-[9.5px] text-gray-400 hover:text-gold transition-colors font-medium underline cursor-pointer"
+                                      title="Hoàn tác về Chờ liên hệ"
+                                    >
+                                      Hoàn tác
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* ARTICLES TAB */}
             {activeTab === "articles" && (
@@ -1959,7 +2969,7 @@ export default function Dashboard({
                           type="text"
                           placeholder="Tìm kiếm.."
                           value={articleSearchTerm}
-                          onChange={(e) => setArticleSearchTerm(e.target.value)}
+                          onChange={(e) => { setArticleSearchTerm(e.target.value); setArticleCurrentPage(1); }}
                           className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 pr-10 rounded text-xs focus:outline-none placeholder-gray-400 font-light text-gray-700 bg-white shadow-sm"
                         />
                         <svg
@@ -1987,115 +2997,200 @@ export default function Dashboard({
                         return <p className="text-gray-400 text-center py-12 font-light">Không tìm thấy bài viết phù hợp với từ khóa.</p>;
                       }
 
+                      const itemsPerPage = 10;
+                      const totalPages = Math.ceil(filtered.length / itemsPerPage);
+                      const safeCurrentPage = Math.min(articleCurrentPage, totalPages || 1);
+                      const currentArticles = filtered.slice(
+                        (safeCurrentPage - 1) * itemsPerPage,
+                        safeCurrentPage * itemsPerPage
+                      );
+
                       return (
-                        <div className="overflow-x-auto border border-gray-100 rounded-xl shadow-sm">
-                          <table className="w-full text-left border-collapse min-w-[900px]">
-                            <thead>
-                              <tr className="border-b border-gray-150 text-[10px] font-bold uppercase text-gray-400 tracking-wider bg-gray-50/75 select-none">
-                                <th className="py-4 px-4 w-12 text-center">ID</th>
-                                <th className="py-4 px-4 w-28">Hình ảnh</th>
-                                <th className="py-4 px-4">Tiêu đề</th>
-                                <th className="py-4 px-4 text-center w-28">Is Featured</th>
-                                <th className="py-4 px-4 text-center w-28">Trạng thái</th>
-                                <th className="py-4 px-4 text-center w-20">Lượt xem</th>
-                                <th className="py-4 px-4 text-center w-36">Ngày tạo</th>
-                                <th className="py-4 px-4 text-center w-36">Cập nhật cuối</th>
-                                <th className="py-4 px-4 text-right w-24">Thao tác</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-50 text-xs text-gray-600 bg-white">
-                              {filtered.map((art) => (
-                                <tr key={art.id} className="hover:bg-gray-50/50 transition-colors">
-                                  {/* ID */}
-                                  <td className="py-4 px-4 text-center font-bold text-gray-400 align-middle">
-                                    {art.id}
-                                  </td>
+                        <div className="space-y-4">
+                          <div className="overflow-x-auto border border-gray-100 rounded-xl shadow-sm">
+                            <table className="w-full text-left border-collapse min-w-[900px]">
+                              <thead>
+                                <tr className="border-b border-gray-150 text-[10px] font-bold uppercase text-gray-400 tracking-wider bg-gray-50/75 select-none">
+                                  <th className="py-4 px-4 w-12 text-center">ID</th>
+                                  <th className="py-4 px-4 w-28">Hình ảnh</th>
+                                  <th className="py-4 px-4">Tiêu đề</th>
+                                  <th className="py-4 px-4 text-center w-28">Is Featured</th>
+                                  <th className="py-4 px-4 text-center w-28">Trạng thái</th>
+                                  <th className="py-4 px-4 text-center w-20">Lượt xem</th>
+                                  <th className="py-4 px-4 text-center w-36">Ngày tạo</th>
+                                  <th className="py-4 px-4 text-center w-36">Cập nhật cuối</th>
+                                  <th className="py-4 px-4 text-right w-24">Thao tác</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-50 text-xs text-gray-600 bg-white">
+                                {currentArticles.map((art) => (
+                                  <tr key={art.id} className="hover:bg-gray-50/50 transition-colors">
+                                    {/* ID */}
+                                    <td className="py-4 px-4 text-center font-bold text-gray-400 align-middle">
+                                      {art.id}
+                                    </td>
 
-                                  {/* HÌNH ẢNH */}
-                                  <td className="py-4 px-4 align-middle">
-                                    <div className="relative w-20 h-12 bg-gray-100 border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                                      {art.image ? (
-                                        <img src={art.image} alt={art.title} className="object-cover w-full h-full" />
-                                      ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-300">No Img</div>
-                                      )}
-                                    </div>
-                                  </td>
+                                    {/* HÌNH ẢNH */}
+                                    <td className="py-4 px-4 align-middle">
+                                      <div className="relative w-20 h-12 bg-gray-100 border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                                        {art.image ? (
+                                          <img src={art.image} alt={art.title} className="object-cover w-full h-full" />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center text-gray-300">No Img</div>
+                                        )}
+                                      </div>
+                                    </td>
 
-                                  {/* TIÊU ĐỀ */}
-                                  <td className="py-4 px-4 align-middle font-medium text-gray-800 text-left max-w-sm">
-                                    <div className="line-clamp-2 uppercase leading-snug tracking-normal">
-                                      {art.title}
-                                    </div>
-                                    <div className="text-[10px] text-gray-400 font-light mt-1 flex items-center gap-2">
-                                      <span className="bg-gold/10 text-gold font-bold px-1.5 py-0.5 rounded text-[8px] tracking-wider uppercase">
-                                        {art.category}
+                                    {/* TIÊU ĐỀ */}
+                                    <td className="py-4 px-4 align-middle font-medium text-gray-800 text-left max-w-sm">
+                                      <div className="line-clamp-2 uppercase leading-snug tracking-normal">
+                                        {art.title}
+                                      </div>
+                                      <div className="text-[10px] text-gray-400 font-light mt-1 flex items-center gap-2">
+                                        <span className="bg-gold/10 text-gold font-bold px-1.5 py-0.5 rounded text-[8px] tracking-wider uppercase">
+                                          {art.category}
+                                        </span>
+                                        <span>Tác giả: {art.author ? (typeof art.author === "object" ? art.author.name : art.author) : (art.legacy_author || "KT Beauty")}</span>
+                                      </div>
+                                    </td>
+
+                                    {/* IS FEATURED */}
+                                    <td className="py-4 px-4 text-center align-middle">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleToggleHighlightArticle(art.id)}
+                                        className="focus:outline-none inline-flex"
+                                        title={art.is_highlight ? "Bỏ nổi bật" : "Đặt nổi bật"}
+                                      >
+                                        {art.is_highlight ? (
+                                          <span className="w-3 h-3 rounded-full bg-[#f97316] inline-block shadow-sm transition-all hover:scale-110"></span>
+                                        ) : (
+                                          <span className="w-3 h-3 rounded-full bg-[#10b981] inline-block shadow-sm transition-all hover:scale-110"></span>
+                                        )}
+                                      </button>
+                                    </td>
+
+                                    {/* TRẠNG THÁI */}
+                                    <td className="py-4 px-4 text-center align-middle">
+                                      <span className="bg-[#10b981]/10 text-[#10b981] text-[9px] font-bold px-2 py-0.5 rounded border border-[#10b981]/10 uppercase tracking-wider">
+                                        Hiển thị
                                       </span>
-                                      <span>Tác giả: {art.author || "KT Beauty"}</span>
-                                    </div>
-                                  </td>
+                                    </td>
 
-                                  {/* IS FEATURED */}
-                                  <td className="py-4 px-4 text-center align-middle">
+                                    {/* LƯỢT XEM */}
+                                    <td className="py-4 px-4 text-center align-middle font-medium text-gray-400">
+                                      {art.id * 7 + 13}
+                                    </td>
+
+                                    {/* NGÀY TẠO */}
+                                    <td className="py-4 px-4 text-center align-middle text-gray-400 font-light text-[10px]">
+                                      {art.published_date || "08/07/2026 10:20"}
+                                    </td>
+
+                                    {/* CẬP NHẬT CUỐI */}
+                                    <td className="py-4 px-4 text-center align-middle text-gray-400 font-light text-[10px]">
+                                      {art.published_date || "08/07/2026 10:20"}
+                                    </td>
+
+                                    {/* THAO TÁC */}
+                                    <td className="py-4 px-4 text-right align-middle">
+                                      <div className="flex justify-end gap-1">
+                                        <button
+                                          onClick={() => handleOpenEditArticle(art)}
+                                          className="text-gold hover:text-gold-dark p-2 hover:bg-gold/5 rounded-lg transition-colors"
+                                          title="Chỉnh sửa"
+                                        >
+                                          <Edit size={14} />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteArticle(art.id)}
+                                          className="text-red-500 hover:text-red-750 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                                          title="Xóa"
+                                        >
+                                          <Trash size={14} />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {/* Pagination controls */}
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between bg-white px-4 py-3 sm:px-6 border border-gray-150 rounded-xl mt-4 select-none">
+                              <div className="flex flex-1 justify-between sm:hidden">
+                                <button
+                                  type="button"
+                                  onClick={() => setArticleCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                  disabled={safeCurrentPage === 1}
+                                  className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                  Trước
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setArticleCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                  disabled={safeCurrentPage === totalPages}
+                                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                  Sau
+                                </button>
+                              </div>
+                              <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between text-left">
+                                <div>
+                                  <p className="text-xs text-gray-500 font-light">
+                                    Hiển thị từ <span className="font-semibold text-gray-700">{(safeCurrentPage - 1) * itemsPerPage + 1}</span> đến{" "}
+                                    <span className="font-semibold text-gray-700">
+                                      {Math.min(safeCurrentPage * itemsPerPage, filtered.length)}
+                                    </span>{" "}
+                                    trong tổng số <span className="font-semibold text-gray-700">{filtered.length}</span> bài viết
+                                  </p>
+                                </div>
+                                <div>
+                                  <nav className="isolate inline-flex -space-x-px rounded-lg shadow-sm bg-white" aria-label="Pagination">
                                     <button
                                       type="button"
-                                      onClick={() => handleToggleHighlightArticle(art.id)}
-                                      className="focus:outline-none inline-flex"
-                                      title={art.is_highlight ? "Bỏ nổi bật" : "Đặt nổi bật"}
+                                      onClick={() => setArticleCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                      disabled={safeCurrentPage === 1}
+                                      className="relative inline-flex items-center rounded-l-lg px-2.5 py-2 text-gray-400 ring-1 ring-inset ring-gray-150 hover:bg-gray-50 focus:z-20 disabled:opacity-40 cursor-pointer"
                                     >
-                                      {art.is_highlight ? (
-                                        <span className="w-3 h-3 rounded-full bg-[#f97316] inline-block shadow-sm transition-all hover:scale-110"></span>
-                                      ) : (
-                                        <span className="w-3 h-3 rounded-full bg-[#10b981] inline-block shadow-sm transition-all hover:scale-110"></span>
-                                      )}
+                                      <span className="sr-only">Previous</span>
+                                      {"←"}
                                     </button>
-                                  </td>
-
-                                  {/* TRẠNG THÁI */}
-                                  <td className="py-4 px-4 text-center align-middle">
-                                    <span className="bg-[#10b981]/10 text-[#10b981] text-[9px] font-bold px-2 py-0.5 rounded border border-[#10b981]/10 uppercase tracking-wider">
-                                      Hiển thị
-                                    </span>
-                                  </td>
-
-                                  {/* LƯỢT XEM */}
-                                  <td className="py-4 px-4 text-center align-middle font-medium text-gray-400">
-                                    {art.id * 7 + 13}
-                                  </td>
-
-                                  {/* NGÀY TẠO */}
-                                  <td className="py-4 px-4 text-center align-middle text-gray-400 font-light text-[10px]">
-                                    {art.published_date || "08/07/2026 10:20"}
-                                  </td>
-
-                                  {/* CẬP NHẬT CUỐI */}
-                                  <td className="py-4 px-4 text-center align-middle text-gray-400 font-light text-[10px]">
-                                    {art.published_date || "08/07/2026 10:20"}
-                                  </td>
-
-                                  {/* THAO TÁC */}
-                                  <td className="py-4 px-4 text-right align-middle">
-                                    <div className="flex justify-end gap-1">
-                                      <button
-                                        onClick={() => handleOpenEditArticle(art)}
-                                        className="text-gold hover:text-gold-dark p-2 hover:bg-gold/5 rounded-lg transition-colors"
-                                        title="Chỉnh sửa"
-                                      >
-                                        <Edit size={14} />
-                                      </button>
-                                      <button
-                                        onClick={() => handleDeleteArticle(art.id)}
-                                        className="text-red-500 hover:text-red-750 p-2 hover:bg-red-50 rounded-lg transition-colors"
-                                        title="Xóa"
-                                      >
-                                        <Trash size={14} />
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                                    {Array.from({ length: totalPages }).map((_, idx) => {
+                                      const pageNum = idx + 1;
+                                      const isActive = pageNum === safeCurrentPage;
+                                      return (
+                                        <button
+                                          key={pageNum}
+                                          type="button"
+                                          onClick={() => setArticleCurrentPage(pageNum)}
+                                          className={`relative inline-flex items-center px-3.5 py-2 text-xs font-bold focus:z-20 cursor-pointer transition-colors ${
+                                            isActive
+                                              ? "z-10 bg-gold text-white"
+                                              : "text-gray-600 ring-1 ring-inset ring-gray-150 hover:bg-gray-50"
+                                          }`}
+                                        >
+                                          {pageNum}
+                                        </button>
+                                      );
+                                    })}
+                                    <button
+                                      type="button"
+                                      onClick={() => setArticleCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                      disabled={safeCurrentPage === totalPages}
+                                      className="relative inline-flex items-center rounded-r-lg px-2.5 py-2 text-gray-400 ring-1 ring-inset ring-gray-150 hover:bg-gray-50 focus:z-20 disabled:opacity-40 cursor-pointer"
+                                    >
+                                      <span className="sr-only">Next</span>
+                                      {"→"}
+                                    </button>
+                                  </nav>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
@@ -2124,8 +3219,6 @@ export default function Dashboard({
                         {/* Language Selector Tabs */}
                         <div className="flex border-b border-gray-150 gap-2 select-none">
                           <button type="button" className="px-5 py-2.5 text-xs font-bold text-gray-800 border-b-2 border-gold -mb-px">VN Tiếng Việt</button>
-                          <button type="button" className="px-5 py-2.5 text-xs font-semibold text-gray-400 hover:text-gray-650 transition-colors">GB English</button>
-                          <button type="button" className="px-5 py-2.5 text-xs font-semibold text-gray-400 hover:text-gray-650 transition-colors">CN 中文</button>
                         </div>
 
                         {/* Title */}
@@ -2140,28 +3233,68 @@ export default function Dashboard({
                             type="text"
                             required
                             value={articleForm.data.title}
-                            onChange={(e) => articleForm.setData("title", e.target.value)}
+                            onChange={(e) => {
+                              const newTitle = e.target.value;
+                              articleForm.setData((prev) => ({
+                                ...prev,
+                                title: newTitle,
+                                slug: slugify(newTitle),
+                              }));
+                            }}
                             className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded-lg text-sm focus:outline-none text-gray-800 font-bold placeholder-gray-300 bg-white"
                             placeholder="Nhập tiêu đề bài viết"
                           />
-                          {articleForm.data.title && (
-                            <div className="text-[10px] text-blue-500 font-light select-none break-all mt-1 bg-blue-50/50 border border-blue-100/50 px-3 py-1.5 rounded-md inline-block">
-                              URL: https://ktbeauty.vn/tin-tuc/{articleForm.data.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-")}
+                          {articleForm.data.slug && (
+                            <div className="text-[10px] text-blue-600 font-light select-all break-all mt-1 bg-blue-50/50 border border-blue-100/50 px-3 py-1.5 rounded-md inline-block">
+                              Đường dẫn (URL): <span className="font-semibold underline">https://ktbeauty.vn/tin-tuc/{articleForm.data.slug}</span>
                             </div>
                           )}
                         </div>
 
-                        {/* Author */}
-                        <div className="space-y-1.5">
-                          <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Tác giả *</label>
-                          <input
-                            type="text"
-                            required
-                            value={articleForm.data.author}
-                            onChange={(e) => articleForm.setData("author", e.target.value)}
-                            className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
-                            placeholder="Ví dụ: Bác sĩ hoặc Ban biên tập KT+ Beauty"
-                          />
+                        {/* Author Link Selection */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider text-left block">Liên kết tác giả (Hồ sơ hệ thống)</label>
+                            <select
+                              value={articleForm.data.author_id}
+                              onChange={(e) => {
+                                const selectedId = e.target.value;
+                                const matched = authors.find(aut => aut.id === Number(selectedId));
+                                if (matched) {
+                                  articleForm.setData((prev) => ({
+                                    ...prev,
+                                    author_id: selectedId,
+                                    author: matched.name,
+                                  }));
+                                } else {
+                                  articleForm.setData((prev) => ({
+                                    ...prev,
+                                    author_id: "",
+                                  }));
+                                }
+                              }}
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                            >
+                              <option value="">-- Không liên kết / Tự nhập --</option>
+                              {authors.map(aut => (
+                                <option key={aut.id} value={aut.id}>
+                                  {aut.name} ({aut.role})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          
+                          <div className="space-y-1.5">
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider text-left block">Tác giả hiển thị *</label>
+                            <input
+                              type="text"
+                              required
+                              value={articleForm.data.author}
+                              onChange={(e) => articleForm.setData("author", e.target.value)}
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                              placeholder="Ví dụ: Bác sĩ hoặc Ban biên tập KT+ Beauty"
+                            />
+                          </div>
                         </div>
 
                         {/* Description */}
@@ -2191,7 +3324,12 @@ export default function Dashboard({
 
                         {/* Meta Title */}
                         <div className="space-y-1.5 pt-4">
-                          <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Meta Title</label>
+                          <div className="flex justify-between items-center select-none">
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Meta Title</label>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-colors duration-200 ${getMetaTitleStatus(articleForm.data.meta_title?.length || 0).color}`}>
+                              {(articleForm.data.meta_title?.length || 0)} ký tự • {getMetaTitleStatus(articleForm.data.meta_title?.length || 0).text}
+                            </span>
+                          </div>
                           <input
                             type="text"
                             value={articleForm.data.meta_title}
@@ -2203,7 +3341,12 @@ export default function Dashboard({
 
                         {/* Meta Description */}
                         <div className="space-y-1.5">
-                          <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Meta Description</label>
+                          <div className="flex justify-between items-center select-none">
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Meta Description</label>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-colors duration-200 ${getMetaDescStatus(articleForm.data.meta_description?.length || 0).color}`}>
+                              {(articleForm.data.meta_description?.length || 0)} ký tự • {getMetaDescStatus(articleForm.data.meta_description?.length || 0).text}
+                            </span>
+                          </div>
                           <textarea
                             rows={3}
                             value={articleForm.data.meta_description}
@@ -2284,6 +3427,18 @@ export default function Dashboard({
                                   onChange={(e) => articleForm.setData("meta_image", e.target.value)}
                                   className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
                                   placeholder="URL hình ảnh SEO (Open Graph Image)..."
+                                />
+                              </div>
+
+                              {/* Schema JSON-LD */}
+                              <div className="space-y-1.5">
+                                <label className="text-xs uppercase font-bold text-gray-400 tracking-wider text-left block">Schema JSON-LD</label>
+                                <textarea
+                                  rows={5}
+                                  value={articleForm.data.schema}
+                                  onChange={(e) => articleForm.setData("schema", e.target.value)}
+                                  className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded-lg text-sm focus:outline-none text-gray-600 resize-none font-light leading-relaxed bg-white"
+                                  placeholder='Ví dụ: { "@context": "https://schema.org", "@type": "NewsArticle", ... }'
                                 />
                               </div>
                             </div>
@@ -2718,8 +3873,6 @@ export default function Dashboard({
                         {/* Language Selector Tabs */}
                         <div className="flex border-b border-gray-150 gap-2 select-none">
                           <button type="button" className="px-5 py-2.5 text-xs font-bold text-gray-800 border-b-2 border-gold -mb-px">VN Tiếng Việt</button>
-                          <button type="button" className="px-5 py-2.5 text-xs font-semibold text-gray-400 hover:text-gray-650 transition-colors">GB English</button>
-                          <button type="button" className="px-5 py-2.5 text-xs font-semibold text-gray-400 hover:text-gray-650 transition-colors">CN 中文</button>
                         </div>
 
                         {/* Service Name */}
@@ -4715,7 +5868,24 @@ export default function Dashboard({
                   </div>
 
                   {/* Right Pane - Content Grid */}
-                  <div className="md:col-span-9 lg:col-span-9.5 bg-white border border-gray-150 rounded-xl p-6 shadow-sm flex flex-col">
+                  <div 
+                    onDragOver={handleMediaDragOver}
+                    onDragEnter={handleMediaDragEnter}
+                    onDragLeave={handleMediaDragLeave}
+                    onDrop={handleMediaDrop}
+                    className="md:col-span-9 lg:col-span-9.5 bg-white border border-gray-150 rounded-xl p-6 shadow-sm flex flex-col relative"
+                  >
+                    {isMediaDragging && (
+                      <div className="absolute inset-0 bg-orange-50/60 border-2 border-dashed border-[#f97316] rounded-xl z-50 flex flex-col items-center justify-center pointer-events-none animate-pulse">
+                        <div className="bg-white px-6 py-5 rounded-xl shadow-lg border border-orange-100 flex flex-col items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10 text-[#f97316] animate-bounce">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                          </svg>
+                          <span className="text-xs font-bold text-gray-800 uppercase tracking-wider">Thả tệp vào đây để tải lên</span>
+                          <span className="text-[10px] text-gray-400 font-light">Hỗ trợ tải lên nhiều tệp tin ảnh cùng lúc</span>
+                        </div>
+                      </div>
+                    )}
                     {/* Breadcrumbs for orientation */}
                     <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 bg-gray-50/70 border border-gray-100 px-4 py-2 rounded-lg select-none">
                       <span className="font-semibold cursor-pointer hover:text-gold" onClick={() => fetchMedia(null)}>
@@ -4833,10 +6003,10 @@ export default function Dashboard({
                                     e.stopPropagation();
                                     handleDeleteMediaFile(file.id);
                                   }}
-                                  className="p-1 text-gray-700 hover:text-red-500 rounded bg-white/90 shadow-sm border-0 cursor-pointer animate-fade-in"
+                                  className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded bg-white/95 shadow-sm border border-red-150 cursor-pointer animate-fade-in"
                                   title="Xóa tệp"
                                 >
-                                  <Trash size={12} />
+                                  <Trash size={14} />
                                 </button>
                               </div>
 
@@ -5902,6 +7072,726 @@ export default function Dashboard({
                 </form>
               </div>
             )}
+
+            {/* AUTHORS TAB */}
+            {activeTab === "authors" && (
+              <div>
+                {/* Mode: List View */}
+                {authorViewMode === "list" && (
+                  <div>
+                    {/* Breadcrumb path */}
+                    <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-6 font-semibold select-none text-left">
+                      <span className="cursor-pointer hover:text-gold transition-colors" onClick={() => setActiveTab("overview")}>🏠</span>
+                      <span className="text-gray-300">/</span>
+                      <span className="text-gray-600">Tác giả bài viết</span>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-gray-150/60 mb-6" />
+
+                    {/* Actions Row */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                      <button
+                        onClick={handleOpenAddAuthor}
+                        className="bg-[#f97316] hover:bg-[#ea580c] text-white font-bold text-[11px] tracking-wider uppercase px-6 py-2.5 rounded shadow-sm hover:shadow-md transition-all active:translate-y-0.5"
+                      >
+                        Thêm mới
+                      </button>
+
+                      {/* Search box matching design */}
+                      <div className="relative w-72">
+                        <input
+                          type="text"
+                          placeholder="Tìm kiếm.."
+                          value={authorSearchTerm}
+                          onChange={(e) => setAuthorSearchTerm(e.target.value)}
+                          className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 pr-10 rounded text-xs focus:outline-none placeholder-gray-400 font-light text-gray-700 bg-white shadow-sm"
+                        />
+                        <svg
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Listing Table matching Design */}
+                    {authors.length === 0 ? (
+                      <p className="text-gray-400 text-center py-12 font-light">Chưa có tác giả nào.</p>
+                    ) : (() => {
+                      const filtered = authors.filter(aut =>
+                        aut.name.toLowerCase().includes(authorSearchTerm.toLowerCase()) ||
+                        (aut.role && aut.role.toLowerCase().includes(authorSearchTerm.toLowerCase()))
+                      );
+
+                      if (filtered.length === 0) {
+                        return <p className="text-gray-400 text-center py-12 font-light">Không tìm thấy tác giả phù hợp.</p>;
+                      }
+
+                      return (
+                        <div className="overflow-x-auto border border-gray-100 rounded-xl shadow-sm">
+                          <table className="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                              <tr className="border-b border-gray-150 text-[10px] font-bold uppercase text-gray-400 tracking-wider bg-gray-50/75 select-none">
+                                <th className="py-4 px-4 w-12 text-center">ID</th>
+                                <th className="py-4 px-4 w-24">Ảnh đại diện</th>
+                                <th className="py-4 px-4">Tên tác giả</th>
+                                <th className="py-4 px-4">Chức vụ / Vai trò</th>
+                                <th className="py-4 px-4">Đường dẫn</th>
+                                <th className="py-4 px-4 text-right w-24">Thao tác</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50 text-xs text-gray-600 bg-white">
+                              {filtered.map((aut) => (
+                                <tr key={aut.id} className="hover:bg-gray-50/50 transition-colors">
+                                  {/* ID */}
+                                  <td className="py-4 px-4 text-center font-bold text-gray-400 align-middle">
+                                    {aut.id}
+                                  </td>
+
+                                  {/* AVATAR */}
+                                  <td className="py-4 px-4 align-middle">
+                                    <div className="relative w-12 h-12 rounded-full overflow-hidden border border-gray-250/70 shadow-inner bg-gray-100 flex items-center justify-center">
+                                      {aut.avatar ? (
+                                        <img src={aut.avatar} className="object-cover w-full h-full" alt={aut.name} />
+                                      ) : (
+                                        <div className="text-xs text-gray-400 font-bold uppercase select-none">
+                                          {aut.name.split(" ").pop()?.substring(0, 2)}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </td>
+
+                                  {/* TÊN */}
+                                  <td className="py-4 px-4 align-middle font-bold text-gray-800 text-left">
+                                    {aut.name}
+                                  </td>
+
+                                  {/* VAI TRÒ */}
+                                  <td className="py-4 px-4 align-middle text-gray-500 font-medium">
+                                    {aut.role || "Tác giả"}
+                                  </td>
+
+                                  {/* SLUG */}
+                                  <td className="py-4 px-4 align-middle text-gray-400 font-mono text-[10px]">
+                                    /tac-gia/{aut.slug}
+                                  </td>
+
+                                  {/* THAO TÁC */}
+                                  <td className="py-4 px-4 text-right align-middle">
+                                    <div className="flex items-center justify-end gap-1.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenEditAuthor(aut)}
+                                        className="p-1.5 hover:bg-gray-100 rounded text-blue-600 hover:text-blue-700 transition-colors"
+                                        title="Chỉnh sửa"
+                                      >
+                                        Sửa
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteAuthor(aut.id)}
+                                        className="p-1.5 hover:bg-red-50 rounded text-red-500 hover:text-red-650 transition-colors font-semibold"
+                                        title="Xóa"
+                                      >
+                                        Xóa
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* Mode: Create/Edit View */}
+                {(authorViewMode === "create" || authorViewMode === "edit") && (
+                  <div>
+                    {/* Header bar matching styles */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-gray-150 mb-6">
+                      <div className="flex items-center gap-2 select-none">
+                        <span className="text-gray-400 cursor-pointer hover:text-gold" onClick={() => setAuthorViewMode("list")}>Tác giả bài viết</span>
+                        <span className="text-gray-300">/</span>
+                        <span className="text-gray-600">{authorViewMode === "create" ? "Thêm Tác Giả" : "Chỉnh Sửa Tác Giả"}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setAuthorViewMode("list")}
+                        className="text-xs font-semibold text-gray-500 hover:text-gray-700 transition-colors border border-gray-200 px-3.5 py-1.5 rounded-lg bg-white"
+                      >
+                        Quay lại danh sách
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleSaveAuthor} className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left pb-16">
+                      {/* Left side inputs - 8 cols */}
+                      <div className="lg:col-span-8 space-y-6">
+                        <div className="bg-white border border-gray-150 rounded-xl p-6 shadow-sm space-y-5">
+                          {/* Name */}
+                          <div className="space-y-1.5">
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Tên tác giả *</label>
+                            <input
+                              type="text"
+                              required
+                              value={authorForm.data.name}
+                              onChange={(e) => authorForm.setData("name", e.target.value)}
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-800 bg-white"
+                              placeholder="Nhập họ và tên tác giả"
+                            />
+                          </div>
+
+                          {/* Role */}
+                          <div className="space-y-1.5">
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Chức danh / Vai trò</label>
+                            <input
+                              type="text"
+                              value={authorForm.data.role}
+                              onChange={(e) => authorForm.setData("role", e.target.value)}
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-750 bg-white"
+                              placeholder="Ví dụ: Bác sĩ CKI Da liễu, Chuyên gia thẩm mỹ..."
+                            />
+                          </div>
+
+                          {/* Bio */}
+                          <div className="space-y-1.5">
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Tóm tắt tiểu sử</label>
+                            <textarea
+                              rows={3}
+                              value={authorForm.data.bio}
+                              onChange={(e) => authorForm.setData("bio", e.target.value)}
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded-lg text-sm focus:outline-none text-gray-655 bg-white resize-none"
+                              placeholder="Nhập thông tin giới thiệu tóm tắt..."
+                            />
+                          </div>
+
+                          {/* Description */}
+                          <div className="space-y-1.5">
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Nội dung giới thiệu chi tiết (Markdown/HTML)</label>
+                            <RichTextEditor
+                              value={authorForm.data.description || ""}
+                              onChange={(html) => authorForm.setData("description", html)}
+                              placeholder="Giới thiệu chi tiết chuyên môn, quá trình học tập và làm việc của tác giả..."
+                              minHeight="280px"
+                              onOpenMediaLibrary={openMediaLibraryForEditor}
+                            />
+                          </div>
+                        </div>
+
+                        {/* SEO Fields Accordion */}
+                        <div className="bg-white border border-gray-150 rounded-xl overflow-hidden shadow-sm">
+                          <button
+                            type="button"
+                            onClick={() => setAdvancedAuthorOpen(!advancedAuthorOpen)}
+                            className="w-full flex items-center justify-between px-5 py-4 bg-gray-50/50 hover:bg-gray-50 border-b border-gray-150 text-left transition-colors"
+                          >
+                            <span className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1.5 select-none">
+                              {advancedAuthorOpen ? "▼" : "▶"} Cấu hình SEO & Nâng cao
+                            </span>
+                          </button>
+                          
+                          {advancedAuthorOpen && (
+                            <div className="p-5 space-y-4 bg-gray-50/25 border-t border-gray-100 transition-all">
+                              {/* Slug */}
+                              <div className="space-y-1.5">
+                                <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Custom Slug</label>
+                                <input
+                                  type="text"
+                                  value={authorForm.data.slug}
+                                  onChange={(e) => authorForm.setData("slug", e.target.value)}
+                                  className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                                  placeholder="Đường dẫn tùy chỉnh (mặc định tạo từ tên)"
+                                />
+                              </div>
+
+                              {/* Meta Title */}
+                              <div className="space-y-1.5">
+                                <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Meta Title</label>
+                                <input
+                                  type="text"
+                                  value={authorForm.data.meta_title}
+                                  onChange={(e) => authorForm.setData("meta_title", e.target.value)}
+                                  className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                                  placeholder="Nhập tiêu đề SEO..."
+                                />
+                              </div>
+
+                              {/* Meta Description */}
+                              <div className="space-y-1.5">
+                                <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Meta Description</label>
+                                <textarea
+                                  rows={3}
+                                  value={authorForm.data.meta_description}
+                                  onChange={(e) => authorForm.setData("meta_description", e.target.value)}
+                                  className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded-lg text-sm focus:outline-none text-gray-650 bg-white resize-none"
+                                  placeholder="Nhập thẻ mô tả SEO..."
+                                />
+                              </div>
+
+                              {/* Meta Keywords */}
+                              <div className="space-y-1.5">
+                                <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Meta Keywords</label>
+                                <input
+                                  type="text"
+                                  value={authorForm.data.meta_keywords}
+                                  onChange={(e) => authorForm.setData("meta_keywords", e.target.value)}
+                                  className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                                  placeholder="Từ khóa SEO (phẫu thuật thẩm mỹ, cấy tóc...)"
+                                />
+                              </div>
+
+                              {/* Meta Robots */}
+                              <div className="space-y-1.5">
+                                <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Meta Robots</label>
+                                <input
+                                  type="text"
+                                  value={authorForm.data.meta_robots}
+                                  onChange={(e) => authorForm.setData("meta_robots", e.target.value)}
+                                  className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                                  placeholder="index, follow"
+                                />
+                              </div>
+
+                              {/* Canonical Link */}
+                              <div className="space-y-1.5">
+                                <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Canonical Link</label>
+                                <input
+                                  type="text"
+                                  value={authorForm.data.canonical_link}
+                                  onChange={(e) => authorForm.setData("canonical_link", e.target.value)}
+                                  className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                                  placeholder="https://ktbeauty.vn/..."
+                                />
+                              </div>
+
+                              {/* Meta Image */}
+                              <div className="space-y-1.5">
+                                <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Meta Image</label>
+                                <input
+                                  type="text"
+                                  value={authorForm.data.meta_image}
+                                  onChange={(e) => authorForm.setData("meta_image", e.target.value)}
+                                  className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                                  placeholder="URL hình ảnh SEO..."
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right side panel - 4 cols */}
+                      <div className="lg:col-span-4 space-y-6">
+                        {/* Profile avatar box */}
+                        <div className="bg-white border border-gray-150 rounded-xl p-5 shadow-sm">
+                          <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-3 block">Ảnh Đại Diện</label>
+
+
+                          <div className="relative w-36 h-36 mx-auto mb-4">
+                            {/* The Clickable Circle */}
+                            <div
+                              onClick={() => {
+                                setOnMediaSelect(() => (path: string) => {
+                                  authorForm.setData(data => ({
+                                    ...data,
+                                    avatar: path,
+                                    avatar_file: null
+                                  }));
+                                });
+                                setMediaSelectorOpen(true);
+                              }}
+                              className="w-full h-full rounded-full overflow-hidden border-2 border-dashed border-gray-200 hover:border-gold/60 bg-gray-50 flex items-center justify-center group cursor-pointer transition-colors relative shadow-sm"
+                            >
+                              {authorForm.data.avatar_file ? (
+                                <div className="absolute inset-0 w-full h-full">
+                                  <img
+                                    src={URL.createObjectURL(authorForm.data.avatar_file)}
+                                    className="object-cover w-full h-full"
+                                    alt="Preview"
+                                  />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-full">
+                                    <span className="text-[10px] text-white font-bold bg-black/60 px-2.5 py-1 rounded">Thay đổi ảnh</span>
+                                  </div>
+                                </div>
+                              ) : authorForm.data.avatar ? (
+                                <div className="absolute inset-0 w-full h-full">
+                                  <img
+                                    src={authorForm.data.avatar}
+                                    className="object-cover w-full h-full"
+                                    alt="Preview"
+                                  />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-full">
+                                    <span className="text-[10px] text-white font-bold bg-black/60 px-2.5 py-1 rounded">Thay đổi ảnh</span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-center p-4 flex flex-col items-center justify-center">
+                                  <svg className="w-10 h-10 text-gray-350 mb-1 group-hover:text-gold/60 transition-colors" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                  </svg>
+                                  <p className="text-[10px] text-gray-400 group-hover:text-gold font-bold uppercase tracking-wider mt-0.5">Chọn ảnh</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Floating Close Button outside the clipped circle */}
+                            {(authorForm.data.avatar_file || authorForm.data.avatar) && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  authorForm.setData(data => ({
+                                    ...data,
+                                    avatar_file: null,
+                                    avatar: ""
+                                  }));
+                                }}
+                                className="absolute top-0 right-0 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md border-2 border-white transition-colors z-20 cursor-pointer w-6 h-6 flex items-center justify-center font-bold text-xs"
+                                title="Xóa hình ảnh"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                          
+                          <div className="mt-4 pt-4 border-t border-gray-100/60">
+                            <label className="text-[10px] font-bold text-gray-450 uppercase tracking-wider mb-2 block text-center">Hoặc tải tệp lên từ thiết bị</label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => authorForm.setData("avatar_file", e.target.files?.[0] || null)}
+                              className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3.5 file:rounded-xl file:border file:border-gray-250/60 file:text-[10px] file:font-bold file:uppercase file:bg-gray-55 file:text-gray-700 hover:file:bg-gray-100 cursor-pointer"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Save card */}
+                        <div className="bg-white border border-gray-150 rounded-xl p-5 shadow-sm space-y-3">
+                          <button
+                            type="submit"
+                            disabled={authorForm.processing}
+                            className="w-full bg-[#f97316] hover:bg-[#ea580c] text-white text-xs font-bold uppercase tracking-wider py-3 rounded-lg shadow-sm transition-all disabled:opacity-50"
+                          >
+                            {authorForm.processing ? "Đang lưu..." : "Lưu cấu hình tác giả"}
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => setAuthorViewMode("list")}
+                            className="w-full border border-gray-200 hover:bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider py-3 rounded-lg transition-colors"
+                          >
+                            Hủy bỏ
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* REVIEWS TAB */}
+            {activeTab === "reviews" && (
+              <div>
+                {/* Breadcrumb path */}
+                <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-6 font-semibold select-none text-left">
+                  <span className="cursor-pointer hover:text-gold transition-colors" onClick={() => setActiveTab("overview")}>🏠</span>
+                  <span className="text-gray-300">/</span>
+                  <span className="text-gray-600">Đánh giá dịch vụ</span>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-gray-150/60 mb-6" />
+
+                <div className="bg-white border border-gray-150 rounded-xl p-6 shadow-sm text-left">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800 mb-4">Quản lý nhận xét & Đánh giá dịch vụ</h3>
+                  
+                  {service_reviews.length === 0 ? (
+                    <p className="text-gray-450 font-light text-center py-12">Chưa có đánh giá nào từ khách hàng.</p>
+                  ) : (
+                    <div className="overflow-x-auto border border-gray-100 rounded-xl">
+                      <table className="w-full text-left border-collapse min-w-[850px]">
+                        <thead>
+                          <tr className="border-b border-gray-150 text-[10px] font-bold uppercase text-gray-400 tracking-wider bg-gray-50/75 select-none">
+                            <th className="py-4 px-4 w-40">Dịch vụ</th>
+                            <th className="py-4 px-4 w-40">Khách hàng</th>
+                            <th className="py-4 px-4 w-28">Điểm đánh giá</th>
+                            <th className="py-4 px-4">Nhận xét chi tiết</th>
+                            <th className="py-4 px-4 w-28 text-center">Trạng thái</th>
+                            <th className="py-4 px-4 text-right w-36">Thao tác</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 text-xs text-gray-600 bg-white">
+                          {service_reviews.map((rev) => (
+                            <tr key={rev.id} className="hover:bg-gray-50/50 transition-colors">
+                              {/* SERVICE NAME */}
+                              <td className="py-4 px-4 font-semibold text-gray-800 align-middle">
+                                {rev.service?.name || `Dịch vụ #${rev.service_id}`}
+                              </td>
+
+                              {/* CLIENT NAME */}
+                              <td className="py-4 px-4 align-middle">
+                                <div className="font-bold text-gray-800">{rev.name}</div>
+                                <div className="text-[10px] text-gray-400 mt-0.5">{rev.created_at ? new Date(rev.created_at).toLocaleDateString("vi-VN") : ""}</div>
+                              </td>
+
+                              {/* RATING */}
+                              <td className="py-4 px-4 align-middle">
+                                <div className="flex items-center gap-0.5">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <svg
+                                      key={i}
+                                      className={`w-3.5 h-3.5 ${i < rev.rating ? "text-yellow-400 fill-current" : "text-gray-200"}`}
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      viewBox="0 0 20 20"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                  ))}
+                                </div>
+                              </td>
+
+                              {/* COMMENT */}
+                              <td className="py-4 px-4 align-middle text-gray-550 leading-relaxed font-light">
+                                {rev.comment || <em className="text-gray-300">Không có bình luận</em>}
+                              </td>
+
+                              {/* STATUS */}
+                              <td className="py-4 px-4 text-center align-middle">
+                                {rev.is_approved ? (
+                                  <span className="bg-green-50 text-green-700 text-[9px] font-bold px-2 py-0.5 rounded border border-green-200 uppercase tracking-wider">
+                                    Đã hiển thị
+                                  </span>
+                                ) : (
+                                  <span className="bg-amber-50 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded border border-amber-200 uppercase tracking-wider">
+                                    Chờ duyệt
+                                  </span>
+                                )}
+                              </td>
+
+                              {/* ACTIONS */}
+                              <td className="py-4 px-4 text-right align-middle">
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleReviewApproval(rev.id)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                                      rev.is_approved
+                                        ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                        : "bg-green-600 hover:bg-green-700 text-white"
+                                    }`}
+                                  >
+                                    {rev.is_approved ? "Ẩn đi" : "Duyệt hiển thị"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteReview(rev.id)}
+                                    className="p-1.5 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors"
+                                    title="Xóa đánh giá"
+                                  >
+                                    <Trash size={14} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* SHIFTS TAB */}
+            {activeTab === "shifts" && (
+              <div>
+                {/* Breadcrumb path */}
+                <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-6 font-semibold select-none text-left">
+                  <span className="cursor-pointer hover:text-gold transition-colors" onClick={() => setActiveTab("overview")}>🏠</span>
+                  <span className="text-gray-300">/</span>
+                  <span className="text-gray-600">Lịch trực bác sĩ</span>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-gray-150/60 mb-6" />
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
+                  {/* Create Shift Form - 4 cols */}
+                  <div className="lg:col-span-4 space-y-6">
+                    <div className="bg-white border border-gray-150 rounded-xl p-5 shadow-sm space-y-4">
+                      <h3 className="text-xs uppercase font-bold text-gray-400 tracking-wider">Thêm lịch trực mới</h3>
+                      <form onSubmit={handleSaveDoctorShift} className="space-y-4">
+                        {/* Doctor */}
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold text-gray-700">Chọn Bác sĩ *</label>
+                          <select
+                            required
+                            value={shiftForm.data.doctor_id}
+                            onChange={(e) => shiftForm.setData("doctor_id", e.target.value)}
+                            className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                          >
+                            <option value="">-- Chọn bác sĩ --</option>
+                            {doctors.map((doc) => (
+                              <option key={doc.id} value={doc.id}>
+                                {doc.name} ({doc.role})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Day of Week */}
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold text-gray-700">Thứ trong tuần *</label>
+                          <select
+                            required
+                            value={shiftForm.data.day_of_week}
+                            onChange={(e) => shiftForm.setData("day_of_week", Number(e.target.value))}
+                            className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                          >
+                            <option value={1}>Thứ Hai (Thứ 2)</option>
+                            <option value={2}>Thứ Ba (Thứ 3)</option>
+                            <option value={3}>Thứ Tư (Thứ 4)</option>
+                            <option value={4}>Thứ Năm (Thứ 5)</option>
+                            <option value={5}>Thứ Sáu (Thứ 6)</option>
+                            <option value={6}>Thứ Bảy (Thứ 7)</option>
+                            <option value={7}>Chủ Nhật (CN)</option>
+                          </select>
+                        </div>
+
+                        {/* Time Range */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-gray-700">Bắt đầu *</label>
+                            <input
+                              type="text"
+                              required
+                              value={shiftForm.data.start_time}
+                              onChange={(e) => shiftForm.setData("start_time", e.target.value)}
+                              className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                              placeholder="08:00"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-gray-700">Kết thúc *</label>
+                            <input
+                              type="text"
+                              required
+                              value={shiftForm.data.end_time}
+                              onChange={(e) => shiftForm.setData("end_time", e.target.value)}
+                              className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                              placeholder="17:00"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Branch Location */}
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-semibold text-gray-700">Chi nhánh / Cơ sở</label>
+                          <select
+                            value={shiftForm.data.branch || ""}
+                            onChange={(e) => shiftForm.setData("branch", e.target.value)}
+                            className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
+                          >
+                            <option value="Hà Nội">Hà Nội (Hồ Tây)</option>
+                            <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh (Quận 1)</option>
+                          </select>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={shiftForm.processing}
+                          className="w-full bg-gold hover:bg-gold-dark text-white text-xs font-bold uppercase tracking-wider py-3 rounded-lg shadow-sm transition-all disabled:opacity-50"
+                        >
+                          {shiftForm.processing ? "Đang xử lý..." : "Thêm ca trực"}
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+
+                  {/* Shift List Table - 8 cols */}
+                  <div className="lg:col-span-8 space-y-6">
+                    <div className="bg-white border border-gray-150 rounded-xl p-5 shadow-sm">
+                      <h3 className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-4">Danh sách lịch trực hiện tại</h3>
+                      
+                      {doctor_shifts.length === 0 ? (
+                        <p className="text-gray-450 font-light text-center py-12">Chưa cấu hình lịch trực cho bác sĩ nào.</p>
+                      ) : (
+                        <div className="overflow-x-auto border border-gray-100 rounded-xl">
+                          <table className="w-full text-left border-collapse min-w-[500px]">
+                            <thead>
+                              <tr className="border-b border-gray-150 text-[10px] font-bold uppercase text-gray-400 tracking-wider bg-gray-50/75 select-none">
+                                <th className="py-4 px-4">Bác sĩ</th>
+                                <th className="py-4 px-4 w-28">Thứ</th>
+                                <th className="py-4 px-4 w-32">Ca trực</th>
+                                <th className="py-4 px-4 w-32">Chi nhánh</th>
+                                <th className="py-4 px-4 text-right w-16">Thao tác</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50 text-xs text-gray-600 bg-white">
+                              {doctor_shifts.map((sh) => {
+                                const days = ["", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
+                                return (
+                                  <tr key={sh.id} className="hover:bg-gray-50/50 transition-colors">
+                                    {/* DOCTOR */}
+                                    <td className="py-4 px-4 align-middle">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 bg-gray-50">
+                                          {sh.doctor?.image ? (
+                                            <img src={sh.doctor.image} className="object-cover w-full h-full" alt={sh.doctor.name} />
+                                          ) : (
+                                            <div className="w-full h-full bg-gray-150 flex items-center justify-center text-[10px] text-gray-400 font-bold uppercase">KT</div>
+                                          )}
+                                        </div>
+                                        <div className="font-bold text-gray-800">{sh.doctor?.name || `Bác sĩ #${sh.doctor_id}`}</div>
+                                      </div>
+                                    </td>
+
+                                    {/* DAY */}
+                                    <td className="py-4 px-4 align-middle font-medium text-gray-700">
+                                      {days[sh.day_of_week] || `Thứ ${sh.day_of_week + 1}`}
+                                    </td>
+
+                                    {/* TIME */}
+                                    <td className="py-4 px-4 align-middle font-mono text-gray-500 font-bold text-[10px]">
+                                      {sh.start_time} - {sh.end_time}
+                                    </td>
+
+                                    {/* BRANCH */}
+                                    <td className="py-4 px-4 align-middle font-medium text-gray-500">
+                                      {sh.branch || "Cả 2 cơ sở"}
+                                    </td>
+
+                                    {/* ACTIONS */}
+                                    <td className="py-4 px-4 text-right align-middle">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteDoctorShift(sh.id)}
+                                        className="p-1.5 hover:bg-red-50 text-red-500 rounded-lg transition-colors"
+                                        title="Xóa ca trực"
+                                      >
+                                        <Trash size={14} />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
@@ -6407,8 +8297,23 @@ export default function Dashboard({
                 </div>
 
                 {/* Grid of Folders and Files */}
-                <div className="flex-grow overflow-y-auto border border-gray-150 rounded-xl p-4 bg-gray-50/20 max-h-[350px]">
-                  {mediaLoading ? (
+                <div 
+                  onDragOver={handleMediaDragOver}
+                  onDragEnter={handleMediaDragEnter}
+                  onDragLeave={handleMediaDragLeave}
+                  onDrop={handleMediaDrop}
+                  className="flex-grow overflow-y-auto border border-gray-150 rounded-xl p-4 bg-gray-50/20 max-h-[350px] relative"
+                >
+                  {isMediaDragging && (
+                    <div className="absolute inset-0 bg-orange-50/60 border-2 border-dashed border-[#f97316] rounded-xl z-50 flex flex-col items-center justify-center pointer-events-none animate-pulse">
+                      <div className="bg-white px-4 py-3 rounded-lg shadow-md border border-orange-100 flex flex-col items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 text-[#f97316] animate-bounce">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                        </svg>
+                        <span className="text-[11px] font-bold text-gray-800 uppercase tracking-wider">Thả để tải lên ảnh</span>
+                      </div>
+                    </div>
+                  )}                  {mediaLoading ? (
                     <div className="py-20 flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-gold border-t-transparent rounded-full animate-spin"></div>
                       <span className="text-xs text-gray-400">Đang tải...</span>
@@ -6440,7 +8345,7 @@ export default function Dashboard({
                       {mediaFiles.map((file) => (
                         <div
                           key={file.id}
-                          className="group border border-gray-200 hover:border-gold/80 rounded-lg overflow-hidden bg-white hover:shadow-md transition-all flex flex-col cursor-pointer"
+                          className="group relative border border-gray-200 hover:border-gold/80 rounded-lg overflow-hidden bg-white hover:shadow-md transition-all flex flex-col cursor-pointer"
                           onClick={() => {
                             if (onMediaSelect) {
                               onMediaSelect(file.path);
@@ -6448,6 +8353,33 @@ export default function Dashboard({
                             setMediaSelectorOpen(false);
                           }}
                         >
+                          {/* Action buttons inside card */}
+                          <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(window.location.origin + file.path);
+                                alert("Đã sao chép đường dẫn hình ảnh!");
+                              }}
+                              className="p-1 text-gray-750 hover:text-gold rounded bg-white/95 shadow-sm border-0 cursor-pointer animate-fade-in"
+                              title="Sao chép link"
+                            >
+                              <LinkIcon size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteMediaFile(file.id);
+                              }}
+                              className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded bg-white/95 shadow-sm border border-red-150 cursor-pointer animate-fade-in"
+                              title="Xóa tệp"
+                            >
+                              <Trash size={14} />
+                            </button>
+                          </div>
+
                           <div className="aspect-square bg-gray-50 flex items-center justify-center overflow-hidden border-b border-gray-100">
                             <img
                               src={file.path}
@@ -6477,6 +8409,413 @@ export default function Dashboard({
                 Đóng
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Tạo Lịch Hẹn Mới */}
+      {showCreateBookingModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn" onClick={() => setShowCreateBookingModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-lg overflow-y-auto max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center pb-4 border-b border-gray-100 mb-5">
+              <h3 className="text-base font-bold text-gray-800 font-serif flex items-center gap-2">
+                <Calendar size={18} className="text-gold" />
+                Tạo Lịch Hẹn Mới
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowCreateBookingModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateBooking} className="space-y-4 text-left">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Name */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Tên khách hàng *</label>
+                  <input
+                    type="text"
+                    required
+                    value={manualBookingForm.data.name}
+                    onChange={(e) => manualBookingForm.setData("name", e.target.value)}
+                    placeholder="Nguyễn Văn A"
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm"
+                  />
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Số điện thoại *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={manualBookingForm.data.phone}
+                    onChange={(e) => manualBookingForm.setData("phone", e.target.value)}
+                    placeholder="0912345678"
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Email */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    value={manualBookingForm.data.email}
+                    onChange={(e) => manualBookingForm.setData("email", e.target.value)}
+                    placeholder="khachhang@gmail.com"
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm"
+                  />
+                </div>
+
+                {/* Branch */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Cơ sở điều trị</label>
+                  <select
+                    value={manualBookingForm.data.branch}
+                    onChange={(e) => manualBookingForm.setData("branch", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  >
+                    <option value="">-- Chọn cơ sở --</option>
+                    <option value="KT Beauty - Sài Gòn">KT Beauty - Sài Gòn</option>
+                    <option value="KT Beauty - Hà Nội">KT Beauty - Hà Nội</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Service */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Dịch vụ</label>
+                  <select
+                    value={manualBookingForm.data.service || ""}
+                    onChange={(e) => manualBookingForm.setData("service", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  >
+                    <option value="">-- Chọn dịch vụ --</option>
+                    {services.map((srv) => (
+                      <option key={srv.id} value={srv.name}>{srv.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Doctor */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Bác sĩ chỉ định</label>
+                  <select
+                    value={manualBookingForm.data.doctor_id}
+                    onChange={(e) => manualBookingForm.setData("doctor_id", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  >
+                    <option value="">-- Chọn bác sĩ --</option>
+                    {doctors.map((doc) => (
+                      <option key={doc.id} value={doc.id}>{doc.name} ({doc.role})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Booking Date */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Ngày hẹn *</label>
+                  <input
+                    type="date"
+                    required
+                    value={manualBookingForm.data.booking_date}
+                    onChange={(e) => manualBookingForm.setData("booking_date", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  />
+                </div>
+
+                {/* Booking Time */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Khung giờ hẹn *</label>
+                  <select
+                    required
+                    value={manualBookingForm.data.booking_time}
+                    onChange={(e) => manualBookingForm.setData("booking_time", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  >
+                    <option value="">-- Chọn khung giờ --</option>
+                    {TIME_SLOTS.map((slot) => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Warnings check */}
+              {(() => {
+                const { hasShift, isConflicting } = getDoctorShiftAndConflictStatus(
+                  manualBookingForm.data.doctor_id,
+                  manualBookingForm.data.booking_date,
+                  manualBookingForm.data.booking_time
+                );
+                if (!hasShift || isConflicting) {
+                  return (
+                    <div className="bg-red-50 border border-red-100 rounded-xl p-3 space-y-1 text-left select-none">
+                      {!hasShift && (
+                        <div className="text-[10.5px] text-red-600 font-bold flex items-center gap-1.5">
+                          <span>⚠️ Bác sĩ không có ca trực vào thứ này tại chi nhánh đã chọn!</span>
+                        </div>
+                      )}
+                      {isConflicting && (
+                        <div className="text-[10.5px] text-red-650 font-bold flex items-center gap-1.5">
+                          <span>⚠️ Bác sĩ đã có lịch hẹn khác vào khung giờ này!</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Note */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Ghi chú thêm</label>
+                <textarea
+                  value={manualBookingForm.data.note}
+                  onChange={(e) => manualBookingForm.setData("note", e.target.value)}
+                  placeholder="Yêu cầu đặc biệt của khách hàng..."
+                  rows={3}
+                  className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateBookingModal(false)}
+                  className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors rounded-xl cursor-pointer"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={manualBookingForm.processing}
+                  className="px-5 py-2 text-xs font-black bg-gold text-white rounded-xl hover:bg-gold/90 transition-colors cursor-pointer shadow-md disabled:opacity-50"
+                >
+                  Tạo lịch hẹn
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Chỉnh Sửa Lịch Hẹn */}
+      {showEditBookingModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn" onClick={() => setShowEditBookingModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-lg overflow-y-auto max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center pb-4 border-b border-gray-100 mb-5">
+              <h3 className="text-base font-bold text-gray-800 font-serif flex items-center gap-2">
+                <Edit size={18} className="text-gold" />
+                Chỉnh Sửa Lịch Hẹn
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowEditBookingModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 bg-gray-55 rounded-lg hover:bg-gray-100 transition-all cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditBooking} className="space-y-4 text-left">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Name */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Tên khách hàng *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editBookingForm.data.name}
+                    onChange={(e) => editBookingForm.setData("name", e.target.value)}
+                    placeholder="Nguyễn Văn A"
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm"
+                  />
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Số điện thoại *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={editBookingForm.data.phone}
+                    onChange={(e) => editBookingForm.setData("phone", e.target.value)}
+                    placeholder="0912345678"
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Email */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    value={editBookingForm.data.email}
+                    onChange={(e) => editBookingForm.setData("email", e.target.value)}
+                    placeholder="khachhang@gmail.com"
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm"
+                  />
+                </div>
+
+                {/* Branch */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Cơ sở điều trị</label>
+                  <select
+                    value={editBookingForm.data.branch}
+                    onChange={(e) => editBookingForm.setData("branch", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  >
+                    <option value="">-- Chọn cơ sở --</option>
+                    <option value="KT Beauty - Sài Gòn">KT Beauty - Sài Gòn</option>
+                    <option value="KT Beauty - Hà Nội">KT Beauty - Hà Nội</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Service */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Dịch vụ</label>
+                  <select
+                    value={editBookingForm.data.service || ""}
+                    onChange={(e) => editBookingForm.setData("service", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  >
+                    <option value="">-- Chọn dịch vụ --</option>
+                    {services.map((srv) => (
+                      <option key={srv.id} value={srv.name}>{srv.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Doctor */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Bác sĩ chỉ định</label>
+                  <select
+                    value={editBookingForm.data.doctor_id}
+                    onChange={(e) => editBookingForm.setData("doctor_id", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  >
+                    <option value="">-- Chọn bác sĩ --</option>
+                    {doctors.map((doc) => (
+                      <option key={doc.id} value={doc.id}>{doc.name} ({doc.role})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Booking Date */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Ngày hẹn *</label>
+                  <input
+                    type="date"
+                    required
+                    value={editBookingForm.data.booking_date}
+                    onChange={(e) => editBookingForm.setData("booking_date", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  />
+                </div>
+
+                {/* Booking Time */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">Khung giờ hẹn *</label>
+                  <select
+                    required
+                    value={editBookingForm.data.booking_time}
+                    onChange={(e) => editBookingForm.setData("booking_time", e.target.value)}
+                    className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                  >
+                    <option value="">-- Chọn khung giờ --</option>
+                    {TIME_SLOTS.map((slot) => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Status Select */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Trạng thái lịch hẹn</label>
+                <select
+                  value={editBookingForm.data.status}
+                  onChange={(e) => editBookingForm.setData("status", e.target.value)}
+                  className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
+                >
+                  <option value="Chờ liên hệ">Chờ liên hệ</option>
+                  <option value="Đã liên hệ">Đã xác nhận</option>
+                  <option value="Đã hủy">Đã hủy</option>
+                </select>
+              </div>
+
+              {/* Warnings check */}
+              {(() => {
+                const { hasShift, isConflicting } = getDoctorShiftAndConflictStatus(
+                  editBookingForm.data.doctor_id,
+                  editBookingForm.data.booking_date,
+                  editBookingForm.data.booking_time,
+                  editBookingForm.data.id
+                );
+                if (!hasShift || isConflicting) {
+                  return (
+                    <div className="bg-red-50 border border-red-100 rounded-xl p-3 space-y-1 text-left select-none">
+                      {!hasShift && (
+                        <div className="text-[10.5px] text-red-650 font-bold flex items-center gap-1.5">
+                          <span>⚠️ Bác sĩ không có ca trực vào thứ này tại chi nhánh đã chọn!</span>
+                        </div>
+                      )}
+                      {isConflicting && (
+                        <div className="text-[10.5px] text-red-650 font-bold flex items-center gap-1.5">
+                          <span>⚠️ Bác sĩ đã có lịch hẹn khác vào khung giờ này!</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Note */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700">Ghi chú thêm</label>
+                <textarea
+                  value={editBookingForm.data.note}
+                  onChange={(e) => editBookingForm.setData("note", e.target.value)}
+                  placeholder="Yêu cầu đặc biệt của khách hàng..."
+                  rows={3}
+                  className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditBookingModal(false)}
+                  className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors rounded-xl cursor-pointer"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={editBookingForm.processing}
+                  className="px-5 py-2 text-xs font-black bg-gold text-white rounded-xl hover:bg-gold/90 transition-colors cursor-pointer shadow-md disabled:opacity-50"
+                >
+                  Lưu thay đổi
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

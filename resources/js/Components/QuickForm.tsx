@@ -58,11 +58,18 @@ export const QuickForm: React.FC = () => {
   const settings = (props.settings as Record<string, string>) || {};
   const hotline = settings.site_hotline || "1900 5006";
 
+  const doctors = (props.doctors as Array<{ id: number; name: string; role: string }>) || [];
+
   const { data, setData, post, processing, reset, wasSuccessful } = useForm({
     name: "",
     phone: "",
     email: "",
+    branch: "",
     service: "",
+    booking_date: "",
+    booking_time: "",
+    doctor_id: "",
+    note: "",
   });
 
   const [countryCode, setCountryCode] = React.useState("+84");
@@ -90,7 +97,7 @@ export const QuickForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!data.name || !data.phone) return;
+    if (!data.name || !data.phone || !data.branch || !data.booking_date || !data.booking_time) return;
     post("/consult", {
       onSuccess: () => {
         reset();
@@ -191,10 +198,10 @@ export const QuickForm: React.FC = () => {
             <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gold/5 rounded-full blur-3xl pointer-events-none" />
 
             <h3 className="text-2xl font-serif font-bold text-gray-800 text-center mb-1.5">
-              Đặt Lịch Hẹn Tư Vấn
+              Đặt Lịch Hẹn Khám
             </h3>
             <p className="text-xs text-gray-400 font-light text-center mb-6 max-w-xs mx-auto">
-              Nhận cuộc gọi tư vấn giải đáp trực tiếp từ bác sĩ chuyên khoa trong vòng 15 phút.
+              Đặt hẹn khám trực tiếp với bác sĩ tại các cơ sở KT Beauty nhanh chóng.
             </p>
 
             {wasSuccessful ? (
@@ -202,9 +209,9 @@ export const QuickForm: React.FC = () => {
                 <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-100">
                   <CheckCircle2 size={32} />
                 </div>
-                <h4 className="font-bold text-gray-800 text-lg mb-2">Đăng Ký Thành Công!</h4>
+                <h4 className="font-bold text-gray-800 text-lg mb-2">Đặt Lịch Thành Công!</h4>
                 <p className="text-xs text-gray-500 font-light leading-relaxed max-w-[240px] mx-auto">
-                  Cảm ơn bạn đã tin tưởng KT Beauty. Bác sĩ chuyên khoa sẽ liên hệ trực tiếp cho bạn qua số điện thoại sớm nhất có thể.
+                  Cảm ơn bạn đã tin tưởng KT Beauty. Chúng tôi đã ghi nhận yêu cầu đặt lịch hẹn khám của bạn và sẽ liên hệ xác nhận trong thời gian sớm nhất.
                 </p>
               </div>
             ) : (
@@ -304,6 +311,26 @@ export const QuickForm: React.FC = () => {
                   />
                 </div>
 
+                {/* Branch Selection */}
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1 block">Cơ sở tư vấn *</label>
+                  <div className="relative">
+                    <select
+                      value={data.branch}
+                      onChange={(e) => setData("branch", e.target.value)}
+                      className="w-full bg-gray-50/50 border border-gray-200 focus:border-gold/80 px-4 py-3 rounded-xl text-gray-700 focus:outline-none transition-all text-sm focus:ring-1 focus:ring-gold/30 appearance-none cursor-pointer"
+                      required
+                    >
+                      <option value="">Chọn cơ sở làm đẹp *</option>
+                      <option value="KT Beauty - Sài Gòn">KT Beauty - Sài Gòn</option>
+                      <option value="Văn phòng hợp tác Úc Châu">Văn phòng hợp tác Úc Châu</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">
+                      ▼
+                    </div>
+                  </div>
+                </div>
+
                 {/* Service Selection */}
                 <div>
                   <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1 block">Dịch vụ quan tâm</label>
@@ -323,6 +350,74 @@ export const QuickForm: React.FC = () => {
                       ▼
                     </div>
                   </div>
+                </div>
+
+                {/* Doctor select */}
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1 block">Bác sĩ mong muốn (Không bắt buộc)</label>
+                  <div className="relative">
+                    <select
+                      value={data.doctor_id}
+                      onChange={(e) => setData("doctor_id", e.target.value)}
+                      className="w-full bg-gray-50/50 border border-gray-200 focus:border-gold/80 px-4 py-3 rounded-xl text-gray-700 focus:outline-none transition-all text-sm focus:ring-1 focus:ring-gold/30 appearance-none cursor-pointer"
+                    >
+                      <option value="">Chọn bác sĩ khám</option>
+                      {doctors.map((d: any) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name} ({d.role})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">
+                      ▼
+                    </div>
+                  </div>
+                </div>
+
+                {/* Date and Time Selectors */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1 block">Ngày hẹn *</label>
+                    <input
+                      type="date"
+                      value={data.booking_date}
+                      onChange={(e) => setData("booking_date", e.target.value)}
+                      className="w-full bg-gray-50/50 border border-gray-200 focus:border-gold/80 px-3 py-3 rounded-xl text-gray-800 focus:outline-none transition-all text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1 block">Giờ hẹn *</label>
+                    <div className="relative">
+
+                      <select
+                        value={data.booking_time}
+                        onChange={(e) => setData("booking_time", e.target.value)}
+                        className="w-full bg-gray-50/50 border border-gray-200 focus:border-gold/80 px-3 py-3 rounded-xl text-gray-700 focus:outline-none transition-all text-sm appearance-none cursor-pointer"
+                        required
+                      >
+                        <option value="">Chọn giờ *</option>
+                        {["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00"].map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">
+                        ▼
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Note */}
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1 block">Ghi chú thêm</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Tình trạng hoặc yêu cầu khác của bạn..."
+                    value={data.note}
+                    onChange={(e) => setData("note", e.target.value)}
+                    className="w-full bg-gray-50/50 border border-gray-200 focus:border-gold/80 px-4 py-3 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition-all text-sm"
+                  />
                 </div>
 
                 {/* Submit Button */}

@@ -182,10 +182,10 @@ export default function DichVu({ services = [] }: DichVuProps) {
                         </Link>
                         
                         <a
-                          href={`#consult`}
+                          href="/dat-lich"
                           className="px-4 py-2 border border-gold/40 hover:bg-gold hover:text-white text-gold text-xs uppercase font-bold rounded-lg transition-all duration-300 shadow-sm"
                         >
-                          Đăng ký tư vấn
+                          Đặt lịch khám
                         </a>
                       </div>
                     </div>

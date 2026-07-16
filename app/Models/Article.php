@@ -12,7 +12,8 @@ class Article extends Model
         'description',
         'content',
         'image',
-        'author',
+        'author_id',
+        'legacy_author',
         'published_date',
         'category',
         'is_highlight',
@@ -22,9 +23,20 @@ class Article extends Model
         'meta_robots',
         'canonical_link',
         'meta_image',
+        'schema',
     ];
 
     protected $casts = [
         'is_highlight' => 'boolean',
     ];
+
+    protected $with = ['author'];
+
+    /**
+     * Get the author of this article.
+     */
+    public function author()
+    {
+        return $this->belongsTo(Author::class, 'author_id');
+    }
 }

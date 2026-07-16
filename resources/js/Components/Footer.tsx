@@ -6,6 +6,9 @@ import { FacebookIcon, InstagramIcon, YoutubeIcon } from "./icons";
 export const Footer: React.FC = () => {
   const { props } = usePage();
   const settings = (props.settings as Record<string, string>) || {};
+  const hotline = settings.site_hotline || "1900 5006";
+  const email = settings.site_email || "contact@ktbeauty.vn";
+  const address = settings.site_address || "386-388 Đường 3/2, Phường 12, Quận 10, TP. Hồ Chí Minh";
   const facebookUrl = settings.facebook_url || "https://facebook.com";
   const youtubeUrl = settings.youtube_url || "https://youtube.com";
 
@@ -28,9 +31,14 @@ export const Footer: React.FC = () => {
               </span>
             )}
           </div>
-          <p className="text-xs md:text-sm text-gray-400 font-light leading-relaxed mb-6">
+          <p className="text-xs md:text-sm text-gray-400 font-light leading-relaxed mb-4">
             KT Beauty Medical Centre mang đến các liệu trình làm đẹp chuẩn y khoa, giúp bạn sở hữu vẻ đẹp độc bản, chuẩn tỷ lệ vàng và an toàn tuyệt đối.
           </p>
+          <div className="text-xs text-gray-400 space-y-2 mb-6 font-light">
+            <p><span className="font-semibold text-gold">Hotline:</span> {hotline}</p>
+            <p><span className="font-semibold text-gold">Email:</span> {email}</p>
+            <p><span className="font-semibold text-gold">Địa chỉ:</span> {address}</p>
+          </div>
           <div className="flex items-center gap-3">
             <a
               href={facebookUrl}
