@@ -88,12 +88,15 @@ class MediaController extends Controller
             'file' => 'required|file|max:10240', // Max 10MB
             'folder_id' => 'nullable|exists:media_folders,id',
         ]);
-
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $originalName = $file->getClientOriginalName();
-            $filename = time() . '_' . str_replace(' ', '_', $originalName);
+            $filename = pathinfo($originalName, PATHINFO_FILENAME) . '_' . time() . '.' . $file->getClientOriginalExtension();
             
+            // Get metadata before moving
+            $mimeType = $file->getClientMimeType();
+            $size = $file->getSize();
+
             // Put in public/uploads/media
             $destinationPath = public_path('uploads/media');
             if (!File::exists($destinationPath)) {
@@ -107,8 +110,8 @@ class MediaController extends Controller
                 'folder_id' => $request->get('folder_id') ?: null,
                 'name' => $originalName,
                 'path' => $path,
-                'mime_type' => $file->getClientMimeType(),
-                'size' => File::size($destinationPath . '/' . $filename),
+                'mime_type' => $mimeType,
+                'size' => $size,
             ]);
 
             return response()->json([
