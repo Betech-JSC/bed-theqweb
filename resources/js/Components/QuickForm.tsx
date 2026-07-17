@@ -95,6 +95,48 @@ export const QuickForm: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
+  const [now, setNow] = React.useState(new Date());
+
+  // Update current time every 15 seconds for real-time validation of time slots
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDateString = (date: Date) => {
+    const offset = date.getTimezoneOffset();
+    const adjustedDate = new Date(date.getTime() - offset * 60 * 1000);
+    return adjustedDate.toISOString().split("T")[0];
+  };
+
+  const isTimeSlotPassed = (timeStr: string) => {
+    if (!data.booking_date) return false;
+    
+    const todayStr = formatDateString(now);
+    if (data.booking_date !== todayStr) return false;
+
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    const [slotHour, slotMinute] = timeStr.split(":").map(Number);
+    
+    if (slotHour < currentHour) return true;
+    if (slotHour === currentHour && slotMinute <= currentMinute) return true;
+    
+    return false;
+  };
+
+  // Reset booking time if selected time slot passes in real-time
+  React.useEffect(() => {
+    if (data.booking_date && data.booking_time) {
+      if (isTimeSlotPassed(data.booking_time)) {
+        setData("booking_time", "");
+      }
+    }
+  }, [now, data.booking_date, data.booking_time]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!data.name || !data.phone || !data.branch || !data.booking_date || !data.booking_time) return;
@@ -397,9 +439,14 @@ export const QuickForm: React.FC = () => {
                         required
                       >
                         <option value="">Chọn giờ *</option>
-                        {["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00"].map((t) => (
-                          <option key={t} value={t}>{t}</option>
-                        ))}
+                        {["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00"].map((t) => {
+                          const passed = isTimeSlotPassed(t);
+                          return (
+                            <option key={t} value={t} disabled={passed}>
+                              {t}{passed ? " (Đã qua giờ)" : ""}
+                            </option>
+                          );
+                        })}
                       </select>
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">
                         ▼

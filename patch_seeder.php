@@ -345,7 +345,7 @@ $newServicesCode = '        // 3. Seed Services (Services Catalog)
             ]
         ];
 
-        foreach ($services as $srv) {
+        foreach ($services as $idx => $srv) {
             Service::updateOrCreate(
                 [\'name\' => $srv[\'name\']],
                 [
@@ -358,6 +358,7 @@ $newServicesCode = '        // 3. Seed Services (Services Catalog)
                     \'pillars\' => $srv[\'pillars\'] ?? null,
                     \'reviews\' => $srv[\'reviews\'] ?? null,
                     \'before_after\' => $srv[\'before_after\'] ?? null,
+                    \'order\' => $idx,
                 ]
             );
         }

@@ -14,17 +14,17 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('Home', [
         'articles' => Article::where('is_highlight', true)->latest()->get(),
-        'services' => Service::all(),
+        'services' => Service::latest()->get(),
         'banners' => \App\Models\Banner::where('is_active', true)->orderBy('order')->get(),
         'doctors' => \App\Models\Doctor::orderBy('order')->get(),
         'faqs' => \App\Models\Faq::orderBy('order')->get(),
-        'realResults' => \App\Models\RealResult::orderBy('order')->get(),
+        'realResults' => \App\Models\RealResult::latest()->get(),
     ]);
 });
 
 Route::get('/dich-vu', function () {
     return Inertia::render('DichVu', [
-        'services' => \App\Models\Service::all()
+        'services' => \App\Models\Service::latest()->get()
     ]);
 });
 
@@ -37,14 +37,14 @@ Route::get('/gioi-thieu', function () {
 Route::get('/phau-thuat-tham-my', function () {
     return Inertia::render('PhauThuatThamMy', [
         'doctors' => \App\Models\Doctor::orderBy('order')->get(),
-        'services' => \App\Models\Service::where('category', 'Phẫu thuật thẩm mỹ')->get(),
+        'services' => \App\Models\Service::where('category', 'Phẫu thuật thẩm mỹ')->latest()->get(),
     ]);
 });
 
 Route::get('/da-lieu-tre-hoa', function () {
     return Inertia::render('DaLieuTreHoa', [
         'doctors' => \App\Models\Doctor::orderBy('order')->get(),
-        'services' => \App\Models\Service::where('category', 'Da liễu & Trẻ hóa')->get(),
+        'services' => \App\Models\Service::where('category', 'Da liễu & Trẻ hóa')->latest()->get(),
     ]);
 });
 
@@ -61,7 +61,7 @@ Route::get('/cay-toc-y-khoa', function () {
 Route::get('/ket-qua', function () {
     return Inertia::render('KetQua', [
         'faqs' => \App\Models\Faq::orderBy('order')->get(),
-        'realResults' => \App\Models\RealResult::orderBy('order')->get(),
+        'realResults' => \App\Models\RealResult::latest()->get(),
     ]);
 });
 
@@ -193,7 +193,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'banners' => \App\Models\Banner::orderBy('order')->get(),
             'doctors' => \App\Models\Doctor::orderBy('order')->get(),
             'faqs' => \App\Models\Faq::orderBy('order')->get(),
-            'realResults' => \App\Models\RealResult::orderBy('order')->get(),
+            'realResults' => \App\Models\RealResult::latest()->get(),
             'authors' => \App\Models\Author::latest()->get(),
             'analytics' => [
                 'daily_trends' => $chartData,

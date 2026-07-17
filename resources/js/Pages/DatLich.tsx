@@ -38,6 +38,15 @@ export default function DatLich() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [now, setNow] = useState(new Date());
+
+  // Update current time every 15 seconds for real-time validation of time slots
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 15000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Doctor schedule state
   const [doctorShifts, setDoctorShifts] = useState<any[]>([]);
@@ -87,8 +96,7 @@ export default function DatLich() {
       const dbDay = jsDay === 0 ? 7 : jsDay;
       const isWorking = doctorShifts.some(shift => Number(shift.day_of_week) === dbDay);
       if (!isWorking) {
-        setData("booking_date", "");
-        setData("booking_time", "");
+        setData(data => ({ ...data, booking_date: "", booking_time: "" }));
       }
     }
   }, [doctorShifts]);
@@ -136,6 +144,32 @@ export default function DatLich() {
 
   const selectedDateStr = data.booking_date;
 
+  const isTimeSlotPassed = (timeStr: string) => {
+    if (!selectedDateStr) return false;
+    
+    const todayStr = formatDateString(now);
+    if (selectedDateStr !== todayStr) return false;
+
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    const [slotHour, slotMinute] = timeStr.split(":").map(Number);
+    
+    if (slotHour < currentHour) return true;
+    if (slotHour === currentHour && slotMinute <= currentMinute) return true;
+    
+    return false;
+  };
+
+  // Reset booking time if selected time slot passes in real-time
+  useEffect(() => {
+    if (selectedDateStr && data.booking_time) {
+      if (isTimeSlotPassed(data.booking_time)) {
+        setData("booking_time", "");
+      }
+    }
+  }, [now, selectedDateStr, data.booking_time]);
+
   // Calendar calculation
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -163,8 +197,7 @@ export default function DatLich() {
   const handleSelectDay = (day: number) => {
     const targetDate = new Date(year, month, day);
     const dateStr = formatDateString(targetDate);
-    setData("booking_date", dateStr);
-    setData("booking_time", ""); // Reset time when date changes
+    setData(data => ({ ...data, booking_date: dateStr, booking_time: "" }));
   };
 
   // Check if a specific slot is booked
@@ -483,7 +516,8 @@ export default function DatLich() {
                         {timeSlots.map((time) => {
                           const booked = isSlotBooked(selectedDateStr, time);
                           const inShift = isTimeInDoctorShift(selectedDateStr, time);
-                          const isAvailable = inShift && !booked;
+                          const passed = isTimeSlotPassed(time);
+                          const isAvailable = inShift && !booked && !passed;
                           const isSelected = data.booking_time === time;
                           
                           let btnStyle = "bg-gray-50 border-gray-200 hover:bg-gold/15 hover:border-gold/50 text-gray-700";

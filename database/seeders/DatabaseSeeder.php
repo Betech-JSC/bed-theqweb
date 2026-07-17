@@ -463,6 +463,7 @@ class DatabaseSeeder extends Seeder
                     'pillars' => $srv['pillars'] ?? null,
                     'reviews' => $srv['reviews'] ?? null,
                     'before_after' => $srv['before_after'] ?? null,
+                    'order' => $idx,
                 ]
             );
         }
@@ -683,6 +684,7 @@ class DatabaseSeeder extends Seeder
             \App\Models\DoctorShift::updateOrCreate(
                 ['doctor_id' => $docTrinh->id, 'day_of_week' => 4],
                 ['start_time' => '08:30', 'end_time' => '17:30', 'branch' => 'KT Beauty - Sài Gòn']
+            );
         }
     }
 }

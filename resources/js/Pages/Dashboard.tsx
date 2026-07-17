@@ -122,6 +122,7 @@ interface Service {
   image: string | null;
   banner_image?: string;
   is_highlight?: boolean | number;
+  order?: number;
   created_at?: string;
   meta_title?: string;
   meta_description?: string;
@@ -133,6 +134,7 @@ interface Service {
   pillars?: Array<{ title: string; desc: string; img: string }> | null;
   reviews?: string[] | null;
   before_after?: Array<{ title: string; before: string; after: string; desc: string }> | null;
+  schema?: string | null;
 }
 
 interface Banner {
@@ -186,6 +188,7 @@ interface RealResult {
   canonical_link?: string;
   meta_image?: string;
   video?: string | null;
+  created_at?: string;
 }
 
 interface DashboardProps {
@@ -814,7 +817,7 @@ export default function Dashboard({
     title: "",
     description: "",
     content: "",
-    author: "",
+    legacy_author: "",
     author_id: "" as string | number,
     published_date: "",
     category: "Chuyên môn",
@@ -840,6 +843,7 @@ export default function Dashboard({
     image: "",
     banner_image: "",
     is_highlight: 0 as number,
+    order: 0,
     slug: "",
     meta_title: "",
     meta_description: "",
@@ -850,6 +854,7 @@ export default function Dashboard({
     pillars: [] as Array<{ title: string; desc: string; img: string }>,
     reviews: [] as string[],
     before_after: [] as Array<{ title: string; before: string; after: string; desc: string }>,
+    schema: "",
   });
 
   const doctorForm = useForm({
@@ -1077,9 +1082,10 @@ export default function Dashboard({
         });
       }
       fetchMedia(currentFolderId);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Lỗi khi tải tệp lên:", err);
-      alert("Tải tệp lên thất bại!");
+      const errMsg = err.response?.data?.error || "Tải tệp lên thất bại!";
+      alert(errMsg);
     } finally {
       setMediaUploadLoading(false);
     }
@@ -1247,7 +1253,7 @@ export default function Dashboard({
       title: art.title,
       description: art.description || "",
       content: art.content || "",
-      author: art.author ? (typeof art.author === "object" ? art.author.name : art.author) : (art.legacy_author || ""),
+      legacy_author: art.author ? (typeof art.author === "object" ? art.author.name : art.author) : (art.legacy_author || ""),
       author_id: art.author_id || "",
       published_date: art.published_date || "",
       category: art.category,
@@ -1396,6 +1402,7 @@ export default function Dashboard({
       image: srv.image || "",
       banner_image: srv.banner_image || "",
       is_highlight: srv.is_highlight ? 1 : 0,
+      order: srv.order || 0,
       slug: srv.slug || "",
       meta_title: srv.meta_title || "",
       meta_description: srv.meta_description || "",
@@ -1406,6 +1413,7 @@ export default function Dashboard({
       pillars: srv.pillars || [],
       reviews: srv.reviews || [],
       before_after: srv.before_after || [],
+      schema: srv.schema || "",
     });
     setServiceViewMode("edit");
   };
@@ -3289,8 +3297,8 @@ export default function Dashboard({
                             <input
                               type="text"
                               required
-                              value={articleForm.data.author}
-                              onChange={(e) => articleForm.setData("author", e.target.value)}
+                              value={articleForm.data.legacy_author}
+                              onChange={(e) => articleForm.setData("legacy_author", e.target.value)}
                               className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
                               placeholder="Ví dụ: Bác sĩ hoặc Ban biên tập KT+ Beauty"
                             />
@@ -4250,6 +4258,18 @@ export default function Dashboard({
                                   onChange={(e) => serviceForm.setData("meta_image", e.target.value)}
                                   className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
                                   placeholder="URL hình ảnh SEO cho dịch vụ..."
+                                />
+                              </div>
+
+                              {/* Schema JSON-LD */}
+                              <div className="space-y-1.5 col-span-2">
+                                <label className="text-xs uppercase font-bold text-gray-400 tracking-wider">Schema JSON-LD</label>
+                                <textarea
+                                  value={serviceForm.data.schema}
+                                  onChange={(e) => serviceForm.setData("schema", e.target.value)}
+                                  rows={4}
+                                  className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white font-mono"
+                                  placeholder='Ví dụ: { "@context": "https://schema.org", "@type": "MedicalProcedure" }'
                                 />
                               </div>
                             </div>
@@ -5273,7 +5293,7 @@ export default function Dashboard({
                                 <th className="py-4 px-4 w-40">Danh mục</th>
                                 <th className="py-4 px-4">Chi tiết</th>
                                 <th className="py-4 px-4 text-center w-36">Loại phương tiện</th>
-                                <th className="py-4 px-4 text-center w-28">Thứ tự</th>
+                                <th className="py-4 px-4 text-center w-36">Ngày tạo</th>
                                 <th className="py-4 px-4 text-center w-28">Trạng thái</th>
                                 <th className="py-4 px-4 text-right w-24">Thao tác</th>
                               </tr>
@@ -5329,9 +5349,9 @@ export default function Dashboard({
                                     )}
                                   </td>
 
-                                  {/* THỨ TỰ */}
-                                  <td className="py-4 px-4 text-center align-middle font-bold text-gray-600">
-                                    {res.order}
+                                  {/* NGÀY TẠO */}
+                                  <td className="py-4 px-4 text-center align-middle text-gray-400 font-light text-[10px]">
+                                    {res.created_at ? new Date(res.created_at).toLocaleDateString("vi-VN") : "08/07/2026"}
                                   </td>
 
                                   {/* TRẠNG THÁI */}

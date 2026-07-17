@@ -15,6 +15,7 @@ class Service extends Model
         'banner_image',
         'slug',
         'is_highlight',
+        'order',
         'meta_title',
         'meta_description',
         'meta_keywords',

@@ -9,6 +9,32 @@ use Illuminate\Support\Str;
 
 class ContentController extends Controller
 {
+    /**
+     * Generate a unique slug for the given model.
+     */
+    private function uniqueSlug(string $modelClass, string $base, ?int $excludeId = null): string
+    {
+        $slug = Str::slug($base);
+        if (empty($slug)) {
+            $slug = 'item-' . time();
+        }
+        $original = $slug;
+        $counter = 1;
+        $query = $modelClass::where('slug', $slug);
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+        while ($query->exists()) {
+            $slug = $original . '-' . $counter;
+            $counter++;
+            $query = $modelClass::where('slug', $slug);
+            if ($excludeId) {
+                $query->where('id', '!=', $excludeId);
+            }
+        }
+        return $slug;
+    }
+
     // Article CRUD
     public function storeArticle(Request $request)
     {
@@ -43,7 +69,7 @@ class ContentController extends Controller
             $imagePath = $request->input('image');
         }
 
-        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['title']);
+        $slug = $this->uniqueSlug(Article::class, $validated['slug'] ?? $validated['title']);
 
         Article::create([
             'title' => $validated['title'],
@@ -91,7 +117,7 @@ class ContentController extends Controller
             'schema' => 'nullable|string',
         ]);
 
-        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['title']);
+        $slug = $this->uniqueSlug(Article::class, $validated['slug'] ?? $validated['title'], $article->id);
 
         $data = [
             'title' => $validated['title'],
@@ -151,6 +177,7 @@ class ContentController extends Controller
             'image' => 'nullable|string|max:255',
             'banner_image' => 'nullable|string|max:255',
             'is_highlight' => 'nullable|boolean',
+            'order' => 'nullable|integer',
             'slug' => 'nullable|string|max:255',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
@@ -174,7 +201,7 @@ class ContentController extends Controller
             $imagePath = $request->input('image');
         }
 
-        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['name']);
+        $slug = $this->uniqueSlug(Service::class, $validated['slug'] ?? $validated['name']);
 
         Service::create([
             'name' => $validated['name'],
@@ -185,6 +212,7 @@ class ContentController extends Controller
             'image' => $imagePath,
             'banner_image' => $validated['banner_image'] ?? null,
             'is_highlight' => $request->boolean('is_highlight'),
+            'order' => $validated['order'] ?? 0,
             'meta_title' => $validated['meta_title'] ?? null,
             'meta_description' => $validated['meta_description'] ?? null,
             'meta_keywords' => $validated['meta_keywords'] ?? null,
@@ -211,6 +239,7 @@ class ContentController extends Controller
             'image' => 'nullable|string|max:255',
             'banner_image' => 'nullable|string|max:255',
             'is_highlight' => 'nullable|boolean',
+            'order' => 'nullable|integer',
             'slug' => 'nullable|string|max:255',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
@@ -224,7 +253,7 @@ class ContentController extends Controller
             'schema' => 'nullable|string',
         ]);
 
-        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['name']);
+        $slug = $this->uniqueSlug(Service::class, $validated['slug'] ?? $validated['name'], $service->id);
 
         $data = [
             'name' => $validated['name'],
@@ -234,6 +263,7 @@ class ContentController extends Controller
             'description' => $validated['description'],
             'banner_image' => $validated['banner_image'] ?? null,
             'is_highlight' => $request->boolean('is_highlight'),
+            'order' => $validated['order'] ?? 0,
             'meta_title' => $validated['meta_title'] ?? null,
             'meta_description' => $validated['meta_description'] ?? null,
             'meta_keywords' => $validated['meta_keywords'] ?? null,
@@ -608,7 +638,7 @@ class ContentController extends Controller
             $videoPath = '/videos/' . $filename;
         }
 
-        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['title']);
+        $slug = $this->uniqueSlug(\App\Models\RealResult::class, $validated['slug'] ?? $validated['title']);
 
         \App\Models\RealResult::create([
             'category' => $validated['category'],
@@ -650,7 +680,7 @@ class ContentController extends Controller
             'meta_image' => 'nullable|string|max:255',
         ]);
 
-        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['title']);
+        $slug = $this->uniqueSlug(\App\Models\RealResult::class, $validated['slug'] ?? $validated['title'], $realResult->id);
 
         $data = [
             'category' => $validated['category'],
@@ -723,7 +753,7 @@ class ContentController extends Controller
             $avatarPath = $request->input('avatar');
         }
 
-        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['name']);
+        $slug = $this->uniqueSlug(\App\Models\Author::class, $validated['slug'] ?? $validated['name']);
 
         \App\Models\Author::create([
             'name' => $validated['name'],
@@ -761,7 +791,7 @@ class ContentController extends Controller
             'meta_image' => 'nullable|string|max:255',
         ]);
 
-        $slug = !empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['name']);
+        $slug = $this->uniqueSlug(\App\Models\Author::class, $validated['slug'] ?? $validated['name'], $author->id);
 
         $data = [
             'name' => $validated['name'],
