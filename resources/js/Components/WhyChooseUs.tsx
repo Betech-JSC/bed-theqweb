@@ -1,67 +1,183 @@
-import React from "react";
-import { Award, UserCheck, Star, Zap } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { usePage } from "@inertiajs/react";
+
+interface CardItem {
+  index: number;
+  title: string;
+  desc: string;
+  image: string;
+}
 
 export const WhyChooseUs: React.FC = () => {
-  const highlights = [
+  const { props } = usePage() as any;
+  const settings = props.settings || {};
+
+  const cards: CardItem[] = [
     {
-      icon: <Award className="w-10 h-10 text-gold" />,
-      title: "Tiêu chuẩn Úc Châu",
-      desc: "Trang thiết bị hiện đại, hệ thống phòng phẫu thuật vô trùng khép kín chuyển giao công nghệ chuẩn quốc tế.",
+      index: 1,
+      title: settings.why_choose_us_1_title || "Tiêu chuẩn Úc Châu",
+      desc: settings.why_choose_us_1_desc || "Các quy trình chăm sóc sắc đẹp tại KT Beauty Medical Centre tuân thủ theo tiêu chuẩn thẩm mỹ nghiêm ngặt của Úc Châu, đảm bảo an toàn và hiệu quả cho khách hàng",
+      image: settings.why_choose_us_1_image || "/images/why-choose-us/banner-web-5-1.png",
     },
     {
-      icon: <UserCheck className="w-10 h-10 text-gold" />,
-      title: "Tư vấn cá nhân hóa",
-      desc: "Phác đồ điều trị được thiết kế riêng biệt dựa trên cấu trúc sinh học mặt và nhu cầu thực tế của từng khách hàng.",
+      index: 2,
+      title: settings.why_choose_us_2_title || "Tư vấn cá nhân hóa",
+      desc: settings.why_choose_us_2_desc || "Mỗi khách hàng đều có nét đẹp riêng biệt. KT Beauty Medical Centre luôn lắng nghe và đưa ra những lời khuyên tốt nhất để tôn lên vẻ đẹp tự nhiên của từng người, đảm bảo mỗi kết quả đều được cá nhân hóa hoàn toàn",
+      image: settings.why_choose_us_2_image || "/images/why-choose-us/banner-web-2-1.png",
     },
     {
-      icon: <Star className="w-10 h-10 text-gold" />,
-      title: "Chuyên môn cao",
-      desc: "Đội ngũ Giáo sư, Thạc sĩ, Bác sĩ CKI chuyên khoa tạo hình thẩm mỹ trực thuộc các hiệp hội thẩm mỹ danh tiếng.",
+      index: 3,
+      title: settings.why_choose_us_3_title || "Chuyên môn cao",
+      desc: settings.why_choose_us_3_desc || "Quy tụ đội ngũ bác sĩ có chuyên môn cao, được đào tạo bài bản và chuyên sâu trong lĩnh vực thẩm mỹ, am hiểu sâu rộng, kinh nghiệm dày dặn và không ngừng cập nhật những phương pháp tiên tiến nhất",
+      image: settings.why_choose_us_3_image || "/images/why-choose-us/banner-web-4-1.png",
     },
     {
-      icon: <Zap className="w-10 h-10 text-gold" />,
-      title: "Công nghệ tiên tiến",
-      desc: "Sở hữu và chuyển giao độc quyền các dòng máy công nghệ trẻ hóa da, điều trị sắc tố tốt nhất hiện nay.",
+      index: 4,
+      title: settings.why_choose_us_4_title || "Công nghệ tiên tiến",
+      desc: settings.why_choose_us_4_desc || "Ứng dụng công nghệ và kỹ thuật hiện đại, KT Beauty Medical Centre cung cấp nhiều phương án thẩm mỹ từ phẫu thuật đến không phẫu thuật với kết quả tự nhiên, giảm tối đa biến chứng, phù hợp nhu cầu và tình trạng cá nhân",
+      image: settings.why_choose_us_4_image || "/images/why-choose-us/banner-web-3-1.png",
     },
   ];
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [scrollProgress, setScrollProgress] = useState<number[]>(new Array(cards.length).fill(0));
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkWidth = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    checkWidth();
+    window.addEventListener("resize", checkWidth);
+    return () => window.removeEventListener("resize", checkWidth);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktop) return;
+
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      
+      const newProgress = cardRefs.current.map((card) => {
+        if (!card) return 0;
+        const rect = card.getBoundingClientRect();
+        
+        // Sticking point is set around top-32 (128px)
+        const stickyTop = 128;
+        const diff = stickyTop - rect.top;
+        if (diff <= 0) return 0;
+        
+        const height = rect.height || 500;
+        return Math.min(1, diff / height);
+      });
+      
+      setScrollProgress(newProgress);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isDesktop]);
+
+  const getCardStyle = (index: number) => {
+    if (!isDesktop) return {};
+    if (index === cards.length - 1) return {};
+
+    const nextProgress = scrollProgress[index + 1] || 0;
+    
+    // Smooth 3D Stacking depth transitions
+    const scale = 1 - nextProgress * 0.04;
+    const translateY = -nextProgress * 20;
+    const opacity = 1 - nextProgress * 0.3;
+    
+    return {
+      transform: `scale(${scale}) translateY(${translateY}px)`,
+      opacity: opacity,
+      transition: "transform 0.1s ease-out, opacity 0.1s ease-out",
+    };
+  };
+
   return (
-    <section className="bg-dark-bg py-28 px-4 md:px-[10%] font-sans text-white border-t border-white/5">
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="text-gold uppercase tracking-widest text-xs md:text-sm font-semibold mb-2 block">
-            Lựa Chọn Hàng Đầu
-          </span>
-          <h2 className="text-2xl md:text-4xl font-bold font-serif text-white">
-            Tại Sao Khách Hàng Tin Chọn
-          </h2>
-          <div className="w-12 h-[2px] bg-gold mx-auto mt-4 mb-6" />
-          <p className="text-sm md:text-base text-gray-300 font-light">
-            Chúng tôi tự hào là thương hiệu thẩm mỹ chuẩn y khoa hàng đầu, đồng hành kiến tạo nên hàng chục nghìn vẻ đẹp độc bản tự nhiên.
-          </p>
+    <section 
+      ref={containerRef}
+      className="bg-[#fcfbf9] py-20 md:py-28 px-4 md:px-[10%] font-sans text-gray-800 border-t border-gray-150"
+    >
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-start relative">
+        
+        {/* Left Column - Sticky Content */}
+        <div className="col-span-1 md:col-span-5 md:sticky md:top-32 flex flex-col justify-center md:h-[calc(100vh-240px)] gap-8 mb-12 md:mb-0">
+          <div className="flex flex-col items-start text-left">
+            <h2 className="text-3xl md:text-5xl font-bold font-serif text-gray-900 leading-tight mb-6">
+              Tại sao khách hàng tin chọn
+            </h2>
+            <div className="w-16 h-[3px] bg-gold mb-6 rounded-full" />
+            <p className="text-base text-gray-600 leading-relaxed font-light">
+              Mỗi hành trình đều bắt đầu từ một hoài bão, và hoài bão của chúng tôi chính là đánh thức vẻ đẹp tự nhiên trong mỗi khách hàng, để từ đó tạo nên một cuộc sống tràn đầy sự tự tin và niềm vui. KT Beauty Medical Centre không chỉ là nơi thực hiện các liệu trình thẩm mỹ, mà còn là một hành trình khám phá bản thân, nơi mà mỗi khách hàng bước vào với kỳ vọng và bước ra với một phiên bản hoàn thiện hơn của chính mình.
+            </p>
+          </div>
+          <div>
+            <a
+              href="#footer"
+              className="inline-flex items-center gap-3 bg-neutral-950 text-white px-8 py-4 rounded-[12px] font-medium tracking-wide transition-all duration-300 hover:bg-gold hover:text-neutral-950 hover:shadow-lg group"
+            >
+              Thay đổi diện mạo ngay
+              <svg 
+                className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1.5" 
+                viewBox="0 0 30.1 18.2" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M1 9.1h28M21.1 1.1l8 8-8 8" />
+              </svg>
+            </a>
+          </div>
         </div>
 
-        {/* Highlights Grid */}
-        <div className="grid grid-cols-12 gap-8">
-          {highlights.map((h) => (
+        {/* Right Column - Scrolling Cards */}
+        <div className="col-span-1 md:col-span-7 space-y-8 md:space-y-[15vh] md:pb-[15vh]">
+          {cards.map((card, idx) => (
             <div
-              key={h.title}
-              className="col-span-12 md:col-span-6 lg:col-span-3 bg-white/[0.03] backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/5 flex flex-col items-start text-left hover:-translate-y-1.5 transition-all duration-300 hover:border-gold/30 hover:bg-white/[0.05]"
+              key={card.index}
+              ref={(el) => {
+                cardRefs.current[idx] = el;
+              }}
+              style={getCardStyle(idx)}
+              className="relative md:sticky md:top-32 bg-white rounded-[24px] p-6 md:p-10 shadow-[0_15px_45px_rgba(0,0,0,0.035)] border border-gray-100 flex flex-col gap-6 origin-top"
             >
-              <div className="mb-6 bg-gold/15 p-3.5 rounded-full flex items-center justify-center text-gold shadow-inner">
-                {h.icon}
+              {/* Circular overlap number badge */}
+              <div className="absolute -left-4 md:-left-5 top-6 md:top-10 w-10 h-10 rounded-full bg-white border border-gray-200/80 flex items-center justify-center font-serif font-bold text-gray-800 shadow-md text-base z-10">
+                {card.index}
               </div>
-              <h3 className="text-lg font-serif font-bold text-white mb-3 hover:text-gold transition-colors duration-300">
-                {h.title}
-              </h3>
-              <p className="text-sm text-gray-350 leading-relaxed font-light">
-                {h.desc}
-              </p>
+
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold font-serif text-gray-900 mb-3">
+                  {card.title}
+                </h3>
+                <p className="text-sm md:text-base text-gray-600 leading-relaxed font-light">
+                  {card.desc}
+                </p>
+              </div>
+
+              <div className="w-full overflow-hidden rounded-[16px] aspect-[16/10] shadow-inner bg-gray-50 mt-2">
+                <div className="w-full h-full overflow-hidden rounded-[12px]">
+                  <img
+                    src={card.image}
+                    alt={card.title}
+                    className="w-full h-full object-cover hover:scale-103 transition-transform duration-700 ease-out"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );
 };
+

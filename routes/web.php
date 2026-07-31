@@ -174,9 +174,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
 
         $submissionsDaily = Submission::where('created_at', '>=', now()->subDays(6)->startOfDay())
-            ->selectRaw('DATE_FORMAT(created_at, "%d/%m") as date, count(*) as count')
-            ->groupBy('date')
-            ->pluck('count', 'date');
+            ->get()
+            ->groupBy(function ($submission) {
+                return \Carbon\Carbon::parse($submission->created_at)->format('d/m');
+            })
+            ->map(fn ($group) => $group->count());
 
         $chartData = [];
         foreach ($days as $date => $count) {

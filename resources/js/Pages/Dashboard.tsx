@@ -929,6 +929,18 @@ export default function Dashboard({
       policy_chinh_sach_thanh_toan: settings.policy_chinh_sach_thanh_toan || "",
       policy_chinh_sach_hoan_tien: settings.policy_chinh_sach_hoan_tien || "",
       policy_tuyen_bo_mien_tru_trach_nhiem: settings.policy_tuyen_bo_mien_tru_trach_nhiem || "",
+      why_choose_us_1_title: settings.why_choose_us_1_title || "Tiêu chuẩn Úc Châu",
+      why_choose_us_1_desc: settings.why_choose_us_1_desc || "",
+      why_choose_us_1_image: settings.why_choose_us_1_image || "",
+      why_choose_us_2_title: settings.why_choose_us_2_title || "Tư vấn cá nhân hóa",
+      why_choose_us_2_desc: settings.why_choose_us_2_desc || "",
+      why_choose_us_2_image: settings.why_choose_us_2_image || "",
+      why_choose_us_3_title: settings.why_choose_us_3_title || "Chuyên môn cao",
+      why_choose_us_3_desc: settings.why_choose_us_3_desc || "",
+      why_choose_us_3_image: settings.why_choose_us_3_image || "",
+      why_choose_us_4_title: settings.why_choose_us_4_title || "Công nghệ tiên tiến",
+      why_choose_us_4_desc: settings.why_choose_us_4_desc || "",
+      why_choose_us_4_image: settings.why_choose_us_4_image || "",
     },
   });
 
@@ -6102,7 +6114,7 @@ export default function Dashboard({
                   <p className="text-xs text-gray-400 mt-1">Thiết lập trạng thái hoạt động hoặc bảo trì của website hệ thống.</p>
                 </div>
 
-                <form onSubmit={handleSaveSettings} className="max-w-2xl space-y-6">
+                <form onSubmit={handleSaveSettings} className="w-full space-y-6">
                   {/* Status Options */}
                   <div className="bg-gray-50/50 border border-gray-150 rounded-xl p-6 space-y-4">
                     <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-2 block">Trạng thái hệ thống</label>
@@ -6197,7 +6209,7 @@ export default function Dashboard({
             {activeTab === "settings" && (
               <div>
                 <h3 className="text-lg font-bold font-serif text-gray-800 mb-6">Cấu Hình Thông Tin Hệ Thống</h3>
-                <form onSubmit={handleSaveSettings} className="max-w-3xl space-y-6 text-left">
+                <form onSubmit={handleSaveSettings} className="w-full space-y-6 text-left">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Số điện thoại Hotline</label>
@@ -6514,7 +6526,7 @@ export default function Dashboard({
             {activeTab === "intro" && (
               <div>
                 <h3 className="text-lg font-bold font-serif text-gray-800 mb-6">Quản Lý Trang Giới Thiệu & Triết Lý</h3>
-                <form onSubmit={handleSaveSettings} className="max-w-4xl space-y-8 text-left pb-12">
+                <form onSubmit={handleSaveSettings} className="w-full space-y-8 text-left pb-12">
                   
                   {/* PHẦN 1: GIỚI THIỆU CHÍNH */}
                   <div className="bg-white border border-gray-150 rounded-xl p-6 shadow-sm space-y-6">
@@ -6526,7 +6538,7 @@ export default function Dashboard({
                       <div className="lg:col-span-2 space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Nhãn phụ giới thiệu (Eyebrow)</label>
+                            <label className="text-xs md:text-sm font-semibold text-gray-600 mb-2 block">Nhãn phụ giới thiệu (Eyebrow)</label>
                             <input
                               type="text"
                               value={settingsForm.data.settings.intro_subtitle}
@@ -6534,13 +6546,13 @@ export default function Dashboard({
                                 ...settingsForm.data.settings,
                                 intro_subtitle: e.target.value
                               })}
-                              className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none"
                               placeholder="Ví dụ: Về Chúng Tôi"
                             />
                           </div>
                           
                           <div>
-                            <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Tiêu đề chính (Title)</label>
+                            <label className="text-xs md:text-sm font-semibold text-gray-600 mb-2 block">Tiêu đề chính (Title)</label>
                             <input
                               type="text"
                               value={settingsForm.data.settings.intro_title}
@@ -6548,7 +6560,7 @@ export default function Dashboard({
                                 ...settingsForm.data.settings,
                                 intro_title: e.target.value
                               })}
-                              className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none"
                               placeholder="Ví dụ: KT BEAUTY MEDICAL CENTRE"
                             />
                           </div>
@@ -6556,29 +6568,29 @@ export default function Dashboard({
 
                         <div className="space-y-4">
                           <div>
-                            <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Đoạn mô tả giới thiệu 1</label>
+                            <label className="text-xs md:text-sm font-semibold text-gray-600 mb-2 block">Đoạn mô tả giới thiệu 1</label>
                             <textarea
-                              rows={6}
+                              rows={10}
                               value={settingsForm.data.settings.intro_desc_1}
                               onChange={(e) => settingsForm.setData("settings", {
                                 ...settingsForm.data.settings,
                                 intro_desc_1: e.target.value
                               })}
-                              className="w-full border border-gray-200 focus:border-gold px-3 py-2 rounded text-sm focus:outline-none resize-y"
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none resize-y"
                               placeholder="Nhập đoạn văn giới thiệu thứ nhất..."
                             />
                           </div>
                           
                           <div>
-                            <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Đoạn mô tả giới thiệu 2</label>
+                            <label className="text-xs md:text-sm font-semibold text-gray-600 mb-2 block">Đoạn mô tả giới thiệu 2</label>
                             <textarea
-                              rows={6}
+                              rows={10}
                               value={settingsForm.data.settings.intro_desc_2}
                               onChange={(e) => settingsForm.setData("settings", {
                                 ...settingsForm.data.settings,
                                 intro_desc_2: e.target.value
                               })}
-                              className="w-full border border-gray-200 focus:border-gold px-3 py-2 rounded text-sm focus:outline-none resize-y"
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none resize-y"
                               placeholder="Nhập đoạn văn giới thiệu thứ hai..."
                             />
                           </div>
@@ -6599,7 +6611,7 @@ export default function Dashboard({
                             });
                             setMediaSelectorOpen(true);
                           }}
-                          className="border border-dashed border-gray-250 rounded-xl p-3 bg-gray-50 flex flex-col items-center justify-center min-h-[220px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
+                          className="border border-dashed border-gray-250 rounded-xl p-3 bg-gray-50 flex flex-col items-center justify-center aspect-[4/5] w-full text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
                         >
                            {settingsForm.data.settings.intro_image ? (
                             <>
@@ -6728,7 +6740,7 @@ export default function Dashboard({
                     </h4>
                     
                     <div>
-                      <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Tiêu đề câu chuyện</label>
+                      <label className="text-xs md:text-sm font-semibold text-gray-600 mb-2 block">Tiêu đề câu chuyện</label>
                       <input
                         type="text"
                         value={settingsForm.data.settings.intro_story_title || ""}
@@ -6736,36 +6748,36 @@ export default function Dashboard({
                           ...settingsForm.data.settings,
                           intro_story_title: e.target.value
                         })}
-                        className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                        className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none"
                         placeholder="Nhập tiêu đề câu chuyện..."
                       />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Đoạn mô tả câu chuyện 1</label>
+                        <label className="text-xs md:text-sm font-semibold text-gray-600 mb-2 block">Đoạn mô tả câu chuyện 1</label>
                         <textarea
-                          rows={6}
+                          rows={10}
                           value={settingsForm.data.settings.intro_story_desc_1 || ""}
                           onChange={(e) => settingsForm.setData("settings", {
                             ...settingsForm.data.settings,
                             intro_story_desc_1: e.target.value
                           })}
-                          className="w-full border border-gray-200 focus:border-gold px-3 py-2 rounded text-sm focus:outline-none resize-y"
+                          className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none resize-y"
                           placeholder="Nhập nội dung mô tả thứ nhất..."
                         />
                       </div>
                       
                       <div>
-                        <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Đoạn mô tả câu chuyện 2</label>
+                        <label className="text-xs md:text-sm font-semibold text-gray-600 mb-2 block">Đoạn mô tả câu chuyện 2</label>
                         <textarea
-                          rows={6}
+                          rows={10}
                           value={settingsForm.data.settings.intro_story_desc_2 || ""}
                           onChange={(e) => settingsForm.setData("settings", {
                             ...settingsForm.data.settings,
                             intro_story_desc_2: e.target.value
                           })}
-                          className="w-full border border-gray-200 focus:border-gold px-3 py-2 rounded text-sm focus:outline-none resize-y"
+                          className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none resize-y"
                           placeholder="Nhập nội dung mô tả thứ hai..."
                         />
                       </div>
@@ -6773,7 +6785,7 @@ export default function Dashboard({
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-50">
                       <div className="md:col-span-2">
-                        <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Câu trích dẫn (Quote)</label>
+                        <label className="text-xs md:text-sm font-semibold text-gray-600 mb-2 block">Câu trích dẫn (Quote)</label>
                         <input
                           type="text"
                           value={settingsForm.data.settings.intro_story_quote || ""}
@@ -6781,13 +6793,13 @@ export default function Dashboard({
                             ...settingsForm.data.settings,
                             intro_story_quote: e.target.value
                           })}
-                          className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                          className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none"
                           placeholder="Câu nói truyền cảm hứng..."
                         />
                       </div>
                       
                       <div>
-                        <label className="text-xs uppercase font-semibold text-gray-500 mb-1.5 block">Người trích dẫn (Tác giả)</label>
+                        <label className="text-xs md:text-sm font-semibold text-gray-600 mb-2 block">Người trích dẫn (Tác giả)</label>
                         <input
                           type="text"
                           value={settingsForm.data.settings.intro_story_quote_author || ""}
@@ -6795,7 +6807,7 @@ export default function Dashboard({
                             ...settingsForm.data.settings,
                             intro_story_quote_author: e.target.value
                           })}
-                          className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
+                          className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none"
                           placeholder="Ví dụ: CEO Khánh Tôn"
                         />
                       </div>
@@ -6819,7 +6831,7 @@ export default function Dashboard({
                               });
                               setMediaSelectorOpen(true);
                             }}
-                            className="border border-dashed border-gray-250 rounded-xl p-2 bg-gray-55/10 flex flex-col items-center justify-center min-h-[140px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
+                            className="border border-dashed border-gray-250 rounded-xl p-2 bg-gray-55/10 flex flex-col items-center justify-center aspect-video w-full text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
                           >
                             {settingsForm.data.settings.intro_story_image_1 ? (
                               <>
@@ -6870,7 +6882,7 @@ export default function Dashboard({
                               });
                               setMediaSelectorOpen(true);
                             }}
-                            className="border border-dashed border-gray-250 rounded-xl p-2 bg-gray-55/10 flex flex-col items-center justify-center min-h-[140px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
+                            className="border border-dashed border-gray-250 rounded-xl p-2 bg-gray-55/10 flex flex-col items-center justify-center aspect-video w-full text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
                           >
                             {settingsForm.data.settings.intro_story_image_2 ? (
                               <>
@@ -6921,7 +6933,7 @@ export default function Dashboard({
                               });
                               setMediaSelectorOpen(true);
                             }}
-                            className="border border-dashed border-gray-250 rounded-xl p-2 bg-gray-55/10 flex flex-col items-center justify-center min-h-[140px] text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
+                            className="border border-dashed border-gray-250 rounded-xl p-2 bg-gray-55/10 flex flex-col items-center justify-center aspect-video w-full text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
                           >
                             {settingsForm.data.settings.intro_story_image_3 ? (
                               <>
@@ -6960,6 +6972,105 @@ export default function Dashboard({
                         </div>
 
                       </div>
+                    </div>
+                  </div>
+
+                  {/* PHẦN 3: TẠI SAO KHÁCH HÀNG TIN CHỌN */}
+                  <div className="bg-white border border-gray-150 rounded-xl p-6 shadow-sm space-y-6">
+                    <h4 className="text-sm font-bold font-serif text-gold uppercase tracking-wider border-b border-gray-100 pb-3">
+                      3. Tại sao khách hàng tin chọn (Why Choose Us Cards)
+                    </h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {[1, 2, 3, 4].map((num) => {
+                        const titleKey = `why_choose_us_${num}_title`;
+                        const descKey = `why_choose_us_${num}_desc`;
+                        const imgKey = `why_choose_us_${num}_image`;
+                        
+                        return (
+                          <div key={num} className="border border-gray-100 rounded-xl p-4 bg-gray-50/30 space-y-4">
+                            <span className="text-[10px] font-black bg-gold/15 text-gold px-2.5 py-1 rounded-full uppercase">Thẻ {num}</span>
+                            
+                            <div>
+                              <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Tiêu đề thẻ</label>
+                              <input
+                                type="text"
+                                value={(settingsForm.data.settings as any)[titleKey] || ""}
+                                onChange={(e) => settingsForm.setData("settings", {
+                                  ...settingsForm.data.settings,
+                                  [titleKey]: e.target.value
+                                })}
+                                className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none bg-white"
+                                placeholder={`Tiêu đề thẻ ${num}...`}
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Mô tả ngắn</label>
+                              <textarea
+                                rows={6}
+                                value={(settingsForm.data.settings as any)[descKey] || ""}
+                                onChange={(e) => settingsForm.setData("settings", {
+                                  ...settingsForm.data.settings,
+                                  [descKey]: e.target.value
+                                })}
+                                className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none bg-white resize-y"
+                                placeholder={`Mô tả thẻ ${num}...`}
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Hình ảnh đại diện</label>
+                              <div
+                                onClick={() => {
+                                  setOnMediaSelect(() => (path: string) => {
+                                    settingsForm.setData("settings", {
+                                      ...settingsForm.data.settings,
+                                      [imgKey]: path
+                                    });
+                                  });
+                                  setMediaSelectorOpen(true);
+                                }}
+                                className="border border-dashed border-gray-250 rounded-lg p-2 bg-white flex flex-col items-center justify-center aspect-[16/10] w-full text-center relative overflow-hidden group cursor-pointer hover:border-gold/50 transition-colors"
+                              >
+                                {(settingsForm.data.settings as any)[imgKey] ? (
+                                  <>
+                                    <div className="absolute inset-0 w-full h-full">
+                                      <img
+                                        src={(settingsForm.data.settings as any)[imgKey]}
+                                        className="object-cover w-full h-full"
+                                        alt={`Card ${num}`}
+                                      />
+                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                        <span className="text-[8px] text-white font-bold bg-black/60 px-1.5 py-0.5 rounded">Thay đổi</span>
+                                      </div>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        settingsForm.setData("settings", {
+                                          ...settingsForm.data.settings,
+                                          [imgKey]: ""
+                                        });
+                                      }}
+                                      className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 text-white rounded shadow transition-all z-20 hover:scale-105 duration-200"
+                                      title="Xóa ảnh"
+                                    >
+                                      <Trash size={10} />
+                                    </button>
+                                  </>
+                                ) : (
+                                  <div className="text-gray-400 flex flex-col items-center gap-1">
+                                    <ImageIcon size={18} className="stroke-1" />
+                                    <span className="text-[9px]">Chọn ảnh</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -7006,7 +7117,7 @@ export default function Dashboard({
                   ))}
                 </div>
 
-                <form onSubmit={handleSaveSettings} className="max-w-4xl space-y-8 text-left pb-12">
+                <form onSubmit={handleSaveSettings} className="w-full space-y-8 text-left pb-12">
                   <div className="bg-white border border-gray-150 rounded-xl p-6 shadow-sm space-y-6">
                     {activePolicyTab === "dieu-khoan" && (
                       <div className="space-y-4">
