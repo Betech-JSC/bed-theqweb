@@ -1819,246 +1819,270 @@ export default function Dashboard({
           </div>
 
           {/* Nav Links */}
-          <nav className="flex-grow p-4 space-y-1.5 overflow-y-auto">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "overview"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <LayoutDashboard size={16} />
-              <span>Tổng quan hệ thống</span>
-            </button>
+          <nav className="flex-grow p-4 space-y-4 overflow-y-auto">
+            {/* HỆ THỐNG / DASHBOARD */}
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Hệ thống</span>
+              <button
+                onClick={() => setActiveTab("overview")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "overview"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <LayoutDashboard size={16} />
+                <span>Tổng quan hệ thống</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab("submissions")}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "submissions"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Phone size={16} />
-                <span>Đăng ký tư vấn</span>
-              </div>
-              {submissions.length > 0 && (
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                  activeTab === "submissions" ? "bg-white text-gold" : "bg-gold/15 text-gold"
-                }`}>
-                  {submissions.length}
-                </span>
-              )}
-            </button>
+              <button
+                onClick={() => setActiveTab("settings")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "settings"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <Settings size={16} />
+                <span>Cấu hình chung</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab("bookings")}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "bookings"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <div className="flex items-center gap-3">
+              <button
+                onClick={() => setActiveTab("media")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "media"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <ImageIcon size={16} />
+                <span>Thư viện Tệp tin</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("configs")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "configs"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <Sliders size={16} />
+                <span>Configs nâng cao</span>
+              </button>
+            </div>
+
+            {/* YÊU CẦU & LỊCH HẸN */}
+            <div className="space-y-1 pt-3 border-t border-white/5">
+              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Yêu cầu & Lịch hẹn</span>
+              <button
+                onClick={() => setActiveTab("submissions")}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "submissions"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Phone size={16} />
+                  <span>Đăng ký tư vấn</span>
+                </div>
+                {submissions.length > 0 && (
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                    activeTab === "submissions" ? "bg-white text-gold" : "bg-gold/15 text-gold"
+                  }`}>
+                    {submissions.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab("bookings")}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "bookings"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Calendar size={16} />
+                  <span>Lịch hẹn trực tuyến</span>
+                </div>
+                {submissions.filter(sub => sub.booking_date || sub.booking_time).length > 0 && (
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                    activeTab === "bookings" ? "bg-white text-gold" : "bg-gold/15 text-gold"
+                  }`}>
+                    {submissions.filter(sub => sub.booking_date || sub.booking_time).length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* QUẢN LÝ DỊCH VỤ */}
+            <div className="space-y-1 pt-3 border-t border-white/5">
+              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Quản lý Dịch vụ</span>
+              <button
+                onClick={() => {
+                  setActiveTab("services");
+                  setServiceViewMode("list");
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "services"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <Sparkles size={16} />
+                <span>Danh sách Dịch vụ</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab("serviceCategories");
+                  setServiceCategoryViewMode("list");
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "serviceCategories"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <List size={16} />
+                <span>Danh mục dịch vụ</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("reviews")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "reviews"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <MessageSquare size={16} />
+                <span>Quản lý đánh giá</span>
+              </button>
+            </div>
+
+            {/* BÀI VIẾT TIN TỨC */}
+            <div className="space-y-1 pt-3 border-t border-white/5">
+              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Tin tức & Bài viết</span>
+              <button
+                onClick={() => setActiveTab("articles")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "articles"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <BookOpen size={16} />
+                <span>Bài viết tin tức</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("authors")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "authors"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <Users size={16} />
+                <span>Tác giả bài viết</span>
+              </button>
+            </div>
+
+            {/* ĐỘI NGŨ CHUYÊN GIA */}
+            <div className="space-y-1 pt-3 border-t border-white/5">
+              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Bác sĩ & Chuyên môn</span>
+              <button
+                onClick={() => setActiveTab("doctors")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "doctors"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <Users size={16} />
+                <span>Đội ngũ bác sĩ</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("shifts")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "shifts"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
                 <Calendar size={16} />
-                <span>Lịch hẹn trực tuyến</span>
-              </div>
-              {submissions.filter(sub => sub.booking_date || sub.booking_time).length > 0 && (
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                  activeTab === "bookings" ? "bg-white text-gold" : "bg-gold/15 text-gold"
-                }`}>
-                  {submissions.filter(sub => sub.booking_date || sub.booking_time).length}
-                </span>
-              )}
-            </button>
+                <span>Lịch trực bác sĩ</span>
+              </button>
+            </div>
 
-            <button
-              onClick={() => setActiveTab("articles")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "articles"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <BookOpen size={16} />
-              <span>Bài viết tin tức</span>
-            </button>
+            {/* GIAO DIỆN & NỘI DUNG */}
+            <div className="space-y-1 pt-3 border-t border-white/5">
+              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Nội dung website</span>
+              <button
+                onClick={() => setActiveTab("banners")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "banners"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <Sliders size={16} />
+                <span>Quản lý banners</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab("authors")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "authors"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <Users size={16} />
-              <span>Tác giả bài viết</span>
-            </button>
+              <button
+                onClick={() => setActiveTab("realResults")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "realResults"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <CheckCircle size={16} />
+                <span>Kết quả thực tế</span>
+              </button>
 
-            <button
-              onClick={() => {
-                setActiveTab("services");
-                setServiceViewMode("list");
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "services"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <Sparkles size={16} />
-              <span>Dịch vụ</span>
-            </button>
+              <button
+                onClick={() => setActiveTab("intro")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "intro"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <Info size={16} />
+                <span>Quản lý giới thiệu</span>
+              </button>
 
-            <button
-              onClick={() => {
-                setActiveTab("serviceCategories");
-                setServiceCategoryViewMode("list");
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "serviceCategories"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <List size={16} />
-              <span>Danh mục dịch vụ</span>
-            </button>
+              <button
+                onClick={() => setActiveTab("faqs")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "faqs"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <HelpCircle size={16} />
+                <span>Hỏi đáp FAQ</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab("reviews")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "reviews"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <MessageSquare size={16} />
-              <span>Quản lý đánh giá</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("banners")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "banners"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <Sliders size={16} />
-              <span>Quản lý banners</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("doctors")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "doctors"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <Users size={16} />
-              <span>Đội ngũ bác sĩ</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("shifts")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "shifts"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <Calendar size={16} />
-              <span>Lịch trực bác sĩ</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("faqs")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "faqs"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <HelpCircle size={16} />
-              <span>Hỏi đáp FAQ</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("realResults")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "realResults"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <CheckCircle size={16} />
-              <span>Kết quả thực tế</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("intro")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "intro"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <Info size={16} />
-              <span>Quản lý giới thiệu</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("policies")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "policies"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <FileText size={16} />
-              <span>Quản lý chính sách</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("settings")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "settings"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <Settings size={16} />
-              <span>Cấu hình hệ thống</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("media")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "media"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <ImageIcon size={16} />
-              <span>Quản lý Tệp</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("configs")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                activeTab === "configs"
-                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                  : "hover:bg-white/5 hover:text-white text-gray-400"
-              }`}
-            >
-              <Sliders size={16} />
-              <span>Configs</span>
-            </button>
+              <button
+                onClick={() => setActiveTab("policies")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "policies"
+                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                    : "hover:bg-white/5 hover:text-white text-gray-400"
+                }`}
+              >
+                <FileText size={16} />
+                <span>Quản lý chính sách</span>
+              </button>
+            </div>
           </nav>
 
           {/* User Profile Footer */}
