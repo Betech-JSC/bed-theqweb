@@ -153,7 +153,7 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
   return (
     <section
       ref={sectionRef}
-      className="bg-black text-white py-14 md:py-18 font-sans overflow-hidden border-b border-neutral-900"
+      className="bg-[#faf8f5] text-gray-800 py-14 md:py-18 font-sans overflow-hidden border-b border-gray-150/40"
     >
       {/* Title block */}
       <div className="max-w-7xl mx-auto px-4 md:px-[10%] mb-10">
@@ -161,7 +161,7 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
           <span className="text-gold uppercase tracking-widest text-[10px] md:text-xs font-semibold block">
             {eyebrow || "KT BEAUTY MEDICAL CENTRE"}
           </span>
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-serif font-bold text-white tracking-wide">
+          <h2 className="text-2xl md:text-4xl lg:text-5xl font-serif font-bold text-dark-bg tracking-wide">
             {title || "Kiến tạo - Vẻ đẹp độc bản"}
           </h2>
         </div>
@@ -179,7 +179,7 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
             {row1Cards.map((card, index) => (
               <div
                 key={`row1-${index}`}
-                className="min-w-[210px] w-[210px] md:min-w-[290px] md:w-[290px] aspect-[3/4] relative rounded-[24px] overflow-hidden border border-white/10 shadow-2xl group transition-all duration-300 hover:border-gold/30 shrink-0"
+                className="min-w-[210px] w-[210px] md:min-w-[290px] md:w-[290px] aspect-[3/4] relative rounded-[24px] overflow-hidden border border-gold/15 shadow-xl group transition-all duration-300 hover:border-gold/50 hover:shadow-2xl hover:shadow-gold/5 shrink-0"
               >
                 {/* Card Background Image */}
                 <div className="absolute inset-0 z-0">
@@ -189,8 +189,8 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
                     fill
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-103"
                   />
-                  <div className="absolute inset-2 md:inset-2.5 border border-white/10 pointer-events-none rounded-[18px]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                  <div className="absolute inset-2 md:inset-2.5 border border-white/20 pointer-events-none rounded-[18px]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 </div>
               </div>
             ))}
@@ -206,7 +206,7 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
             {row2Cards.map((card, index) => (
               <div
                 key={`row2-${index}`}
-                className="min-w-[210px] w-[210px] md:min-w-[290px] md:w-[290px] aspect-[3/4] relative rounded-[24px] overflow-hidden border border-white/10 shadow-2xl group transition-all duration-300 hover:border-gold/30 shrink-0"
+                className="min-w-[210px] w-[210px] md:min-w-[290px] md:w-[290px] aspect-[3/4] relative rounded-[24px] overflow-hidden border border-gold/15 shadow-xl group transition-all duration-300 hover:border-gold/50 hover:shadow-2xl hover:shadow-gold/5 shrink-0"
               >
                 {/* Card Background Image */}
                 <div className="absolute inset-0 z-0">
@@ -216,8 +216,8 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
                     fill
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-103"
                   />
-                  <div className="absolute inset-2 md:inset-2.5 border border-white/10 pointer-events-none rounded-[18px]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                  <div className="absolute inset-2 md:inset-2.5 border border-white/20 pointer-events-none rounded-[18px]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 </div>
               </div>
             ))}
