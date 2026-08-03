@@ -92,7 +92,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
         <Introduction />
 
         {/* Story Section */}
-        <section className="py-24 bg-white px-4 md:px-[10%] text-left font-sans border-t border-gray-100">
+        <section className="py-16 md:py-20 bg-white px-4 md:px-[10%] text-left font-sans border-t border-gray-100">
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-6 space-y-6">
               <span className="text-gold uppercase tracking-widest text-xs font-semibold block">
@@ -143,9 +143,9 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
         </section>
 
         {/* Timeline Section */}
-        <section className="py-24 bg-white px-4 md:px-[10%] text-left font-sans border-b border-gray-150/40">
+        <section className="py-16 md:py-20 bg-white px-4 md:px-[10%] text-left font-sans border-b border-gray-150/40">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-2xl mx-auto mb-20">
+            <div className="text-center max-w-2xl mx-auto mb-14">
               <span className="text-gold uppercase tracking-widest text-xs font-semibold mb-2 block">
                 Cột Mốc Phát Triển
               </span>
@@ -238,9 +238,9 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
         <WhyChooseUs />
 
         {/* Facilities Section */}
-        <section className="py-24 bg-[#faf8f5] px-4 md:px-[10%] text-left font-sans border-b border-gray-150/40">
+        <section className="py-16 md:py-20 bg-[#faf8f5] px-4 md:px-[10%] text-left font-sans border-b border-gray-150/40">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center max-w-2xl mx-auto mb-16">
+            <div className="text-center max-w-2xl mx-auto mb-12">
               <span className="text-gold uppercase tracking-widest text-xs font-semibold mb-2 block">
                 Không Gian Trị Liệu
               </span>
@@ -318,7 +318,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
         {/* Dynamic Doctors Carousel Section */}
         {doctors && doctors.length > 0 && (
           <section className="bg-white border-t border-gray-100">
-            <div className="pt-24 text-center max-w-2xl mx-auto -mb-16">
+            <div className="pt-16 md:pt-20 text-center max-w-2xl mx-auto -mb-12">
               <span className="text-gold uppercase tracking-widest text-xs font-semibold mb-2 block">
                 {settings.doctors_intro_eyebrow || "ĐỘI NGŨ CHUYÊN GIA"}
               </span>

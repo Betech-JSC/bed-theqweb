@@ -62,8 +62,8 @@ export const Introduction: React.FC = () => {
   ];
 
   return (
-    <section id="introduction" className="bg-white py-24 px-4 md:px-[10%] font-sans overflow-hidden">
-      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-12 items-center mb-20">
+    <section id="introduction" className="bg-white py-16 md:py-20 px-4 md:px-[10%] font-sans overflow-hidden">
+      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-12 items-center mb-12">
         {/* Left Column: Image with decoration (5/12 width) */}
         <div className="col-span-12 lg:col-span-5 relative w-full aspect-square md:aspect-[4/3] lg:aspect-square max-w-lg mx-auto p-3">
           <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-gray-200/20">
@@ -129,7 +129,7 @@ export const Introduction: React.FC = () => {
       </div>
 
       {/* Integrated Core Philosophy / 3 Pillars */}
-      <div className="max-w-7xl mx-auto border-t border-gray-200/60 pt-16">
+      <div className="max-w-7xl mx-auto border-t border-gray-200/60 pt-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {pillars.map((p) => (
             <div

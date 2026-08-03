@@ -55,11 +55,13 @@ export const HighlightServices: React.FC<HighlightServicesProps> = ({ services =
     return Math.max(2, evenN);
   };
 
-  const displayItems = Array(getMultiplier(items.length)).fill(items).flat();  return (
-    <section id="services" className="bg-white py-20 font-sans overflow-hidden">
+  const displayItems = Array(getMultiplier(items.length)).fill(items).flat();
+
+  return (
+    <section id="services" className="bg-white py-16 font-sans overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-[10%]">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-gold uppercase tracking-widest text-xs md:text-sm font-semibold mb-2 block">
             Dịch Vụ Nổi Bật
           </span>

@@ -123,7 +123,7 @@ export default function DichVu({ services = [], categoriesList = [] }: DichVuPro
         </section>
 
         {/* Services Grid */}
-        <section className="py-20 px-4 md:px-[10%]">
+        <section className="py-16 px-4 md:px-[10%]">
           <div className="max-w-7xl mx-auto">
             {filteredServices.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">

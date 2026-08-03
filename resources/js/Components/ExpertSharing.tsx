@@ -22,10 +22,10 @@ export const ExpertSharing: React.FC<ExpertSharingProps> = ({ articles = [] }) =
   if (articles.length === 0) return null;
 
   return (
-    <section className="bg-white py-20 px-4 md:px-[10%] font-sans">
+    <section className="bg-white py-16 px-4 md:px-[10%] font-sans">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-gold uppercase tracking-widest text-xs md:text-sm font-semibold mb-2 block">
             Kiến Thức Làm Đẹp
           </span>

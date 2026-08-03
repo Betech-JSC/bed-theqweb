@@ -116,10 +116,10 @@ export default function KetQuaPage({ faqs = [], realResults = [] }: KetQuaProps)
         </section>
 
         {/* Results Showroom */}
-        <section className="py-20 px-4 md:px-[10%]">
+        <section className="py-16 px-4 md:px-[10%] border-b border-gray-50">
           <div className="max-w-7xl mx-auto">
             {/* Title */}
-            <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
+            <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
               <div className="text-sm md:text-base text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
                 Tại KT Beauty Medical Centre, mỗi kết quả là sự kết hợp giữa chuyên môn, sự tinh chỉnh đúng mức và cam kết dài hạn, nhằm mang lại vẻ đẹp tự nhiên và bền vững.
               </div>

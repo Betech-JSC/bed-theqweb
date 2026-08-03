@@ -101,10 +101,10 @@ export default function DaLieuTreHoaPage({ doctors = [], services = [] }: DaLieu
         </section>
 
         {/* Catalog List section */}
-        <section className="bg-white py-20 px-4 md:px-[10%] border-b border-gray-100">
+        <section className="bg-white py-16 px-4 md:px-[10%] border-b border-gray-100">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="text-center max-w-3xl mx-auto mb-10">
               <span className="text-gold uppercase tracking-widest text-xs md:text-sm font-semibold mb-2 block">
                 Giải Pháp Thẩm Mỹ Da
               </span>
@@ -179,8 +179,8 @@ export default function DaLieuTreHoaPage({ doctors = [], services = [] }: DaLieu
 
             {/* Dynamic Services List from Database */}
             {services.length > 0 && (
-              <div className="mt-20 pt-20 border-t border-gray-100">
-                <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="mt-16 pt-16 border-t border-gray-100">
+                <div className="text-center max-w-3xl mx-auto mb-10">
                   <span className="text-gold uppercase tracking-widest text-xs md:text-sm font-semibold mb-2 block">
                     Danh Sách Chi Tiết
                   </span>
