@@ -45,6 +45,7 @@ class HandleInertiaRequests extends Middleware
             'authors' => \App\Models\Author::orderBy('name')->get(),
             'doctor_shifts' => $request->user() ? \App\Models\DoctorShift::with('doctor')->get() : [],
             'service_reviews' => $request->user() ? \App\Models\ServiceReview::with('service')->latest()->get() : [],
+            'menu_categories' => \App\Models\ServiceCategory::orderBy('order')->with('services')->get(),
         ];
     }
 }

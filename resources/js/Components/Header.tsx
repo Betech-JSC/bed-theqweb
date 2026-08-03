@@ -16,6 +16,7 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const { url, props } = usePage();
+  const menuCategories = (props.menu_categories as any[]) || [];
   const settings = (props.settings as Record<string, string>) || {};
   const hotline = settings.site_hotline || "19005006";
 
@@ -36,11 +37,10 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
     {
       name: "Dịch vụ",
       href: "/dich-vu",
-      subLinks: [
-        { name: "Phẫu thuật thẩm mỹ", href: "/phau-thuat-tham-my" },
-        { name: "Cấy tóc y khoa", href: "/cay-toc-y-khoa" },
-        { name: "Da liễu & Trẻ hóa", href: "/da-lieu-tre-hoa" },
-      ],
+      subLinks: menuCategories.map((cat) => ({
+        name: cat.name,
+        href: `/${cat.slug}`,
+      })),
     },
     { name: "Kết quả", href: "/ket-qua" },
     { name: "Tin Tức", href: "/tin-tuc" },
@@ -105,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
           <nav className="hidden lg:flex items-center gap-8 xl:gap-10 font-sans font-semibold text-sm xl:text-base tracking-wide h-full">
             {navLinks.map((link) => {
               if (link.subLinks) {
-                const isServicesActive = url.startsWith("/phau-thuat-tham-my") || url.startsWith("/da-lieu-tre-hoa") || url.startsWith("/cay-toc-y-khoa") || url === "/dich-vu";
+                const isServicesActive = url === "/dich-vu" || menuCategories.some((cat) => url.startsWith(`/${cat.slug}`));
                 return (
                   <div key={link.name} className="group static flex items-center">
                     <Link
@@ -128,77 +128,22 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
 
                     {/* Mega Menu Dropdown */}
                     <div className="absolute top-full left-0 w-full bg-[#fcfcfc] border-t border-gray-150 shadow-xl py-12 px-6 md:px-[10%] grid grid-cols-1 md:grid-cols-4 gap-8 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 text-left before:absolute before:bottom-full before:left-0 before:w-full before:h-10 before:content-['']">
-                      {/* Col 1: Phẫu thuật thẩm mỹ */}
-                      <div>
-                        <Link href="/phau-thuat-tham-my" className="font-serif font-bold text-gray-800 text-base hover:text-gold block mb-4 border-b border-gray-100 pb-2">
-                          Phẫu thuật thẩm mỹ
-                        </Link>
-                        <ul className="space-y-3 text-xs md:text-sm text-gray-500 font-light">
-                          <li>
-                            <Link href="/dich-vu/cat-mi-double-eyeluxe" className="hover:text-gold flex items-center gap-1.5 transition-colors">
-                              <span className="text-gold/60">—</span> Phẫu Thuật Tạo Hình Mắt
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/dich-vu/nang-mui-cau-truc-gold-line" className="hover:text-gold flex items-center gap-1.5 transition-colors">
-                              <span className="text-gold/60">—</span> Phẫu Thuật Tạo Hình Mũi
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/dich-vu/tiem-fillerbotox-tao-hinh" className="hover:text-gold flex items-center gap-1.5 transition-colors">
-                              <span className="text-gold/60">—</span> Thẩm mỹ vùng mặt
-                            </Link>
-                          </li>
-                        </ul>
-                      </div>
-
-                      {/* Col 2: Cấy tóc y khoa */}
-                      <div>
-                        <Link href="/cay-toc-y-khoa" className="font-serif font-bold text-gray-800 text-base hover:text-gold block mb-4 border-b border-gray-100 pb-2">
-                          Cấy tóc y khoa
-                        </Link>
-                        <ul className="space-y-3 text-xs md:text-sm text-gray-500 font-light">
-                          <li>
-                            <Link href="/cay-toc-y-khoa" className="hover:text-gold flex items-center gap-1.5 transition-colors">
-                              <span className="text-gold/60">—</span> Cấy tóc tự thân DHI
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/cay-toc-y-khoa" className="hover:text-gold flex items-center gap-1.5 transition-colors">
-                              <span className="text-gold/60">—</span> Cấy râu, cấy lông mày
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/cay-toc-y-khoa" className="hover:text-gold flex items-center gap-1.5 transition-colors">
-                              <span className="text-gold/60">—</span> Điều trị rụng tóc hói đầu
-                            </Link>
-                          </li>
-                        </ul>
-                      </div>
-
-                      {/* Col 3: Da liễu & Trẻ hóa */}
-                      <div>
-                        <Link href="/da-lieu-tre-hoa" className="font-serif font-bold text-gray-800 text-base hover:text-gold block mb-4 border-b border-gray-100 pb-2">
-                          Da liễu & Trẻ hóa
-                        </Link>
-                        <ul className="space-y-3 text-xs md:text-sm text-gray-500 font-light">
-                          <li>
-                            <Link href="/dich-vu/cay-tinh-chat-meso-cang-bong" className="hover:text-gold flex items-center gap-1.5 transition-colors">
-                              <span className="text-gold/60">—</span> Cấy tinh chất Meso căng bóng
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/dich-vu/nang-co-tre-hoa-ultherapy" className="hover:text-gold flex items-center gap-1.5 transition-colors">
-                              <span className="text-gold/60">—</span> Nâng cơ trẻ hóa Ultherapy
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href="/dich-vu/dieu-tri-nam-laser-cong-nghe-cao" className="hover:text-gold flex items-center gap-1.5 transition-colors">
-                              <span className="text-gold/60">—</span> Điều trị nám Laser công nghệ cao
-                            </Link>
-                          </li>
-                        </ul>
-                      </div>
+                      {menuCategories.slice(0, 3).map((category: any) => (
+                        <div key={category.id}>
+                          <Link href={`/${category.slug}`} className="font-serif font-bold text-gray-800 text-base hover:text-gold block mb-4 border-b border-gray-100 pb-2">
+                            {category.name}
+                          </Link>
+                          <ul className="space-y-3 text-xs md:text-sm text-gray-500 font-light">
+                            {category.services && category.services.map((sub: any) => (
+                              <li key={sub.id}>
+                                <Link href={`/dich-vu/${sub.slug}`} className="hover:text-gold flex items-center gap-1.5 transition-colors">
+                                  <span className="text-gold/60">—</span> {sub.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
 
                       {/* Col 4: Cam kết y khoa */}
                       <div className="bg-gray-50 p-6 rounded-lg border border-gray-200/50">

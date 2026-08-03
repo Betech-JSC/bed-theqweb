@@ -9,6 +9,7 @@ class Service extends Model
     protected $fillable = [
         'name',
         'category',
+        'service_category_id',
         'price',
         'description',
         'image',
@@ -41,5 +42,21 @@ class Service extends Model
     public function serviceReviews()
     {
         return $this->hasMany(ServiceReview::class);
+    }
+
+    /**
+     * Get the service category.
+     */
+    public function serviceCategory()
+    {
+        return $this->belongsTo(ServiceCategory::class);
+    }
+
+    /**
+     * Accessor for category string attribute for backward compatibility.
+     */
+    public function getCategoryAttribute($value)
+    {
+        return $this->serviceCategory ? $this->serviceCategory->name : $value;
     }
 }

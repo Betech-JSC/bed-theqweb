@@ -21,16 +21,15 @@ interface ServiceItem {
 
 interface DichVuProps {
   services: ServiceItem[];
+  categoriesList?: string[];
 }
 
-export default function DichVu({ services = [] }: DichVuProps) {
+export default function DichVu({ services = [], categoriesList = [] }: DichVuProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("Tất cả");
 
   const categories = [
     "Tất cả",
-    "Phẫu thuật thẩm mỹ",
-    "Cấy tóc y khoa",
-    "Da liễu & Trẻ hóa"
+    ...categoriesList
   ];
 
   useEffect(() => {

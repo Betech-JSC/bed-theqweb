@@ -170,7 +170,8 @@ class ContentController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
+            'service_category_id' => 'nullable|exists:service_categories,id',
+            'category' => 'nullable|string|max:255',
             'price' => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'image_file' => 'nullable|image|max:2048',
@@ -203,10 +204,19 @@ class ContentController extends Controller
 
         $slug = $this->uniqueSlug(Service::class, $validated['slug'] ?? $validated['name']);
 
+        $categoryName = '';
+        if (!empty($validated['service_category_id'])) {
+            $cat = \App\Models\ServiceCategory::find($validated['service_category_id']);
+            if ($cat) {
+                $categoryName = $cat->name;
+            }
+        }
+
         Service::create([
             'name' => $validated['name'],
             'slug' => $slug,
-            'category' => $validated['category'],
+            'service_category_id' => $validated['service_category_id'] ?? null,
+            'category' => $categoryName,
             'price' => $validated['price'] ?? 'Liên hệ',
             'description' => $validated['description'],
             'image' => $imagePath,
@@ -232,7 +242,8 @@ class ContentController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
+            'service_category_id' => 'nullable|exists:service_categories,id',
+            'category' => 'nullable|string|max:255',
             'price' => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'image_file' => 'nullable|image|max:2048',
@@ -255,10 +266,19 @@ class ContentController extends Controller
 
         $slug = $this->uniqueSlug(Service::class, $validated['slug'] ?? $validated['name'], $service->id);
 
+        $categoryName = '';
+        if (!empty($validated['service_category_id'])) {
+            $cat = \App\Models\ServiceCategory::find($validated['service_category_id']);
+            if ($cat) {
+                $categoryName = $cat->name;
+            }
+        }
+
         $data = [
             'name' => $validated['name'],
             'slug' => $slug,
-            'category' => $validated['category'],
+            'service_category_id' => $validated['service_category_id'] ?? null,
+            'category' => $categoryName,
             'price' => $validated['price'] ?? 'Liên hệ',
             'description' => $validated['description'],
             'banner_image' => $validated['banner_image'] ?? null,
@@ -890,5 +910,69 @@ class ContentController extends Controller
     {
         $review->delete();
         return back()->with('success', 'Xóa đánh giá thành công.');
+    }
+
+    /**
+     * Store a new service category.
+     */
+    public function storeServiceCategory(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'order' => 'nullable|integer',
+        ]);
+
+        $slug = $this->uniqueSlug(\App\Models\ServiceCategory::class, $validated['slug'] ?? $validated['name']);
+
+        \App\Models\ServiceCategory::create([
+            'name' => $validated['name'],
+            'slug' => $slug,
+            'order' => $validated['order'] ?? 0,
+        ]);
+
+        return back()->with('success', 'Thêm danh mục dịch vụ thành công.');
+    }
+
+    /**
+     * Update an existing service category.
+     */
+    public function updateServiceCategory(Request $request, \App\Models\ServiceCategory $category)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'order' => 'nullable|integer',
+        ]);
+
+        $slug = $this->uniqueSlug(\App\Models\ServiceCategory::class, $validated['slug'] ?? $validated['name'], $category->id);
+
+        $category->update([
+            'name' => $validated['name'],
+            'slug' => $slug,
+            'order' => $validated['order'] ?? 0,
+        ]);
+
+        // Automatically sync existing services category string name as well
+        \App\Models\Service::where('service_category_id', $category->id)
+            ->update(['category' => $validated['name']]);
+
+        return back()->with('success', 'Cập nhật danh mục dịch vụ thành công.');
+    }
+
+    /**
+     * Delete a service category.
+     */
+    public function destroyServiceCategory(\App\Models\ServiceCategory $category)
+    {
+        // Nullify relation and empty legacy string category
+        \App\Models\Service::where('service_category_id', $category->id)
+            ->update([
+                'service_category_id' => null,
+                'category' => ''
+            ]);
+
+        $category->delete();
+        return back()->with('success', 'Xóa danh mục dịch vụ thành công.');
     }
 }

@@ -61,14 +61,14 @@ export const ExpertSharing: React.FC<ExpertSharingProps> = ({ articles = [] }) =
                   Ngày đăng: {art.published_date}
                 </span>
                 <h3 className="text-lg font-serif font-bold text-dark-bg leading-snug mb-3 hover:text-gold transition-colors duration-200 line-clamp-2">
-                  <Link href="/tin-tuc">{art.title}</Link>
+                  <Link href={art.slug ? `/tin-tuc/${art.slug}` : "/tin-tuc"}>{art.title}</Link>
                 </h3>
                 <p className="text-sm text-gray-500 font-light leading-relaxed mb-6 line-clamp-3">
                   {art.description}
                 </p>
                 <div className="mt-auto">
                   <Link
-                    href="/tin-tuc"
+                    href={art.slug ? `/tin-tuc/${art.slug}` : "/tin-tuc"}
                     className="text-gold hover:text-gold-dark font-bold text-xs uppercase tracking-wider flex items-center gap-1.5"
                   >
                     Đọc tiếp

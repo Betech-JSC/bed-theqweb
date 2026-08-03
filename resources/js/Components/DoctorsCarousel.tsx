@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "@/Components/Image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { usePage } from "@inertiajs/react";
 
 interface Doctor {
   id: number;
@@ -15,9 +16,12 @@ interface Doctor {
 
 interface DoctorsCarouselProps {
   doctors?: Doctor[];
+  hideHeader?: boolean;
 }
 
-export const DoctorsCarousel: React.FC<DoctorsCarouselProps> = ({ doctors = [] }) => {
+export const DoctorsCarousel: React.FC<DoctorsCarouselProps> = ({ doctors = [], hideHeader = false }) => {
+  const { props } = usePage();
+  const settings = (props.settings as Record<string, string>) || {};
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const defaultDoctors = [
@@ -86,18 +90,20 @@ export const DoctorsCarousel: React.FC<DoctorsCarouselProps> = ({ doctors = [] }
     <section className="bg-white py-16 px-4 md:px-[10%] font-sans">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-gold uppercase tracking-widest text-xs md:text-sm font-semibold mb-2 block">
-            Đội Ngũ Bác Sĩ
-          </span>
-          <h2 className="text-2xl md:text-4xl font-bold font-serif text-dark-bg">
-            Đội Ngũ Chuyên Gia Làm Đẹp
-          </h2>
-          <div className="w-12 h-[2px] bg-gold mx-auto mt-4 mb-6" />
-          <p className="text-sm md:text-base text-gray-500 font-light">
-            Các chuyên gia đầu ngành có nhiều năm kinh nghiệm, học tập và tu nghiệp tại nước ngoài. Trực tiếp thực hiện 100% ca thăm khám & điều trị.
-          </p>
-        </div>
+        {!hideHeader && (
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-gold uppercase tracking-widest text-xs md:text-sm font-semibold mb-2 block">
+              {settings.doctors_carousel_eyebrow || "ĐỘI NGŨ BÁC SĨ"}
+            </span>
+            <h2 className="text-2xl md:text-4xl font-bold font-serif text-dark-bg">
+              {settings.doctors_carousel_title || "Đội Ngũ Chuyên Gia Làm Đẹp"}
+            </h2>
+            <div className="w-12 h-[2px] bg-gold mx-auto mt-4 mb-6" />
+            <p className="text-sm md:text-base text-gray-500 font-light">
+              Các chuyên gia đầu ngành có nhiều năm kinh nghiệm, học tập và tu nghiệp tại nước ngoài. Trực tiếp thực hiện 100% ca thăm khám & điều trị.
+            </p>
+          </div>
+        )}
 
         {/* Carousel Slider */}
         <div

@@ -140,12 +140,28 @@ export default function PhauThuatThamMyPage({ doctors = [], services = [] }: Pha
 
                   {/* Subfeatures */}
                   <ul className="space-y-2 mb-8 border-t border-gray-100 pt-4 flex-grow text-xs md:text-sm text-gray-600 font-light">
-                    {c.features.map((f, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-                        <span>{f}</span>
-                      </li>
-                    ))}
+                    {c.features.map((f, i) => {
+                      const matchedService = services.find(s => 
+                        s.name.toLowerCase().includes(f.toLowerCase()) || 
+                        f.toLowerCase().includes(s.name.toLowerCase())
+                      );
+                      if (matchedService) {
+                        return (
+                          <li key={i} className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                            <Link href={`/dich-vu/${matchedService.slug}`} className="hover:text-gold hover:underline transition-colors font-medium">
+                              {f}
+                            </Link>
+                          </li>
+                        );
+                      }
+                      return (
+                        <li key={i} className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                          <span>{f}</span>
+                        </li>
+                      );
+                    })}
                   </ul>
 
                   {/* Booking CTA */}

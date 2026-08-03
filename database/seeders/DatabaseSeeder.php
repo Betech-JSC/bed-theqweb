@@ -523,6 +523,36 @@ class DatabaseSeeder extends Seeder
                 'value' => '<div><h2 class="text-xl font-serif font-bold text-dark-bg mb-4">1. Về mặt thông tin trên Website</h2><p class="mb-4">Mọi thông tin, bài viết, hình ảnh tư vấn khoa học được đăng tải trên website này chỉ mang tính chất tham khảo, chia sẻ kiến thức phổ thông và không được coi là lời khuyên, chẩn đoán, phác đồ điều trị thay thế cho các văn bản y khoa chính thức. Người dùng không được tự ý áp dụng các thông tin trên website để tự điều trị tại nhà khi chưa có sự thăm khám và chỉ định từ bác sĩ chuyên môn. KT Beauty Medical Centre hoàn toàn miễn trừ trách nhiệm pháp lý đối với bất kỳ hậu quả nào do việc tự ý áp dụng thông tin của người dùng gây ra.</p></div><div class="mt-8"><h2 class="text-xl font-serif font-bold text-dark-bg mb-4">2. Về hiệu quả và kết quả dịch vụ</h2><p class="mb-4">Y khoa và thẩm mỹ là những lĩnh vực phụ thuộc lớn vào yếu tố cơ địa. Kết quả thực tế của các liệu trình chăm sóc, điều trị da hoặc thẩm mỹ tại KT Beauty Medical Centre có thể khác nhau tùy thuộc vào:</p><ul class="list-disc list-inside pl-4 space-y-2 text-gray-600"><li>Cơ địa, thể trạng và cấu trúc da riêng biệt của mỗi khách hàng.</li><li>Mức độ tuân thủ hướng dẫn chăm sóc sau dịch vụ tại nhà của khách hàng.</li><li>Chế độ ăn uống, sinh hoạt và các yếu tố môi trường tác động ngoài tầm kiểm soát của trung tâm. Chúng tôi không đưa ra các cam kết mang tính chất tuyệt đối 100% cho tất cả các trường hợp khách hàng.</li></ul></div><div class="mt-8"><h2 class="text-xl font-serif font-bold text-dark-bg mb-4">3. Về các liên kết ngoài (External Links)</h2><p class="mb-4">Website có thể chứa các liên kết dẫn đến các website thuộc bên thứ ba nhằm mục đích cung cấp thêm nguồn tham khảo hữu ích cho người đọc. KT Beauty Medical Centre không quản lý, không chịu trách nhiệm về nội dung, tính chính xác hay chính sách bảo mật của các website bên ngoài này.</p></div>',
                 'label' => 'Tuyên Bố Miễn Trừ Trách Nhiệm'
             ],
+            [
+                'key' => 'doctors_intro_eyebrow',
+                'value' => 'ĐỘI NGŨ CHUYÊN GIA',
+                'label' => 'Nhãn phụ phần bác sĩ (Trang Giới thiệu)'
+            ],
+            [
+                'key' => 'doctors_intro_title',
+                'value' => 'Hội Đồng Bác Sĩ Đầu Ngành',
+                'label' => 'Tiêu đề phần bác sĩ (Trang Giới thiệu)'
+            ],
+            [
+                'key' => 'doctors_carousel_eyebrow',
+                'value' => 'ĐỘI NGŨ BÁC SĨ',
+                'label' => 'Nhãn phụ phần bác sĩ (Carousel dùng chung)'
+            ],
+            [
+                'key' => 'doctors_carousel_title',
+                'value' => 'Đội Ngũ Chuyên Gia Làm Đẹp',
+                'label' => 'Tiêu đề phần bác sĩ (Carousel dùng chung)'
+            ],
+            [
+                'key' => 'about_carousel_eyebrow',
+                'value' => 'KT BEAUTY MEDICAL CENTRE',
+                'label' => 'Nhãn phụ phần Model Carousel (Trang Giới thiệu)'
+            ],
+            [
+                'key' => 'about_carousel_title',
+                'value' => 'Kiến tạo - Vẻ đẹp độc bản',
+                'label' => 'Tiêu đề phần Model Carousel (Trang Giới thiệu)'
+            ],
         ];
 
         foreach ($settings as $setting) {

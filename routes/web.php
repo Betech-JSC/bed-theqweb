@@ -24,27 +24,31 @@ Route::get('/', function () {
 
 Route::get('/dich-vu', function () {
     return Inertia::render('DichVu', [
-        'services' => \App\Models\Service::latest()->get()
+        'services' => \App\Models\Service::latest()->get(),
+        'categoriesList' => \App\Models\ServiceCategory::orderBy('order')->pluck('name')->toArray(),
     ]);
 });
 
 Route::get('/gioi-thieu', function () {
     return Inertia::render('GioiThieu', [
         'doctors' => \App\Models\Doctor::orderBy('order')->get(),
+        'realResults' => \App\Models\RealResult::orderBy('order')->latest()->get(),
     ]);
 });
 
 Route::get('/phau-thuat-tham-my', function () {
+    $category = \App\Models\ServiceCategory::where('slug', 'phau-thuat-tham-my')->first();
     return Inertia::render('PhauThuatThamMy', [
         'doctors' => \App\Models\Doctor::orderBy('order')->get(),
-        'services' => \App\Models\Service::where('category', 'Phẫu thuật thẩm mỹ')->latest()->get(),
+        'services' => $category ? $category->services()->latest()->get() : collect(),
     ]);
 });
 
 Route::get('/da-lieu-tre-hoa', function () {
+    $category = \App\Models\ServiceCategory::where('slug', 'da-lieu-tre-hoa')->first();
     return Inertia::render('DaLieuTreHoa', [
         'doctors' => \App\Models\Doctor::orderBy('order')->get(),
-        'services' => \App\Models\Service::where('category', 'Da liễu & Trẻ hóa')->latest()->get(),
+        'services' => $category ? $category->services()->latest()->get() : collect(),
     ]);
 });
 
@@ -192,6 +196,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'submissions' => Submission::latest()->get(),
             'articles' => Article::latest()->get(),
             'services' => Service::latest()->get(),
+            'serviceCategories' => \App\Models\ServiceCategory::orderBy('order')->get(),
             'banners' => \App\Models\Banner::orderBy('order')->get(),
             'doctors' => \App\Models\Doctor::orderBy('order')->get(),
             'faqs' => \App\Models\Faq::orderBy('order')->get(),
@@ -220,6 +225,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/services/{service}', [ContentController::class, 'updateService'])->name('admin.services.update'); // POST due to multipart/form-data upload bugs in PUT
     Route::delete('/admin/services/{service}', [ContentController::class, 'destroyService'])->name('admin.services.destroy');
     Route::patch('/admin/services/{service}/toggle-highlight', [ContentController::class, 'toggleHighlightService'])->name('admin.services.toggle-highlight');
+
+    // Service Category management CRUD
+    Route::post('/admin/service-categories', [ContentController::class, 'storeServiceCategory'])->name('admin.service-categories.store');
+    Route::post('/admin/service-categories/{category}', [ContentController::class, 'updateServiceCategory'])->name('admin.service-categories.update');
+    Route::delete('/admin/service-categories/{category}', [ContentController::class, 'destroyServiceCategory'])->name('admin.service-categories.destroy');
 
     // Banner management CRUD
     Route::post('/admin/banners', [ContentController::class, 'storeBanner'])->name('admin.banners.store');
@@ -274,6 +284,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Dynamic fallback route for service category slugs
+Route::get('/{slug}', function ($slug) {
+    $category = \App\Models\ServiceCategory::where('slug', $slug)->first();
+    if ($category) {
+        return redirect()->to('/dich-vu?category=' . urlencode($category->name));
+    }
+    abort(404);
 });
 
 require __DIR__.'/auth.php';

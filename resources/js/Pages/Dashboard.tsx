@@ -117,6 +117,7 @@ interface Service {
   id: number;
   name: string;
   category: string;
+  service_category_id?: number | string;
   price: string | null;
   description: string | null;
   image: string | null;
@@ -191,10 +192,19 @@ interface RealResult {
   created_at?: string;
 }
 
+interface ServiceCategory {
+  id: number;
+  name: string;
+  slug: string;
+  order: number;
+  created_at?: string;
+}
+
 interface DashboardProps {
   submissions: Submission[];
   articles: Article[];
   services: Service[];
+  serviceCategories: ServiceCategory[];
   banners: Banner[];
   doctors: Doctor[];
   faqs: Faq[];
@@ -700,6 +710,7 @@ export default function Dashboard({
   submissions = [],
   articles = [],
   services = [],
+  serviceCategories = [],
   banners = [],
   doctors = [],
   faqs = [],
@@ -714,7 +725,7 @@ export default function Dashboard({
   const user = (props.auth as any).user;
 
   const [activeTab, setActiveTab] = useState<
-    "overview" | "submissions" | "bookings" | "articles" | "services" | "banners" | "doctors" | "faqs" | "settings" | "realResults" | "media" | "configs" | "intro" | "policies" | "authors" | "reviews" | "shifts"
+    "overview" | "submissions" | "bookings" | "articles" | "services" | "serviceCategories" | "banners" | "doctors" | "faqs" | "settings" | "realResults" | "media" | "configs" | "intro" | "policies" | "authors" | "reviews" | "shifts"
   >("overview");
 
   const [activePolicyTab, setActivePolicyTab] = useState("dieu-khoan");
@@ -755,6 +766,10 @@ export default function Dashboard({
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [serviceViewMode, setServiceViewMode] = useState<"list" | "edit" | "create">("list");
   const [advancedServiceOpen, setAdvancedServiceOpen] = useState(false);
+
+  const [serviceCategorySearchTerm, setServiceCategorySearchTerm] = useState("");
+  const [editingServiceCategory, setEditingServiceCategory] = useState<ServiceCategory | null>(null);
+  const [serviceCategoryViewMode, setServiceCategoryViewMode] = useState<"list" | "edit" | "create">("list");
 
   const [bannerModalOpen, setBannerModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
@@ -836,7 +851,8 @@ export default function Dashboard({
 
   const serviceForm = useForm({
     name: "",
-    category: "Phẫu thuật thẩm mỹ",
+    service_category_id: "" as string | number,
+    category: "",
     price: "Liên hệ",
     description: "",
     image_file: null as File | null,
@@ -855,6 +871,12 @@ export default function Dashboard({
     reviews: [] as string[],
     before_after: [] as Array<{ title: string; before: string; after: string; desc: string }>,
     schema: "",
+  });
+
+  const serviceCategoryForm = useForm({
+    name: "",
+    slug: "",
+    order: 0,
   });
 
   const doctorForm = useForm({
@@ -941,6 +963,12 @@ export default function Dashboard({
       why_choose_us_4_title: settings.why_choose_us_4_title || "Công nghệ tiên tiến",
       why_choose_us_4_desc: settings.why_choose_us_4_desc || "",
       why_choose_us_4_image: settings.why_choose_us_4_image || "",
+      doctors_intro_eyebrow: settings.doctors_intro_eyebrow || "ĐỘI NGŨ CHUYÊN GIA",
+      doctors_intro_title: settings.doctors_intro_title || "Hội Đồng Bác Sĩ Đầu Ngành",
+      doctors_carousel_eyebrow: settings.doctors_carousel_eyebrow || "ĐỘI NGŨ BÁC SĨ",
+      doctors_carousel_title: settings.doctors_carousel_title || "Đội Ngũ Chuyên Gia Làm Đẹp",
+      about_carousel_eyebrow: settings.about_carousel_eyebrow || "KT BEAUTY MEDICAL CENTRE",
+      about_carousel_title: settings.about_carousel_title || "Kiến tạo - Vẻ đẹp độc bản",
     },
   });
 
@@ -1400,6 +1428,9 @@ export default function Dashboard({
   const handleOpenAddService = () => {
     setEditingService(null);
     serviceForm.reset();
+    if (serviceCategories.length > 0) {
+      serviceForm.setData("service_category_id", serviceCategories[0].id);
+    }
     setServiceViewMode("create");
   };
 
@@ -1407,7 +1438,8 @@ export default function Dashboard({
     setEditingService(srv);
     serviceForm.setData({
       name: srv.name,
-      category: srv.category,
+      service_category_id: srv.service_category_id || "",
+      category: srv.category || "",
       price: srv.price || "Liên hệ",
       description: srv.description || "",
       image_file: null,
@@ -1448,6 +1480,48 @@ export default function Dashboard({
           serviceForm.reset();
         },
       });
+    }
+  };
+
+  // Service Category Actions
+  const handleOpenAddServiceCategory = () => {
+    setEditingServiceCategory(null);
+    serviceCategoryForm.reset();
+    setServiceCategoryViewMode("create");
+  };
+
+  const handleOpenEditServiceCategory = (cat: ServiceCategory) => {
+    setEditingServiceCategory(cat);
+    serviceCategoryForm.setData({
+      name: cat.name,
+      slug: cat.slug || "",
+      order: cat.order || 0,
+    });
+    setServiceCategoryViewMode("edit");
+  };
+
+  const handleSaveServiceCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingServiceCategory) {
+      serviceCategoryForm.post(route("admin.service-categories.update", editingServiceCategory.id), {
+        onSuccess: () => {
+          setServiceCategoryViewMode("list");
+          serviceCategoryForm.reset();
+        },
+      });
+    } else {
+      serviceCategoryForm.post(route("admin.service-categories.store"), {
+        onSuccess: () => {
+          setServiceCategoryViewMode("list");
+          serviceCategoryForm.reset();
+        },
+      });
+    }
+  };
+
+  const handleDeleteServiceCategory = (id: number) => {
+    if (confirm("Bạn có chắc chắn muốn xóa danh mục dịch vụ này? Các dịch vụ con thuộc danh mục này sẽ chuyển sang không phân loại.")) {
+      router.delete(route("admin.service-categories.destroy", id), { preserveScroll: true });
     }
   };
 
@@ -1825,7 +1899,10 @@ export default function Dashboard({
             </button>
 
             <button
-              onClick={() => setActiveTab("services")}
+              onClick={() => {
+                setActiveTab("services");
+                setServiceViewMode("list");
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "services"
                   ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
@@ -1833,6 +1910,21 @@ export default function Dashboard({
               }`}
             >
               <Sparkles size={16} />
+              <span>Dịch vụ</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveTab("serviceCategories");
+                setServiceCategoryViewMode("list");
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                activeTab === "serviceCategories"
+                  ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
+                  : "hover:bg-white/5 hover:text-white text-gray-400"
+              }`}
+            >
+              <List size={16} />
               <span>Danh mục dịch vụ</span>
             </button>
 
@@ -4492,18 +4584,19 @@ export default function Dashboard({
                           <div>
                             <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-2 block">Danh mục dịch vụ</label>
                             <select
-                              value={serviceForm.data.category}
-                              onChange={(e) => serviceForm.setData("category", e.target.value)}
+                              value={serviceForm.data.service_category_id}
+                              onChange={(e) => {
+                                const catId = e.target.value;
+                                serviceForm.setData("service_category_id", catId);
+                                const catName = serviceCategories.find(c => c.id.toString() === catId.toString())?.name || "";
+                                serviceForm.setData("category", catName);
+                              }}
                               className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-xs focus:outline-none text-gray-700 bg-white"
                             >
-                              <option value="Phẫu thuật thẩm mỹ">Phẫu thuật thẩm mỹ</option>
-                              <option value="Nâng mũi chuyên sâu">Nâng mũi chuyên sâu</option>
-                              <option value="Thẩm mỹ mắt & Mí">Thẩm mỹ mắt & Mí</option>
-                              <option value="Cấy tóc & Trị hói">Cấy tóc & Trị hói</option>
-                              <option value="Da liễu & Laser">Da liễu & Laser</option>
-                              <option value="Trẻ hóa công nghệ cao">Trẻ hóa công nghệ cao</option>
-                              <option value="Phun xăm thẩm mỹ">Phun xăm thẩm mỹ</option>
-                              <option value="Chăm sóc da chuyên sâu">Chăm sóc da chuyên sâu</option>
+                              <option value="">-- Chọn danh mục --</option>
+                              {serviceCategories.map((c) => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                              ))}
                             </select>
                           </div>
                         </div>
@@ -4542,6 +4635,228 @@ export default function Dashboard({
                               {serviceForm.processing ? "Đang lưu..." : "LƯU"}
                             </button>
                           </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SERVICE CATEGORIES TAB */}
+            {activeTab === "serviceCategories" && (
+              <div>
+                {/* Mode: List View */}
+                {serviceCategoryViewMode === "list" && (
+                  <div>
+                    {/* Breadcrumb path */}
+                    <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-6 font-semibold select-none text-left">
+                      <span className="cursor-pointer hover:text-gold transition-colors" onClick={() => setActiveTab("overview")}>🏠</span>
+                      <span className="text-gray-300">/</span>
+                      <span className="text-gray-600">Danh Mục Dịch Vụ</span>
+                    </div>
+                    
+                    {/* Divider */}
+                    <div className="border-t border-gray-150/60 mb-6" />
+
+                    {/* Actions Row */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                      {/* THÊM MỚI Button */}
+                      <button
+                        onClick={handleOpenAddServiceCategory}
+                        className="bg-[#f97316] hover:bg-[#ea580c] text-white font-bold text-[11px] tracking-wider uppercase px-6 py-2.5 rounded shadow-sm hover:shadow-md transition-all active:translate-y-0.5"
+                      >
+                        Thêm mới
+                      </button>
+
+                      {/* Search box matching design */}
+                      <div className="relative w-72">
+                        <input
+                          type="text"
+                          placeholder="Tìm kiếm.."
+                          value={serviceCategorySearchTerm}
+                          onChange={(e) => setServiceCategorySearchTerm(e.target.value)}
+                          className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 pr-10 rounded text-xs focus:outline-none placeholder-gray-400 font-light text-gray-700 bg-white shadow-sm"
+                        />
+                        <svg
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Listing Table matching Design */}
+                    {serviceCategories.length === 0 ? (
+                      <p className="text-gray-400 text-center py-12 font-light">Chưa có danh mục nào.</p>
+                    ) : (() => {
+                      const filtered = serviceCategories.filter(cat => 
+                        cat.name.toLowerCase().includes(serviceCategorySearchTerm.toLowerCase()) ||
+                        cat.slug.toLowerCase().includes(serviceCategorySearchTerm.toLowerCase())
+                      );
+
+                      if (filtered.length === 0) {
+                        return <p className="text-gray-400 text-center py-12 font-light">Không tìm thấy danh mục phù hợp.</p>;
+                      }
+
+                      return (
+                        <div className="bg-white border border-gray-150 rounded-xl overflow-hidden shadow-sm">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                              <thead>
+                                <tr className="bg-gray-50 border-b border-gray-150 text-gray-450 font-bold uppercase tracking-wider select-none">
+                                  <th className="py-4 px-6 w-16">ID</th>
+                                  <th className="py-4 px-6">Tên danh mục</th>
+                                  <th className="py-4 px-6">Đường dẫn (Slug)</th>
+                                  <th className="py-4 px-6 w-32 text-center">Thứ tự</th>
+                                  <th className="py-4 px-6 w-28 text-center">Thao tác</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100 text-gray-700 font-light">
+                                {filtered.map((cat) => (
+                                  <tr key={cat.id} className="hover:bg-gray-55/30 transition-colors">
+                                    <td className="py-4.5 px-6 font-mono text-[10px] text-gray-400">{cat.id}</td>
+                                    <td className="py-4.5 px-6 font-medium text-gray-900">{cat.name}</td>
+                                    <td className="py-4.5 px-6 text-gray-500 font-mono text-[11px]">{cat.slug}</td>
+                                    <td className="py-4.5 px-6 text-center text-gray-500">{cat.order}</td>
+                                    <td className="py-4.5 px-6 text-center">
+                                      <div className="flex justify-center items-center gap-2">
+                                        <button
+                                          onClick={() => handleOpenEditServiceCategory(cat)}
+                                          className="p-1.5 text-gray-400 hover:text-gold hover:bg-gold/5 rounded transition-all cursor-pointer bg-transparent border-0 outline-none"
+                                          title="Sửa"
+                                        >
+                                          <Edit size={14} />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteServiceCategory(cat.id)}
+                                          className="p-1.5 text-gray-400 hover:text-red-650 hover:bg-red-50 rounded transition-all cursor-pointer bg-transparent border-0 outline-none"
+                                          title="Xóa"
+                                        >
+                                          <Trash size={14} />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* Mode: Create or Edit Form */}
+                {(serviceCategoryViewMode === "create" || serviceCategoryViewMode === "edit") && (
+                  <div>
+                    {/* Breadcrumb path */}
+                    <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-6 font-semibold select-none text-left">
+                      <span className="cursor-pointer hover:text-gold transition-colors" onClick={() => {
+                        setServiceCategoryViewMode("list");
+                        serviceCategoryForm.reset();
+                      }}>Danh Mục Dịch Vụ</span>
+                      <span className="text-gray-300">/</span>
+                      <span className="text-gray-600">{serviceCategoryViewMode === "create" ? "Tạo Mới" : "Chỉnh Sửa"}</span>
+                    </div>
+
+                    <div className="border-t border-gray-150/60 mb-6" />
+
+                    <form onSubmit={handleSaveServiceCategory} className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-left">
+                      {/* Left Column (Main Form fields) */}
+                      <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-white border border-gray-150 rounded-xl p-6 shadow-sm space-y-5">
+                          <div>
+                            <label className="text-xs uppercase font-bold text-gray-450 tracking-wider mb-2 block">Tên danh mục *</label>
+                            <input
+                              type="text"
+                              value={serviceCategoryForm.data.name}
+                              onChange={(e) => {
+                                serviceCategoryForm.setData("name", e.target.value);
+                                if (serviceCategoryViewMode === "create") {
+                                  // Auto-slugify
+                                  const generatedSlug = e.target.value
+                                    .toLowerCase()
+                                    .normalize("NFD")
+                                    .replace(/[\u0300-\u036f]/g, "")
+                                    .replace(/đ/g, "d")
+                                    .replace(/[^a-z0-9\s-]/g, "")
+                                    .trim()
+                                    .replace(/\s+/g, "-");
+                                  serviceCategoryForm.setData({
+                                    ...serviceCategoryForm.data,
+                                    name: e.target.value,
+                                    slug: generatedSlug,
+                                  });
+                                }
+                              }}
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-xs focus:outline-none text-gray-700 bg-white"
+                              placeholder="Nhập tên danh mục (ví dụ: Chăm sóc da chuyên sâu...)"
+                              required
+                            />
+                            {serviceCategoryForm.errors.name && (
+                              <span className="text-red-500 text-[10px] mt-1 block">{serviceCategoryForm.errors.name}</span>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="text-xs uppercase font-bold text-gray-450 tracking-wider mb-2 block">Đường dẫn (Slug URL)</label>
+                            <input
+                              type="text"
+                              value={serviceCategoryForm.data.slug}
+                              onChange={(e) => serviceCategoryForm.setData("slug", e.target.value)}
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-xs focus:outline-none text-gray-700 bg-white font-mono"
+                              placeholder="url-danh-muc-viet-lien-khong-dau"
+                            />
+                            {serviceCategoryForm.errors.slug && (
+                              <span className="text-red-500 text-[10px] mt-1 block">{serviceCategoryForm.errors.slug}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column (Side controls) */}
+                      <div className="space-y-6">
+                        <div className="bg-white border border-gray-150 rounded-xl p-6 shadow-sm space-y-4">
+                          <div>
+                            <label className="text-xs uppercase font-bold text-gray-450 tracking-wider mb-2 block">Thứ tự hiển thị</label>
+                            <input
+                              type="number"
+                              value={serviceCategoryForm.data.order}
+                              onChange={(e) => serviceCategoryForm.setData("order", parseInt(e.target.value) || 0)}
+                              className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-xs focus:outline-none text-gray-700 bg-white"
+                              min="0"
+                            />
+                            {serviceCategoryForm.errors.order && (
+                              <span className="text-red-500 text-[10px] mt-1 block">{serviceCategoryForm.errors.order}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-150 mt-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setServiceCategoryViewMode("list");
+                              serviceCategoryForm.reset();
+                            }}
+                            className="px-5 py-2.5 border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-lg text-xs font-bold transition-colors"
+                          >
+                            Hủy
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={serviceCategoryForm.processing}
+                            className="px-8 py-2.5 bg-[#f97316] hover:bg-[#ea580c] text-white font-bold rounded-lg text-xs uppercase tracking-wider shadow-sm transition-colors disabled:opacity-50"
+                          >
+                            {serviceCategoryForm.processing ? "Đang lưu..." : "LƯU"}
+                          </button>
                         </div>
                       </div>
                     </form>
@@ -7071,6 +7386,114 @@ export default function Dashboard({
                           </div>
                         );
                       })}
+                    </div>
+                  </div>
+
+                  {/* PHẦN 4: TIÊU ĐỀ KHỐI BÁC SĨ & CHUYÊN GIA */}
+                  <div className="bg-white border border-gray-150 rounded-xl p-6 shadow-sm space-y-6">
+                    <h4 className="text-sm font-bold font-serif text-gold uppercase tracking-wider border-b border-gray-100 pb-3">
+                      4. Tiêu đề khối Đội ngũ Bác sĩ & Chuyên gia
+                    </h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Cấu hình trang Giới thiệu */}
+                      <div className="space-y-4 border-b md:border-b-0 md:border-r border-gray-100 pb-6 md:pb-0 md:pr-8">
+                        <span className="text-[10px] font-black bg-gold/15 text-gold px-2.5 py-1 rounded-full uppercase">Trang Giới thiệu</span>
+                        
+                        <div>
+                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Nhãn phụ (Ví dụ: ĐỘI NGŨ CHUYÊN GIA)</label>
+                          <input
+                            type="text"
+                            value={(settingsForm.data.settings as any).doctors_intro_eyebrow || ""}
+                            onChange={(e) => settingsForm.setData("settings", {
+                              ...settingsForm.data.settings,
+                              doctors_intro_eyebrow: e.target.value
+                            })}
+                            className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded text-sm focus:outline-none"
+                            placeholder="Nhập nhãn phụ..."
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Tiêu đề chính (Ví dụ: Hội Đồng Bác Sĩ Đầu Ngành)</label>
+                          <input
+                            type="text"
+                            value={(settingsForm.data.settings as any).doctors_intro_title || ""}
+                            onChange={(e) => settingsForm.setData("settings", {
+                              ...settingsForm.data.settings,
+                              doctors_intro_title: e.target.value
+                            })}
+                            className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded text-sm focus:outline-none"
+                            placeholder="Nhập tiêu đề chính..."
+                          />
+                        </div>
+                      </div>
+
+                      {/* Cấu hình Carousel dùng chung */}
+                      <div className="space-y-4">
+                        <span className="text-[10px] font-black bg-gold/15 text-gold px-2.5 py-1 rounded-full uppercase">Khối Carousel dùng chung</span>
+                        
+                        <div>
+                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Nhãn phụ (Ví dụ: ĐỘI NGŨ BÁC SĨ)</label>
+                          <input
+                            type="text"
+                            value={(settingsForm.data.settings as any).doctors_carousel_eyebrow || ""}
+                            onChange={(e) => settingsForm.setData("settings", {
+                              ...settingsForm.data.settings,
+                              doctors_carousel_eyebrow: e.target.value
+                            })}
+                            className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded text-sm focus:outline-none"
+                            placeholder="Nhập nhãn phụ..."
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Tiêu đề chính (Ví dụ: Đội Ngũ Chuyên Gia Làm Đẹp)</label>
+                          <input
+                            type="text"
+                            value={(settingsForm.data.settings as any).doctors_carousel_title || ""}
+                            onChange={(e) => settingsForm.setData("settings", {
+                              ...settingsForm.data.settings,
+                              doctors_carousel_title: e.target.value
+                            })}
+                            className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded text-sm focus:outline-none"
+                            placeholder="Nhập tiêu đề chính..."
+                          />
+                        </div>
+                      </div>
+
+                      {/* Cấu hình Model Carousel (Kiến tạo - Vẻ đẹp độc bản) */}
+                      <div className="space-y-4 pt-6 border-t border-gray-100">
+                        <span className="text-[10px] font-black bg-gold/15 text-gold px-2.5 py-1 rounded-full uppercase">Khối Model Carousel (Kiến tạo - Vẻ đẹp độc bản)</span>
+                        
+                        <div>
+                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Nhãn phụ (Ví dụ: KT BEAUTY MEDICAL CENTRE)</label>
+                          <input
+                            type="text"
+                            value={(settingsForm.data.settings as any).about_carousel_eyebrow || ""}
+                            onChange={(e) => settingsForm.setData("settings", {
+                              ...settingsForm.data.settings,
+                              about_carousel_eyebrow: e.target.value
+                            })}
+                            className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded text-sm focus:outline-none"
+                            placeholder="Nhập nhãn phụ..."
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Tiêu đề chính (Ví dụ: Kiến tạo - Vẻ đẹp độc bản)</label>
+                          <input
+                            type="text"
+                            value={(settingsForm.data.settings as any).about_carousel_title || ""}
+                            onChange={(e) => settingsForm.setData("settings", {
+                              ...settingsForm.data.settings,
+                              about_carousel_title: e.target.value
+                            })}
+                            className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded text-sm focus:outline-none"
+                            placeholder="Nhập tiêu đề chính..."
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
