@@ -22,10 +22,10 @@ interface RealResultsProps {
 
 export const RealResults: React.FC<RealResultsProps> = ({ results = [] }) => {
   const tabs = [
-    { id: "eyeluxe", name: "KT Eyeluxe" },
+    { id: "eyeluxe", name: "Theq Eyeluxe" },
     { id: "sylfirm", name: "Sylfirm X" },
     { id: "meso", name: "Cocktail Infusion" },
-    { id: "pro-lift", name: "KT Pro-Lift" },
+    { id: "pro-lift", name: "Theq Pro-Lift" },
     { id: "hya", name: "Hya Reshape" },
   ];
 
@@ -64,7 +64,7 @@ export const RealResults: React.FC<RealResultsProps> = ({ results = [] }) => {
           </h2>
           <div className="w-12 h-[2px] bg-gold mx-auto mt-3 mb-4" />
           <p className="text-sm md:text-base text-gray-500 font-light">
-            Minh chứng rõ nét nhất cho chất lượng dịch vụ tại KT Beauty. Hàng nghìn khách hàng đã thay đổi diện mạo thành công.
+            Minh chứng rõ nét nhất cho chất lượng dịch vụ tại Theq. Hàng nghìn khách hàng đã thay đổi diện mạo thành công.
           </p>
         </div>
 

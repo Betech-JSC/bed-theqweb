@@ -53,15 +53,15 @@ export default function KetQuaPage({ faqs = [], realResults = [] }: KetQuaProps)
     },
     {
       image: "/images/mui-1.png",
-      category: "KT YOUTH LINE",
+      category: "THEQ YOUTH LINE",
     },
     {
       image: "/images/Pro-Lift.png",
-      category: "KT PRO LIFT",
+      category: "THEQ PRO LIFT",
     },
     {
       image: "/images/Hya-2.png",
-      category: "KT HYA RESHAPE",
+      category: "THEQ HYA RESHAPE",
     },
     {
       image: "/images/564628375_122249424116080096_6875006224343365252_n-1.jpg",
@@ -79,7 +79,7 @@ export default function KetQuaPage({ faqs = [], realResults = [] }: KetQuaProps)
   const visibleCases = cases.slice(0, visibleCount);
 
   return (
-    <><Head title="Kết Quả Thẩm Mỹ | KT Beauty" />
+    <><Head title="Kết Quả Thẩm Mỹ | Theq" />
       <Header />
       <main className="flex-grow font-sans bg-white">
         {/* Banner/Hero */}
@@ -109,7 +109,7 @@ export default function KetQuaPage({ faqs = [], realResults = [] }: KetQuaProps)
               </h1>
               {/* Subheading */}
               <p className="text-sm md:text-base text-gray-205 leading-relaxed font-light max-w-3xl">
-                Kết quả tại KT Beauty không chỉ là sự thay đổi bên ngoài, mà là sự nâng tầm thần thái và chất lượng cuộc sống. Mỗi hành trình được thực hiện với sự tận tâm và cam kết.
+                Kết quả tại Theq không chỉ là sự thay đổi bên ngoài, mà là sự nâng tầm thần thái và chất lượng cuộc sống. Mỗi hành trình được thực hiện với sự tận tâm và cam kết.
               </p>
             </div>
           </div>
@@ -121,10 +121,10 @@ export default function KetQuaPage({ faqs = [], realResults = [] }: KetQuaProps)
             {/* Title */}
             <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
               <div className="text-sm md:text-base text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
-                Tại KT Beauty Medical Centre, mỗi kết quả là sự kết hợp giữa chuyên môn, sự tinh chỉnh đúng mức và cam kết dài hạn, nhằm mang lại vẻ đẹp tự nhiên và bền vững.
+                Tại Theq Medical Centre, mỗi kết quả là sự kết hợp giữa chuyên môn, sự tinh chỉnh đúng mức và cam kết dài hạn, nhằm mang lại vẻ đẹp tự nhiên và bền vững.
               </div>
               <h2 className="text-2xl md:text-4xl font-bold font-serif text-dark-bg">
-                Hơn 10.000 khách hàng đã lựa chọn KT Beauty
+                Hơn 10.000 khách hàng đã lựa chọn Theq
               </h2>
               <div className="w-12 h-[2px] bg-gold mx-auto mt-4" />
             </div>

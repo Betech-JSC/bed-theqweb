@@ -32,28 +32,28 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
       desc: "Phân tích khoa học về lão hóa vùng mắt, sụp mí mắt và các công nghệ can thiệp mí hiện đại nhất.",
       img: "/images/725593428_122164685762677110_2827496772101167778_n.jpg",
       date: "05/07/2026",
-      author: "Hội Đồng Bác Sĩ KT",
+      author: "Hội Đồng Bác Sĩ Theq",
     },
     {
-      title: "KT Beauty chào đón công nghệ trẻ hóa thế hệ mới trong tháng 07/2026",
+      title: "Theq chào đón công nghệ trẻ hóa thế hệ mới trong tháng 07/2026",
       desc: "Chuyển giao độc quyền công nghệ nâng cơ trẻ hóa Ultherapy Prime thế hệ mới đem lại hiệu quả vượt trội.",
       img: "/images/web.png",
       date: "01/07/2026",
-      author: "Ban Biên Tập KT",
+      author: "Ban Biên Tập Theq",
     },
     {
-      title: "KT Beauty đồng hành thiện nguyện “Yêu thương cho em”, trao tặng 300 triệu",
+      title: "Theq đồng hành thiện nguyện “Yêu thương cho em”, trao tặng 300 triệu",
       desc: "Hoạt động thiện nguyện ý nghĩa hỗ trợ các bệnh nhân có hoàn cảnh khó khăn điều trị tại bệnh viện.",
       img: "/images/DNG_3069.png",
       date: "28/06/2026",
-      author: "Đoàn Thiện Nguyện KT",
+      author: "Đoàn Thiện Nguyện Theq",
     },
     {
       title: "Private VIP Workshop “The Science of Youth” – Luxury Wellness",
       desc: "Không gian workshop kết nối khoa học làm đẹp độc bản và trải nghiệm chăm sóc sức khỏe thượng lưu.",
       img: "/images/Workshop-1.png",
       date: "22/06/2026",
-      author: "Ban Tổ Chức KT",
+      author: "Ban Tổ Chức Theq",
     },
     {
       title: "CEO Khánh Tôn tham dự Ultherapy Prime APAC 2026 tại Malaysia",
@@ -63,18 +63,18 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
       author: "CEO Khánh Tôn",
     },
     {
-      title: "Đại diện KT Beauty tham dự Hội thảo Enhancing Safety & Precision",
+      title: "Đại diện Theq tham dự Hội thảo Enhancing Safety & Precision",
       desc: "Nâng cao độ an toàn và độ chính xác trong tạo hình thẩm mỹ nội khoa cùng các chuyên gia quốc tế.",
       img: "/images/1-size-web-1.png",
       date: "08/06/2026",
-      author: "Hội Đồng Bác Sĩ KT",
+      author: "Hội Đồng Bác Sĩ Theq",
     },
     {
       title: "MasterClass: Nâng cao chuyên môn cùng các bác sĩ đầu ngành",
       desc: "Chương trình đào tạo chuyên sâu nội bộ định kỳ nhằm cập nhật các kỹ thuật tiên tiến nhất thế giới.",
       img: "/images/Masterclass-1.jpg",
       date: "02/06/2026",
-      author: "Hội Đồng Chuyên Môn KT",
+      author: "Hội Đồng Chuyên Môn Theq",
     },
     {
       title: "3 lý do cần bác sĩ chuyên khoa thực hiện thẩm mỹ nội khoa",
@@ -87,9 +87,9 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
 
   const articles = (initialArticles && initialArticles.length > 0)
     ? initialArticles.map(a => {
-        let displayAuthor = "KT Beauty";
+        let displayAuthor = "Theq";
         if (a.author && typeof a.author === "object") {
-          displayAuthor = a.author.name || "KT Beauty";
+          displayAuthor = a.author.name || "Theq";
         } else if (typeof a.author === "string" && a.author.trim() !== "") {
           displayAuthor = a.author;
         } else if (a.legacy_author) {
@@ -115,7 +115,7 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
           ? "tham-my-vung-mat-khi-nao-can-can-thiep-giai-phap-phu-hop"
           : (s.title.includes("trải nghiệm trẻ hóa") 
              ? "dieu-gi-tao-nen-mot-trai-nghiem-tre-hoa-thuc-su-khac-biet" 
-             : "kt-beauty-chao-don-cong-nghe-tre-hoa-the-he-moi-trong-thang-072026"),
+             : "theq-chao-don-cong-nghe-tre-hoa-the-he-moi-trong-thang-072026"),
         category: s.title.includes("thiện nguyện") || s.title.includes("MasterClass") ? "Hoạt động" : (s.title.includes("Workshop") || s.title.includes("Ultherapy") || s.title.includes("Hội thảo") ? "Sự kiện" : "Chuyên môn")
       }));
 
@@ -130,7 +130,7 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
 
   return (
     <>
-      <Head title="Tin Tức & Hoạt Động | KT Beauty" />
+      <Head title="Tin Tức & Hoạt Động | Theq" />
       <Header />
       
       <main className="flex-grow font-sans bg-gray-55/40">
@@ -161,7 +161,7 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
               </h1>
               {/* Subheading */}
               <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light max-w-3xl">
-                Nơi hội tụ các phân tích chuyên sâu về y học thẩm mỹ, cập nhật công nghệ nâng cơ trẻ hóa thế hệ mới và các hoạt động cộng đồng nổi bật của KT Beauty.
+                Nơi hội tụ các phân tích chuyên sâu về y học thẩm mỹ, cập nhật công nghệ nâng cơ trẻ hóa thế hệ mới và các hoạt động cộng đồng nổi bật của Theq.
               </p>
             </div>
           </div>

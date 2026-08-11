@@ -917,7 +917,7 @@ export default function Dashboard({
   const settingsForm = useForm({
     settings: {
       site_hotline: settings.site_hotline || "19005006",
-      site_email: settings.site_email || "info@ktbeauty.vn",
+      site_email: settings.site_email || "info@theq.vn",
       site_address: settings.site_address || "",
       site_logo_dark: settings.site_logo_dark || "",
       site_logo_light: settings.site_logo_light || "",
@@ -926,7 +926,7 @@ export default function Dashboard({
       facebook_url: settings.facebook_url || "",
       zalo_url: settings.zalo_url || "",
       youtube_url: settings.youtube_url || "",
-      intro_title: settings.intro_title || "KT BEAUTY MEDICAL CENTRE",
+      intro_title: settings.intro_title || "THEQ MEDICAL CENTRE",
       intro_subtitle: settings.intro_subtitle || "Về Chúng Tôi",
       intro_desc_1: settings.intro_desc_1 || "",
       intro_desc_2: settings.intro_desc_2 || "",
@@ -967,7 +967,7 @@ export default function Dashboard({
       doctors_intro_title: settings.doctors_intro_title || "Hội Đồng Bác Sĩ Đầu Ngành",
       doctors_carousel_eyebrow: settings.doctors_carousel_eyebrow || "ĐỘI NGŨ BÁC SĨ",
       doctors_carousel_title: settings.doctors_carousel_title || "Đội Ngũ Chuyên Gia Làm Đẹp",
-      about_carousel_eyebrow: settings.about_carousel_eyebrow || "KT BEAUTY MEDICAL CENTRE",
+      about_carousel_eyebrow: settings.about_carousel_eyebrow || "THEQ MEDICAL CENTRE",
       about_carousel_title: settings.about_carousel_title || "Kiến tạo - Vẻ đẹp độc bản",
     },
   });
@@ -1804,7 +1804,7 @@ export default function Dashboard({
                 <img
                   src={settings.site_logo_square_light || settings.site_logo_square}
                   className="object-contain w-full h-full max-h-full max-w-full p-0.5"
-                  alt="KT Logo"
+                  alt="Theq Logo"
                 />
               </div>
             ) : (
@@ -1813,7 +1813,7 @@ export default function Dashboard({
               </div>
             )}
             <div className="text-left">
-              <h2 className="font-serif font-bold text-white text-sm tracking-widest uppercase">KT+ BEAUTY</h2>
+              <h2 className="font-serif font-bold text-white text-sm tracking-widest uppercase">THEQ</h2>
               <span className="text-[9px] text-gold tracking-widest uppercase font-semibold">Medical Centre</span>
             </div>
           </div>
@@ -3176,7 +3176,7 @@ export default function Dashboard({
                                         <span className="bg-gold/10 text-gold font-bold px-1.5 py-0.5 rounded text-[8px] tracking-wider uppercase">
                                           {art.category}
                                         </span>
-                                        <span>Tác giả: {art.author ? (typeof art.author === "object" ? art.author.name : art.author) : (art.legacy_author || "KT Beauty")}</span>
+                                        <span>Tác giả: {art.author ? (typeof art.author === "object" ? art.author.name : art.author) : (art.legacy_author || "Theq")}</span>
                                       </div>
                                     </td>
 
@@ -3372,7 +3372,7 @@ export default function Dashboard({
                           />
                           {articleForm.data.slug && (
                             <div className="text-[10px] text-blue-600 font-light select-all break-all mt-1 bg-blue-50/50 border border-blue-100/50 px-3 py-1.5 rounded-md inline-block">
-                              Đường dẫn (URL): <span className="font-semibold underline">https://ktbeauty.vn/tin-tuc/{articleForm.data.slug}</span>
+                              Đường dẫn (URL): <span className="font-semibold underline">https://theq.vn/tin-tuc/{articleForm.data.slug}</span>
                             </div>
                           )}
                         </div>
@@ -3418,7 +3418,7 @@ export default function Dashboard({
                               value={articleForm.data.legacy_author}
                               onChange={(e) => articleForm.setData("legacy_author", e.target.value)}
                               className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
-                              placeholder="Ví dụ: Bác sĩ hoặc Ban biên tập KT+ Beauty"
+                              placeholder="Ví dụ: Bác sĩ hoặc Ban biên tập Theq"
                             />
                           </div>
                         </div>
@@ -3540,7 +3540,7 @@ export default function Dashboard({
                                   value={articleForm.data.canonical_link}
                                   onChange={(e) => articleForm.setData("canonical_link", e.target.value)}
                                   className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
-                                  placeholder="Đường dẫn canonical (ví dụ: https://ktbeauty.vn/tin-tuc/abc)..."
+                                  placeholder="Đường dẫn canonical (ví dụ: https://theq.vn/tin-tuc/abc)..."
                                 />
                               </div>
 
@@ -4019,7 +4019,7 @@ export default function Dashboard({
                           />
                           {serviceForm.data.name && (
                             <div className="text-[10px] text-blue-500 font-light select-none break-all mt-1 bg-blue-50/50 border border-blue-100/50 px-3 py-1.5 rounded-md inline-block">
-                              URL: https://ktbeauty.vn/dich-vu/{serviceForm.data.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-")}
+                              URL: https://theq.vn/dich-vu/{serviceForm.data.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-")}
                             </div>
                           )}
                         </div>
@@ -4363,7 +4363,7 @@ export default function Dashboard({
                                   value={serviceForm.data.canonical_link}
                                   onChange={(e) => serviceForm.setData("canonical_link", e.target.value)}
                                   className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
-                                  placeholder="Đường dẫn canonical (ví dụ: https://ktbeauty.vn/dich-vu/xyz)..."
+                                  placeholder="Đường dẫn canonical (ví dụ: https://theq.vn/dich-vu/xyz)..."
                                 />
                               </div>
 
@@ -5764,11 +5764,11 @@ export default function Dashboard({
                             value={realResultForm.data.title}
                             onChange={(e) => realResultForm.setData("title", e.target.value)}
                             className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded-lg text-sm focus:outline-none text-gray-800 font-bold placeholder-gray-300 bg-white"
-                            placeholder="Ví dụ: KT Eyeluxe - Cắt mí Double Eyeluxe"
+                            placeholder="Ví dụ: Theq Eyeluxe - Cắt mí Double Eyeluxe"
                           />
                           {realResultForm.data.title && (
                             <div className="text-[10px] text-blue-500 font-light select-none break-all mt-1 bg-blue-50/50 border border-blue-100/50 px-3 py-1.5 rounded-md inline-block">
-                              URL: https://ktbeauty.vn/ket-qua/{realResultForm.data.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-")}
+                              URL: https://theq.vn/ket-qua/{realResultForm.data.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-")}
                             </div>
                           )}
                         </div>
@@ -5867,7 +5867,7 @@ export default function Dashboard({
                                   value={realResultForm.data.canonical_link}
                                   onChange={(e) => realResultForm.setData("canonical_link", e.target.value)}
                                   className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
-                                  placeholder="Đường dẫn canonical (ví dụ: https://ktbeauty.vn/ket-qua/xyz)..."
+                                  placeholder="Đường dẫn canonical (ví dụ: https://theq.vn/ket-qua/xyz)..."
                                 />
                               </div>
 
@@ -6084,10 +6084,10 @@ export default function Dashboard({
                               onChange={(e) => realResultForm.setData("category", e.target.value)}
                               className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-xs focus:outline-none text-gray-700 bg-white"
                             >
-                              <option value="eyeluxe">KT Eyeluxe</option>
+                              <option value="eyeluxe">Theq Eyeluxe</option>
                               <option value="sylfirm">Sylfirm X</option>
                               <option value="meso">Cocktail Infusion</option>
-                              <option value="pro-lift">KT Pro-Lift</option>
+                              <option value="pro-lift">Theq Pro-Lift</option>
                               <option value="hya">Hya Reshape</option>
                             </select>
                           </div>
@@ -6563,7 +6563,7 @@ export default function Dashboard({
                           site_email: e.target.value
                         })}
                         className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded text-sm focus:outline-none"
-                        placeholder="Ví dụ: info@ktbeauty.vn"
+                        placeholder="Ví dụ: info@theq.vn"
                       />
                     </div>
                   </div>
@@ -6890,7 +6890,7 @@ export default function Dashboard({
                                 intro_title: e.target.value
                               })}
                               className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none"
-                              placeholder="Ví dụ: KT BEAUTY MEDICAL CENTRE"
+                              placeholder="Ví dụ: THEQ MEDICAL CENTRE"
                             />
                           </div>
                         </div>
@@ -7481,7 +7481,7 @@ export default function Dashboard({
                         <span className="text-[10px] font-black bg-gold/15 text-gold px-2.5 py-1 rounded-full uppercase">Khối Model Carousel (Kiến tạo - Vẻ đẹp độc bản)</span>
                         
                         <div>
-                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Nhãn phụ (Ví dụ: KT BEAUTY MEDICAL CENTRE)</label>
+                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Nhãn phụ (Ví dụ: THEQ MEDICAL CENTRE)</label>
                           <input
                             type="text"
                             value={(settingsForm.data.settings as any).about_carousel_eyebrow || ""}
@@ -7935,7 +7935,7 @@ export default function Dashboard({
                                   value={authorForm.data.canonical_link}
                                   onChange={(e) => authorForm.setData("canonical_link", e.target.value)}
                                   className="w-full border border-gray-200 focus:border-gold px-4 py-2.5 rounded-lg text-sm focus:outline-none text-gray-700 bg-white"
-                                  placeholder="https://ktbeauty.vn/..."
+                                  placeholder="https://theq.vn/..."
                                 />
                               </div>
 
@@ -8209,7 +8209,7 @@ export default function Dashboard({
                     value={bannerForm.data.eyebrow}
                     onChange={(e) => bannerForm.setData("eyebrow", e.target.value)}
                     className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
-                    placeholder="Ví dụ: KT Beauty Medical Centre"
+                    placeholder="Ví dụ: Theq Medical Centre"
                   />
                 </div>
                 <div className="min-w-0">
@@ -8869,8 +8869,8 @@ export default function Dashboard({
                     className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
                   >
                     <option value="">-- Chọn cơ sở --</option>
-                    <option value="KT Beauty - Sài Gòn">KT Beauty - Sài Gòn</option>
-                    <option value="KT Beauty - Hà Nội">KT Beauty - Hà Nội</option>
+                    <option value="Theq - Sài Gòn">Theq - Sài Gòn</option>
+                    <option value="Theq - Hà Nội">Theq - Hà Nội</option>
                   </select>
                 </div>
               </div>
@@ -9065,8 +9065,8 @@ export default function Dashboard({
                     className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-xl text-xs focus:outline-none text-gray-700 bg-white shadow-sm cursor-pointer"
                   >
                     <option value="">-- Chọn cơ sở --</option>
-                    <option value="KT Beauty - Sài Gòn">KT Beauty - Sài Gòn</option>
-                    <option value="KT Beauty - Hà Nội">KT Beauty - Hà Nội</option>
+                    <option value="Theq - Sài Gòn">Theq - Sài Gòn</option>
+                    <option value="Theq - Hà Nội">Theq - Hà Nội</option>
                   </select>
                 </div>
               </div>
