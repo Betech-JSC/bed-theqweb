@@ -27,7 +27,7 @@ return new class extends Migration
         $initialResults = [
             [
                 'category' => 'eyeluxe',
-                'title' => 'KT Eyeluxe - Cắt mí Double Eyeluxe',
+                'title' => 'Theq Eyeluxe - Cắt mí Double Eyeluxe',
                 'detail' => 'Khắc phục tình trạng sụp mí, mỡ thừa mắt cho đôi mắt hai mí tự nhiên rạng ngời.',
                 'image' => '/images/EyeLuxe.jpg',
                 'is_video' => false,
@@ -35,7 +35,7 @@ return new class extends Migration
             ],
             [
                 'category' => 'eyeluxe',
-                'title' => 'KT Eyeluxe - Xóa thâm quầng bọng mắt',
+                'title' => 'Theq Eyeluxe - Xóa thâm quầng bọng mắt',
                 'detail' => 'Tạo hình nếp mí đều đẹp, loại bỏ hoàn toàn bọng mắt thâm quầng mệt mỏi.',
                 'image' => '/images/EyeLuxe-3.png',
                 'is_video' => true,
@@ -43,7 +43,7 @@ return new class extends Migration
             ],
             [
                 'category' => 'eyeluxe',
-                'title' => 'KT Eyeluxe - Kiến tạo mí mắt sắc nét',
+                'title' => 'Theq Eyeluxe - Kiến tạo mí mắt sắc nét',
                 'detail' => 'Kết quả sau 30 phút thực hiện cắt mí kết hợp lấy mỡ mí mắt trên.',
                 'image' => '/images/Eyeluxe-_7.png',
                 'is_video' => false,
@@ -67,7 +67,7 @@ return new class extends Migration
             ],
             [
                 'category' => 'pro-lift',
-                'title' => 'KT Pro-Lift - Nâng cơ trẻ hóa Profhilo',
+                'title' => 'Theq Pro-Lift - Nâng cơ trẻ hóa Profhilo',
                 'detail' => 'Nâng cơ xóa nhăn, phục hồi độ đàn hồi săn chắc và thon gọn đường viền hàm.',
                 'image' => '/images/Celeb_Pro-Lift.png',
                 'is_video' => false,
@@ -75,7 +75,7 @@ return new class extends Migration
             ],
             [
                 'category' => 'pro-lift',
-                'title' => 'KT Pro-Lift - Trẻ hóa vùng má & rãnh cười',
+                'title' => 'Theq Pro-Lift - Trẻ hóa vùng má & rãnh cười',
                 'detail' => 'Làm đầy rãnh cười sâu và nâng đỡ các vùng cơ chảy xệ hiệu quả.',
                 'image' => '/images/Pro-Lift.png',
                 'is_video' => true,

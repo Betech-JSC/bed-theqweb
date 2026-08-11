@@ -101,7 +101,7 @@ $newServicesCode = '        // 3. Seed Services (Services Catalog)
                 \'name\' => \'Cấy tóc y khoa tự thân DHI\',
                 \'category\' => \'Cấy tóc y khoa\',
                 \'price\' => \'Liên hệ\',
-                \'description\' => \'<p class="mb-4">Cấy tóc tự thân là phương pháp sử dụng chính nang tóc khỏe mạnh sau gáy của khách hàng để phục hồi các vùng tóc thưa, hói hoặc hạ đường chân tóc thiếu cân đối. Tại KT Beauty, mỗi nang tóc sau cấy được định hướng hài hòa và mọc theo hướng tự nhiên nhất.</p><p>Quy trình cấy tóc được thực hiện trong môi trường chuẩn y khoa với định hướng hạn chế xâm lấn tối thiểu, chú trọng độ chính xác cao trong quá trình tách lọc và cấy nang tóc.</p>\',
+                \'description\' => \'<p class="mb-4">Cấy tóc tự thân là phương pháp sử dụng chính nang tóc khỏe mạnh sau gáy của khách hàng để phục hồi các vùng tóc thưa, hói hoặc hạ đường chân tóc thiếu cân đối. Tại Theq, mỗi nang tóc sau cấy được định hướng hài hòa và mọc theo hướng tự nhiên nhất.</p><p>Quy trình cấy tóc được thực hiện trong môi trường chuẩn y khoa với định hướng hạn chế xâm lấn tối thiểu, chú trọng độ chính xác cao trong quá trình tách lọc và cấy nang tóc.</p>\',
                 \'image\' => \'/images/Hinh-web-3-1.png\',
                 \'slug\' => \'cay-toc-y-khoa\',
                 \'is_highlight\' => false,
@@ -128,7 +128,7 @@ $newServicesCode = '        // 3. Seed Services (Services Catalog)
                     ],
                     [
                         \'title\' => \'Đồng hành dài hạn\',
-                        \'desc\' => \'Không gian phòng khám vô trùng riêng tư, chuyên nghiệp. KT Beauty cam kết đồng hành từ tư vấn tới hậu phẫu trọn đời.\',
+                        \'desc\' => \'Không gian phòng khám vô trùng riêng tư, chuyên nghiệp. Theq cam kết đồng hành từ tư vấn tới hậu phẫu trọn đời.\',
                         \'img\' => \'/images/Hinh-web-9-1.png\',
                     ],
                 ],
@@ -206,7 +206,7 @@ $newServicesCode = '        // 3. Seed Services (Services Catalog)
                 \'description\' => \'Công nghệ nâng cơ không xâm lấn hàng đầu thế giới được FDA Hoa Kỳ chứng nhận.\',
                 \'image\' => \'/images/web.png\',
                 \'is_highlight\' => false,
-                \'pillars' => [
+                \'pillars\' => [
                     [
                         \'title\' => \'Thiết kế vector nâng cơ\',
                         \'desc\' => \'Xác định các vùng cơ chùng nhão chảy xệ để đi năng lượng sóng siêu âm phù hợp.\',
@@ -321,25 +321,25 @@ $newServicesCode = '        // 3. Seed Services (Services Catalog)
                         \'img\' => \'/images/white-placeholder.png\',
                     ],
                     [
-                        \'title' => 'Ủ tê và đi khắc sợi vi điểm',
-                        'desc' => 'Đi sợi siêu mảnh đan xen lông mày tự nhiên mà hoàn toàn không đau rát.',
-                        'img' => '/images/white-placeholder.png',
+                        \'title\' => \'Ủ tê và đi khắc sợi vi điểm\',
+                        \'desc\' => \'Đi sợi siêu mảnh đan xen lông mày tự nhiên mà hoàn toàn không đau rát.\',
+                        \'img\' => \'/images/white-placeholder.png\',
                     ],
                     [
-                        'title' => 'Thoa dưỡng màu bảo vệ',
-                        'desc' => 'Thoa tinh chất dưỡng màu thảo dược giúp da bong mịn màng và giữ màu đẹp nhất.',
-                        'img' => '/images/white-placeholder.png',
+                        \'title\' => \'Thoa dưỡng màu bảo vệ\',
+                        \'desc\' => \'Thoa tinh chất dưỡng màu thảo dược giúp da bong mịn màng và giữ màu đẹp nhất.\',
+                        \'img\' => \'/images/white-placeholder.png\',
                     ]
                 ],
-                'reviews' => [
-                    '/images/white-placeholder.png',
+                \'reviews\' => [
+                    \'/images/white-placeholder.png\',
                 ],
-                'before_after' => [
+                \'before_after\' => [
                     [
-                        'title' => 'Khách hàng N.H.Y',
-                        'before' => '/images/white-placeholder.png',
-                        'after' => '/images/white-placeholder.png',
-                        'desc' => 'Tái tạo dáng lông mày nhạt thưa, cân đối sắc sảo làm bừng sáng gương mặt.',
+                        \'title\' => \'Khách hàng N.H.Y\',
+                        \'before\' => \'/images/white-placeholder.png\',
+                        \'after\' => \'/images/white-placeholder.png\',
+                        \'desc\' => \'Tái tạo dáng lông mày nhạt thưa, cân đối sắc sảo làm bừng sáng gương mặt.\',
                     ]
                 ]
             ]
@@ -352,7 +352,7 @@ $newServicesCode = '        // 3. Seed Services (Services Catalog)
                     \'category\' => $srv[\'category\'],
                     \'price\' => $srv[\'price\'],
                     \'description\' => $srv[\'description\'],
-                    \'image\' => $srv['image'],
+                    \'image\' => $srv[\'image\'],
                     \'slug\' => $srv[\'slug\'] ?? Str::slug($srv[\'name\']),
                     \'is_highlight\' => $srv[\'is_highlight\'],
                     \'pillars\' => $srv[\'pillars\'] ?? null,
