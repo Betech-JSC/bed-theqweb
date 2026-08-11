@@ -28,10 +28,10 @@ export const Hero: React.FC<HeroProps> = ({ banners = [] }) => {
   const defaultBanners: Banner[] = [
     {
       id: 0,
-      eyebrow: "KT Beauty Medical Centre",
+      eyebrow: "Theq Medical Centre",
       title: "Kiến tạo",
       subtitle: "Vẻ đẹp độc bản",
-      description: "KT Beauty Medical Centre mang đến dịch vụ thẩm mỹ chuẩn y khoa hàng đầu Việt Nam, giúp bạn tự tin sở hữu vẻ đẹp độc bản, chuẩn tự nhiên.",
+      description: "Theq Medical Centre mang đến dịch vụ thẩm mỹ chuẩn y khoa hàng đầu Việt Nam, giúp bạn tự tin sở hữu vẻ đẹp độc bản, chuẩn tự nhiên.",
       image_desktop: "/images/Ban-banner-web-3-1.png",
       image_mobile: "/images/size-4x5-phone-1-1.png",
       button_primary_text: "Đặt Lịch Khám Ngay",
@@ -79,7 +79,7 @@ export const Hero: React.FC<HeroProps> = ({ banners = [] }) => {
             <div className="hidden md:block absolute inset-0 w-full h-full">
               <Image
                 src={s.image_desktop}
-                alt={s.title || "KT Beauty Banner Desktop"}
+                alt={s.title || "Theq Banner Desktop"}
                 fill
                 className={`object-cover ${idx === current ? "animate-slow-zoom-out" : ""}`}
                 priority={idx === 0}
@@ -90,7 +90,7 @@ export const Hero: React.FC<HeroProps> = ({ banners = [] }) => {
             <div className="block md:hidden absolute inset-0 w-full h-full">
               <Image
                 src={s.image_mobile || s.image_desktop}
-                alt={s.title || "KT Beauty Banner Mobile"}
+                alt={s.title || "Theq Banner Mobile"}
                 fill
                 className={`object-cover ${idx === current ? "animate-slow-zoom-out" : ""}`}
                 priority={idx === 0}

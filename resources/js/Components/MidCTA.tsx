@@ -8,7 +8,7 @@ export const MidCTA: React.FC = () => {
       <div className="absolute inset-0 w-full h-full opacity-60 z-1">
         <Image
           src="/images/558695653_122247947804080096_8755343274150816539_n-1.jpg"
-          alt="KT Beauty Call to Action"
+          alt="Theq Call to Action"
           fill
           className="object-cover object-center"
         />

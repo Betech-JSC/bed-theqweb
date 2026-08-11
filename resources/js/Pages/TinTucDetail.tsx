@@ -60,7 +60,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
       .catch(() => alert("Sao chép liên kết thất bại."));
   };
 
-  const domain = typeof window !== "undefined" ? window.location.origin : "https://ktbeauty.vn";
+  const domain = typeof window !== "undefined" ? window.location.origin : "https://theq.vn";
   const defaultNewsSchema = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -72,14 +72,14 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
     "datePublished": article.published_date || new Date().toISOString(),
     "author": [{
       "@type": "Person",
-      "name": article.author?.name || article.legacy_author || "KT Beauty",
+      "name": article.author?.name || article.legacy_author || "Theq",
       "url": article.author ? `${domain}/tac-gia/${article.author.slug}` : undefined
     }]
   };
 
   return (
     <>
-      <Head title={`${article.title} | KT Beauty`}>
+      <Head title={`${article.title} | Theq`}>
         {article.schema ? (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: article.schema }} />
         ) : (
@@ -135,7 +135,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                           {article.author.name}
                         </Link>
                       ) : (
-                        article.legacy_author || "KT Beauty"
+                        article.legacy_author || "Theq"
                       )}
                     </span>
                   </div>
@@ -238,7 +238,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                   <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-gold/30 shadow-sm flex-shrink-0 bg-gray-50">
                     <Image
                       src={article.author?.avatar || "/images/default-avatar.png"}
-                      alt={article.author?.name || article.legacy_author || "KT Beauty"}
+                      alt={article.author?.name || article.legacy_author || "Theq"}
                       fill
                       className="object-cover"
                     />
@@ -261,7 +261,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                       <span className="text-gray-500 text-xs font-semibold block">{article.author.role}</span>
                     )}
                     <p className="text-xs md:text-sm text-gray-650 font-light leading-relaxed">
-                      {article.author?.bio || "Đội ngũ biên tập viên và hội đồng y khoa KT Beauty chịu trách nhiệm kiểm duyệt nội dung, mang lại các thông tin làm đẹp chuẩn y khoa, an toàn và hiệu quả."}
+                      {article.author?.bio || "Đội ngũ biên tập viên và hội đồng y khoa Theq chịu trách nhiệm kiểm duyệt nội dung, mang lại các thông tin làm đẹp chuẩn y khoa, an toàn và hiệu quả."}
                     </p>
                   </div>
                 </div>
@@ -324,7 +324,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                   Đặt Lịch Hẹn Khám
                 </h3>
                 <p className="text-xs text-gray-300 font-light leading-relaxed mb-6">
-                  Liên hệ ngay với hội đồng bác sĩ chuyên gia tại KT Beauty để đặt lịch hẹn khám trực tiếp.
+                  Liên hệ ngay với hội đồng bác sĩ chuyên gia tại Theq để đặt lịch hẹn khám trực tiếp.
                 </p>
                 <Link
                   href="/dat-lich"

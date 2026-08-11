@@ -13,7 +13,7 @@ return new class extends Migration
         $settings = [
             [
                 'key' => 'intro_title',
-                'value' => 'KT BEAUTY MEDICAL CENTRE',
+                'value' => 'THEQ MEDICAL CENTRE',
                 'label' => 'Tiêu đề khối giới thiệu',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -27,14 +27,14 @@ return new class extends Migration
             ],
             [
                 'key' => 'intro_desc_1',
-                'value' => 'Tọa lạc tại vị trí đắc địa ở Thành phố Hồ Chí Minh, KT Beauty Medical Centre tự hào là một trong những trung tâm thẩm mỹ hàng đầu cung cấp trọn gói các dịch vụ chăm sóc sắc đẹp từ Da liễu thẩm mỹ, Thẩm mỹ nội khoa, Phẫu thuật tạo hình thẩm mỹ cho đến Phun xăm nghệ thuật.',
+                'value' => 'Tọa lạc tại vị trí đắc địa ở Thành phố Hồ Chí Minh, Theq Medical Centre tự hào là một trong những trung tâm thẩm mỹ hàng đầu cung cấp trọn gói các dịch vụ chăm sóc sắc đẹp từ Da liễu thẩm mỹ, Thẩm mỹ nội khoa, Phẫu thuật tạo hình thẩm mỹ cho đến Phun xăm nghệ thuật.',
                 'label' => 'Mô tả giới thiệu - Đoạn 1',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'key' => 'intro_desc_2',
-                'value' => 'Với triết lý làm đẹp chuẩn tự nhiên, tôn vinh nét riêng của từng cá nhân, đội ngũ Bác sĩ, chuyên gia đầu ngành tại KT Beauty cam kết đồng hành cùng quý khách hàng trên hành trình khám phá và hoàn thiện phiên bản sắc đẹp hoàn hảo nhất của chính mình.',
+                'value' => 'Với triết lý làm đẹp chuẩn tự nhiên, tôn vinh nét riêng của từng cá nhân, đội ngũ Bác sĩ, chuyên gia đầu ngành tại Theq cam kết đồng hành cùng quý khách hàng trên hành trình khám phá và hoàn thiện phiên bản sắc đẹp hoàn hảo nhất của chính mình.',
                 'label' => 'Mô tả giới thiệu - Đoạn 2',
                 'created_at' => now(),
                 'updated_at' => now(),

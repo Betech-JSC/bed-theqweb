@@ -40,8 +40,8 @@ export default function TacGiaDetail({ author, articles = [] }: TacGiaDetailProp
   return (
     <>
       <Head>
-        <title>{author.meta_title || `${author.name} - Tác giả | KT Beauty`}</title>
-        <meta name="description" content={author.meta_description || author.bio || `Thông tin và các bài viết của tác giả ${author.name} tại KT Beauty.`} />
+        <title>{author.meta_title || `${author.name} - Tác giả | Theq`}</title>
+        <meta name="description" content={author.meta_description || author.bio || `Thông tin và các bài viết của tác giả ${author.name} tại Theq.`} />
         {author.meta_keywords && <meta name="keywords" content={author.meta_keywords} />}
         {author.meta_robots && <meta name="robots" content={author.meta_robots} />}
         {author.canonical_link && <link rel="canonical" href={author.canonical_link} />}
@@ -102,7 +102,7 @@ export default function TacGiaDetail({ author, articles = [] }: TacGiaDetailProp
                   />
                 ) : (
                   <p className="text-sm md:text-base text-gray-500 font-light leading-relaxed">
-                    Bác sĩ chuyên gia đồng hành cùng KT Beauty Medical Centre cung cấp thông tin y khoa chính thống, uy tín và chuẩn mực về chăm sóc sắc đẹp thẩm mỹ.
+                    Bác sĩ chuyên gia đồng hành cùng Theq Medical Centre cung cấp thông tin y khoa chính thống, uy tín và chuẩn mực về chăm sóc sắc đẹp thẩm mỹ.
                   </p>
                 )}
               </div>

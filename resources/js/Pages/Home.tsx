@@ -89,7 +89,7 @@ interface HomeProps {
 export default function Home({ banners = [], doctors = [], faqs = [], services = [], realResults = [], articles = [] }: HomeProps) {
   return (
     <>
-      <Head title="KT Beauty Medical Centre" />
+      <Head title="Theq Medical Centre" />
       <Header />
       <main className="flex-grow">
         <Hero banners={banners} />

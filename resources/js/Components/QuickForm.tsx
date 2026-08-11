@@ -170,7 +170,7 @@ export const QuickForm: React.FC = () => {
             <span className="text-[#a88a5e]">Kiến Tạo Sắc Đẹp</span>
           </h2>
           <p className="text-sm md:text-base text-gray-600 font-light max-w-xl leading-relaxed mb-8">
-            Đội ngũ chuyên gia và y bác sĩ tại KT Beauty Medical Centre luôn sẵn sàng lắng nghe, đồng hành và thiết kế phác đồ cá nhân hóa giúp bạn sở hữu vẻ đẹp tự nhiên hoàn mỹ nhất.
+            Đội ngũ chuyên gia và y bác sĩ tại Theq Medical Centre luôn sẵn sàng lắng nghe, đồng hành và thiết kế phác đồ cá nhân hóa giúp bạn sở hữu vẻ đẹp tự nhiên hoàn mỹ nhất.
           </p>
 
           {/* Key Value Badges */}
@@ -243,7 +243,7 @@ export const QuickForm: React.FC = () => {
               Đặt Lịch Hẹn Khám
             </h3>
             <p className="text-xs text-gray-400 font-light text-center mb-6 max-w-xs mx-auto">
-              Đặt hẹn khám trực tiếp với bác sĩ tại các cơ sở KT Beauty nhanh chóng.
+              Đặt hẹn khám trực tiếp với bác sĩ tại các cơ sở Theq nhanh chóng.
             </p>
 
             {wasSuccessful ? (
@@ -253,7 +253,7 @@ export const QuickForm: React.FC = () => {
                 </div>
                 <h4 className="font-bold text-gray-800 text-lg mb-2">Đặt Lịch Thành Công!</h4>
                 <p className="text-xs text-gray-500 font-light leading-relaxed max-w-[240px] mx-auto">
-                  Cảm ơn bạn đã tin tưởng KT Beauty. Chúng tôi đã ghi nhận yêu cầu đặt lịch hẹn khám của bạn và sẽ liên hệ xác nhận trong thời gian sớm nhất.
+                  Cảm ơn bạn đã tin tưởng Theq. Chúng tôi đã ghi nhận yêu cầu đặt lịch hẹn khám của bạn và sẽ liên hệ xác nhận trong thời gian sớm nhất.
                 </p>
               </div>
             ) : (
@@ -364,7 +364,7 @@ export const QuickForm: React.FC = () => {
                       required
                     >
                       <option value="">Chọn cơ sở làm đẹp *</option>
-                      <option value="KT Beauty - Sài Gòn">KT Beauty - Sài Gòn</option>
+                      <option value="Theq - Sài Gòn">Theq - Sài Gòn</option>
                       <option value="Văn phòng hợp tác Úc Châu">Văn phòng hợp tác Úc Châu</option>
                     </select>
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">

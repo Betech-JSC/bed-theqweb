@@ -20,7 +20,7 @@ return new class extends Migration
             ],
             [
                 'key' => 'why_choose_us_1_desc',
-                'value' => 'Các quy trình chăm sóc sắc đẹp tại KT Beauty Medical Centre tuân thủ theo tiêu chuẩn thẩm mỹ nghiêm ngặt của Úc Châu, đảm bảo an toàn và hiệu quả cho khách hàng',
+                'value' => 'Các quy trình chăm sóc sắc đẹp tại Theq Medical Centre tuân thủ theo tiêu chuẩn thẩm mỹ nghiêm ngặt của Úc Châu, đảm bảo an toàn và hiệu quả cho khách hàng',
                 'label' => 'Thẻ 1 - Mô tả',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -41,7 +41,7 @@ return new class extends Migration
             ],
             [
                 'key' => 'why_choose_us_2_desc',
-                'value' => 'Mỗi khách hàng đều có nét đẹp riêng biệt. KT Beauty Medical Centre luôn lắng nghe và đưa ra những lời khuyên tốt nhất để tôn lên vẻ đẹp tự nhiên của từng người, đảm bảo mỗi kết quả đều được cá nhân hóa hoàn toàn',
+                'value' => 'Mỗi khách hàng đều có nét đẹp riêng biệt. Theq Medical Centre luôn lắng nghe và đưa ra những lời khuyên tốt nhất để tôn lên vẻ đẹp tự nhiên của từng người, đảm bảo mỗi kết quả đều được cá nhân hóa hoàn toàn',
                 'label' => 'Thẻ 2 - Mô tả',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -83,7 +83,7 @@ return new class extends Migration
             ],
             [
                 'key' => 'why_choose_us_4_desc',
-                'value' => 'Ứng dụng công nghệ và kỹ thuật hiện đại, KT Beauty Medical Centre cung cấp nhiều phương án thẩm mỹ từ phẫu thuật đến không phẫu thuật với kết quả tự nhiên, giảm tối đa biến chứng, phù hợp nhu cầu và tình trạng cá nhân',
+                'value' => 'Ứng dụng công nghệ và kỹ thuật hiện đại, Theq Medical Centre cung cấp nhiều phương án thẩm mỹ từ phẫu thuật đến không phẫu thuật với kết quả tự nhiên, giảm tối đa biến chứng, phù hợp nhu cầu và tình trạng cá nhân',
                 'label' => 'Thẻ 4 - Mô tả',
                 'created_at' => now(),
                 'updated_at' => now(),

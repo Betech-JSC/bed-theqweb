@@ -11,14 +11,14 @@ export default function DieuKhoanSuDungPage() {
   const defaultContent = `<div>
               <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">1. Chấp thuận điều khoản</h2>
               <p class="mb-4">
-                Bằng việc truy cập, duyệt website hoặc sử dụng bất kỳ dịch vụ trực tuyến nào do KT Beauty Medical Centre cung cấp, người dùng đồng ý tuân thủ toàn bộ các điều khoản, điều kiện và thông báo được quy định tại đây. Nếu bạn không đồng ý với các điều khoản này, vui lòng ngừng sử dụng website.
+                Bằng việc truy cập, duyệt website hoặc sử dụng bất kỳ dịch vụ trực tuyến nào do Theq Medical Centre cung cấp, người dùng đồng ý tuân thủ toàn bộ các điều khoản, điều kiện và thông báo được quy định tại đây. Nếu bạn không đồng ý với các điều khoản này, vui lòng ngừng sử dụng website.
               </p>
             </div>
 
             <div class="mt-8">
               <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">2. Sở hữu trí tuệ</h2>
               <ul class="list-disc list-inside pl-4 space-y-2 text-gray-600">
-                <li>Toàn bộ nội dung trên website bao gồm nhưng không giới hạn ở: văn bản, hình ảnh, video, đồ họa, logo, thiết kế và giao diện thuộc quyền sở hữu hợp pháp của KT Beauty Medical Centre (CÔNG TY TNHH KHÁNH MINH GROUP).</li>
+                <li>Toàn bộ nội dung trên website bao gồm nhưng không giới hạn ở: văn bản, hình ảnh, video, đồ họa, logo, thiết kế và giao diện thuộc quyền sở hữu hợp pháp của Theq Medical Centre (CÔNG TY TNHH KHÁNH MINH GROUP).</li>
                 <li>Mọi hành vi sao chép, trích dẫn, phân phối hoặc sử dụng thương mại các tài nguyên trên website khi chưa có sự đồng ý bằng văn bản của chúng tôi đều là vi phạm pháp luật.</li>
               </ul>
             </div>
@@ -27,7 +27,7 @@ export default function DieuKhoanSuDungPage() {
               <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">3. Giới hạn trách nhiệm và bản chất thông tin</h2>
               <ul class="list-disc list-inside pl-4 space-y-2 text-gray-600">
                 <li>Các kiến thức, bài viết hướng dẫn chăm sóc da hoặc thông tin dịch vụ trên website mang tính chất tham khảo, không thể thay thế cho việc thăm khám, chẩn đoán, tư vấn và phác đồ điều trị chuyên môn trực tiếp từ bác sĩ.</li>
-                <li>KT Beauty Medical Centre nỗ lực đảm bảo tính chính xác của thông tin trên website nhưng không chịu trách nhiệm pháp lý đối với bất kỳ hậu quả nào phát sinh từ việc người dùng tự ý áp dụng thông tin mà không qua tư vấn y khoa chuyên môn.</li>
+                <li>Theq Medical Centre nỗ lực đảm bảo tính chính xác của thông tin trên website nhưng không chịu trách nhiệm pháp lý đối với bất kỳ hậu quả nào phát sinh từ việc người dùng tự ý áp dụng thông tin mà không qua tư vấn y khoa chuyên môn.</li>
               </ul>
             </div>
 
@@ -44,7 +44,7 @@ export default function DieuKhoanSuDungPage() {
             <div class="mt-8">
               <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">5. Thay đổi điều khoản</h2>
               <p class="mb-4">
-                KT Beauty Medical Centre có quyền chỉnh sửa, cập nhật nội dung Điều khoản sử dụng này vào bất kỳ lúc nào mà không cần thông báo trước. Các thay đổi sẽ có hiệu lực ngay khi được đăng tải trên website.
+                Theq Medical Centre có quyền chỉnh sửa, cập nhật nội dung Điều khoản sử dụng này vào bất kỳ lúc nào mà không cần thông báo trước. Các thay đổi sẽ có hiệu lực ngay khi được đăng tải trên website.
               </p>
             </div>`;
 
@@ -52,7 +52,7 @@ export default function DieuKhoanSuDungPage() {
 
   return (
     <>
-      <Head title="Điều Khoản Sử Dụng | KT Beauty" />
+      <Head title="Điều Khoản Sử Dụng | Theq" />
       <Header />
       <main className="flex-grow font-sans bg-white">
         {/* Banner/Hero */}

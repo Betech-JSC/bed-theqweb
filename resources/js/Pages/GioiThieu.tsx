@@ -39,8 +39,8 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
   const settings = (props.settings as Record<string, string>) || {};
 
   const storyTitle = settings.intro_story_title || "Triết Lý Làm Đẹp Chuẩn Y Khoa & Vẻ Đẹp Độc Bản";
-  const storyDesc1 = settings.intro_story_desc_1 || "Tại KT Beauty Medical Centre, chúng tôi tin rằng mỗi người đều sở hữu một vẻ đẹp độc bản riêng biệt. Sự tự tin của bạn là món quà quý giá nhất, và sứ mệnh của chúng tôi là giúp bạn khám phá và gìn giữ nét riêng đó thông qua các giải pháp y khoa thẩm mỹ tiên tiến, an toàn.";
-  const storyDesc2 = settings.intro_story_desc_2 || "Được thành lập bởi đội ngũ bác sĩ chuyên khoa I, KT Beauty đã không ngừng nâng cấp hệ thống phòng khám, chuyển giao độc quyền các công nghệ từ Hàn Quốc, Mỹ và châu Âu. Chúng tôi coi sự an toàn và hiệu quả thực tế của khách hàng là kim chỉ nam tối thượng.";
+  const storyDesc1 = settings.intro_story_desc_1 || "Tại Theq Medical Centre, chúng tôi tin rằng mỗi người đều sở hữu một vẻ đẹp độc bản riêng biệt. Sự tự tin của bạn là món quà quý giá nhất, và sứ mệnh của chúng tôi là giúp bạn khám phá và gìn giữ nét riêng đó thông qua các giải pháp y khoa thẩm mỹ tiên tiến, an toàn.";
+  const storyDesc2 = settings.intro_story_desc_2 || "Được thành lập bởi đội ngũ bác sĩ chuyên khoa I, Theq đã không ngừng nâng cấp hệ thống phòng khám, chuyển giao độc quyền các công nghệ từ Hàn Quốc, Mỹ và châu Âu. Chúng tôi coi sự an toàn và hiệu quả thực tế của khách hàng là kim chỉ nam tối thượng.";
   const storyQuote = settings.intro_story_quote || "Chúng tôi không thay đổi diện mạo của bạn, chúng tôi tôn vinh và khôi phục những nét đẹp độc bản tự nhiên nhất.";
   const storyQuoteAuthor = settings.intro_story_quote_author || "CEO Khánh Tôn";
   const storyImage1 = settings.intro_story_image_1 || "";
@@ -49,7 +49,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
 
   return (
     <>
-      <Head title="Về Chúng Tôi | KT Beauty Medical Centre" />
+      <Head title="Về Chúng Tôi | Theq Medical Centre" />
       <Header />
 
       <main className="flex-grow font-sans bg-white">
@@ -58,7 +58,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
           <div className="absolute inset-0 w-full h-full opacity-40 z-1">
             <Image
               src="/images/Ban-banner-web-3-1.png"
-              alt="KT Beauty Introduction Banner"
+              alt="Theq Introduction Banner"
               fill
               className="object-cover"
               priority
@@ -117,7 +117,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
               <div className="col-span-8 relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-gold/15">
                 <Image
                   src={storyImage1}
-                  alt="KT Beauty Workshop"
+                  alt="Theq Workshop"
                   fill
                   className="object-cover"
                 />
@@ -133,7 +133,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
               <div className="col-span-12 relative aspect-[2/1] rounded-2xl overflow-hidden shadow-lg border border-gold/15 mt-4">
                 <Image
                   src={storyImage3}
-                  alt="KT Beauty Clinic"
+                  alt="Theq Clinic"
                   fill
                   className="object-cover"
                 />
@@ -167,7 +167,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
                     <span className="text-gold font-bold font-serif text-2xl block mb-1">2018</span>
                     <h4 className="font-serif font-bold text-gray-800 text-lg mb-2">Thành Lập Cơ Sở Đầu Tiên</h4>
                     <p className="text-xs md:text-sm text-gray-500 font-light leading-relaxed">
-                      KT Beauty Clinic chính thức ra mắt tại TP. Hồ Chí Minh với định hướng trở thành hệ thống làm đẹp chất lượng cao, tập trung chăm sóc da và điều trị không xâm lấn.
+                      Theq Clinic chính thức ra mắt tại TP. Hồ Chí Minh với định hướng trở thành hệ thống làm đẹp chất lượng cao, tập trung chăm sóc da và điều trị không xâm lấn.
                     </p>
                   </div>
                 </div>
@@ -308,7 +308,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
           </div>
         </section>
 
-        {/* Model Carousel Section (Clone from ktbeauty.com.vn) */}
+        {/* Model Carousel Section (Clone from theq.com.vn) */}
         <AboutHeroCarousel 
           eyebrow={settings.about_carousel_eyebrow}
           title={settings.about_carousel_title}

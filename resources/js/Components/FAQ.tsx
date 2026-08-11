@@ -29,19 +29,19 @@ export const FAQ: React.FC<FAQProps> = ({ faqs = [] }) => {
 
   const defaultFaqs = [
     {
-      q: "Quy trình thăm khám tại KT Beauty Medical Centre như thế nào?",
-      a: "Tất cả khách hàng đến với KT Beauty đều được đón tiếp theo quy trình chuẩn y khoa. Bạn sẽ được Bác sĩ chuyên khoa trực tiếp soi da, tư vấn tình trạng và thiết kế phác đồ điều trị riêng biệt. Trung tâm cam kết tính minh bạch trong chỉ định và sử dụng các sản phẩm chính hãng.",
+      q: "Quy trình thăm khám tại Theq Medical Centre như thế nào?",
+      a: "Tất cả khách hàng đến với Theq đều được đón tiếp theo quy trình chuẩn y khoa. Bạn sẽ được Bác sĩ chuyên khoa trực tiếp soi da, tư vấn tình trạng và thiết kế phác đồ điều trị riêng biệt. Trung tâm cam kết tính minh bạch trong chỉ định và sử dụng các sản phẩm chính hãng.",
     },
     {
-      q: "KT Beauty Medical Centre có cam kết hiệu quả điều trị không?",
+      q: "Theq Medical Centre có cam kết hiệu quả điều trị không?",
       a: "Chúng tôi luôn cam kết chất lượng điều trị bằng văn bản dựa trên tình trạng lâm sàng thực tế của khách hàng. Tất cả dịch vụ phẫu thuật hay điều trị công nghệ cao đều đi kèm chế độ bảo hành và chăm sóc hậu phẫu chu đáo.",
     },
     {
       q: "Các công nghệ điều trị tại trung tâm có đạt chuẩn y khoa không?",
-      a: "100% máy móc và công nghệ tại KT Beauty Medical Centre đều được chứng nhận FDA (Hoa Kỳ) và CE (Châu Âu) về tính an toàn và hiệu quả, được chuyển giao chính hãng trực tiếp từ các tập đoàn y tế thẩm mỹ lớn.",
+      a: "100% máy móc và công nghệ tại Theq Medical Centre đều được chứng nhận FDA (Hoa Kỳ) và CE (Châu Âu) về tính an toàn và hiệu quả, được chuyển giao chính hãng trực tiếp từ các tập đoàn y tế thẩm mỹ lớn.",
     },
     {
-      q: "Chi phí các dịch vụ tại KT Beauty như thế nào?",
+      q: "Chi phí các dịch vụ tại Theq như thế nào?",
       a: "Chi phí được công khai rõ ràng trong quá trình tư vấn và không phát sinh thêm bất kỳ khoản phụ thu nào trong suốt liệu trình. Chúng tôi cũng thường xuyên có các chương trình ưu đãi tri ân và hỗ trợ trả góp 0% lãi suất.",
     },
     {

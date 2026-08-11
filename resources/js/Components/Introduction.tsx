@@ -12,10 +12,10 @@ export const Introduction: React.FC = () => {
   const crmSubmissionsCount = (props.crm_submissions_count as number) || 0;
 
   // Custom Settings (with fallback defaults)
-  const title = settings.intro_title || "KT BEAUTY MEDICAL CENTRE";
+  const title = settings.intro_title || "THEQ MEDICAL CENTRE";
   const subtitle = settings.intro_subtitle || "Về Chúng Tôi";
-  const desc1 = settings.intro_desc_1 || "Tọa lạc tại vị trí đắc địa ở Thành phố Hồ Chí Minh, KT Beauty Medical Centre tự hào là một trong những trung tâm thẩm mỹ hàng đầu cung cấp trọn gói các dịch vụ chăm sóc sắc đẹp từ Da liễu thẩm mỹ, Thẩm mỹ nội khoa, Phẫu thuật tạo hình thẩm mỹ cho đến Phun xăm nghệ thuật.";
-  const desc2 = settings.intro_desc_2 || "Với triết lý làm đẹp chuẩn tự nhiên, tôn vinh nét riêng của từng cá nhân, đội ngũ Bác sĩ, chuyên gia đầu ngành tại KT Beauty cam kết đồng hành cùng quý khách hàng trên hành trình khám phá và hoàn thiện phiên bản sắc đẹp hoàn hảo nhất của chính mình.";
+  const desc1 = settings.intro_desc_1 || "Tọa lạc tại vị trí đắc địa ở Thành phố Hồ Chí Minh, Theq Medical Centre tự hào là một trong những trung tâm thẩm mỹ hàng đầu cung cấp trọn gói các dịch vụ chăm sóc sắc đẹp từ Da liễu thẩm mỹ, Thẩm mỹ nội khoa, Phẫu thuật tạo hình thẩm mỹ cho đến Phun xăm nghệ thuật.";
+  const desc2 = settings.intro_desc_2 || "Với triết lý làm đẹp chuẩn tự nhiên, tôn vinh nét riêng của từng cá nhân, đội ngũ Bác sĩ, chuyên gia đầu ngành tại Theq cam kết đồng hành cùng quý khách hàng trên hành trình khám phá và hoàn thiện phiên bản sắc đẹp hoàn hảo nhất của chính mình.";
 
   // Dynamic Badges calculation
   const showDoctorsMode = settings.intro_stats_doctors_mode || "auto";
@@ -69,7 +69,7 @@ export const Introduction: React.FC = () => {
           <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-gray-200/20">
             <Image
               src={settings.intro_image || ""}
-              alt="KT Beauty Medical Centre Interior"
+              alt="Theq Medical Centre Interior"
               fill
               className="object-cover hover:scale-105 transition-transform duration-700"
             />

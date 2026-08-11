@@ -9,7 +9,7 @@ export default function Guest({ children }: PropsWithChildren) {
                 {/* Background Image with Elegant Overlay */}
                 <img 
                     src="/images/BANNER-WEB-3-1.png" 
-                    alt="KT Beauty Luxury Aesthetic" 
+                    alt="Theq Luxury Aesthetic" 
                     className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity scale-105 hover:scale-100 transition-transform duration-[10s] ease-out"
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#121212] via-[#1a1815]/95 to-[#2a241e]/85 z-10" />

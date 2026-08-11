@@ -39,19 +39,19 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
     {
       image: "/images/625168557_122264581190080096_2304724374689571712_n-1.jpg",
       hasQuote: true,
-      quote: "Điều dưỡng trân quý nhất tại KT Beauty là sự nhất quán trong chuyên môn và chăm sóc - từ thăm khám đến theo dõi sau liệu trình.",
+      quote: "Điều dưỡng trân quý nhất tại Theq là sự nhất quán trong chuyên môn và chăm sóc - từ thăm khám đến theo dõi sau liệu trình.",
       author: "Model TUYÊN DƯƠNG",
     },
     {
       image: "/images/627381223_122264581196080096_2191168211357172673_n-1.jpg",
       hasQuote: true,
-      quote: "Vẻ đẹp bền vững bắt đầu từ sự thấu hiểu và phục hồi chuẩn y khoa từ bên trong. Cảm ơn KT Beauty đã đồng hành cùng Dương trên hành trình nâng tầm nhan sắc.",
+      quote: "Vẻ đẹp bền vững bắt đầu từ sự thấu hiểu và phục hồi chuẩn y khoa từ bên trong. Cảm ơn Theq đã đồng hành cùng Dương trên hành trình nâng tầm nhan sắc.",
       author: "Model TUYÊN DƯƠNG",
     },
     {
       image: "/images/626542132_122264581148080096_3645052413921176353_n-1.jpg",
       hasQuote: true,
-      quote: "Đến với KT Beauty là một quyết định đúng đắn. Đội ngũ bác sĩ và kỹ thuật viên tận tâm, chu đáo giúp tôi hoàn toàn an tâm trong suốt liệu trình.",
+      quote: "Đến với Theq là một quyết định đúng đắn. Đội ngũ bác sĩ và kỹ thuật viên tận tâm, chu đáo giúp tôi hoàn toàn an tâm trong suốt liệu trình.",
       author: "Model MỸ NHÂN",
     },
     {
@@ -70,8 +70,8 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
     {
       image: "/images/625385339_122264581316080096_6494403903634308287_n-1.jpg",
       hasQuote: true,
-      quote: "Các bác sĩ tại KT Beauty luôn tư vấn rất kỹ lưỡng và đưa ra phác đồ chuyên biệt phù hợp nhất với da của tôi, hiệu quả thấy rõ sau từng buổi.",
-      author: "Khách hàng KT BEAUTY",
+      quote: "Các bác sĩ tại Theq luôn tư vấn rất kỹ lưỡng và đưa ra phác đồ chuyên biệt phù hợp nhất với da của tôi, hiệu quả thấy rõ sau từng buổi.",
+      author: "Khách hàng THEQ",
     },
     {
       image: "/images/Untitled-2.png",
@@ -159,7 +159,7 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
       <div className="max-w-7xl mx-auto px-4 md:px-[10%] mb-10">
         <div className="text-center md:text-left space-y-2">
           <span className="text-gold uppercase tracking-widest text-[10px] md:text-xs font-semibold block">
-            {eyebrow || "KT BEAUTY MEDICAL CENTRE"}
+            {eyebrow || "THEQ MEDICAL CENTRE"}
           </span>
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-serif font-bold text-dark-bg tracking-wide">
             {title || "Kiến tạo - Vẻ đẹp độc bản"}

@@ -11,11 +11,11 @@ export default function ChinhSachBaoMatPage() {
   const defaultContent = `<div>
               <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">1. Mục đích và phạm vi thu thập thông tin</h2>
               <p class="mb-4">
-                KT Beauty Medical Centre (thuộc sở hữu của CÔNG TY TNHH KHÁNH MINH GROUP) thực hiện việc thu thập thông tin cá nhân của khách hàng khi khách hàng tương tác, đăng ký tư vấn hoặc đặt lịch dịch vụ trên website.
+                Theq Medical Centre (thuộc sở hữu của CÔNG TY TNHH KHÁNH MINH GROUP) thực hiện việc thu thập thông tin cá nhân của khách hàng khi khách hàng tương tác, đăng ký tư vấn hoặc đặt lịch dịch vụ trên website.
               </p>
               <ul class="list-disc list-inside pl-4 space-y-2 text-gray-600">
                 <li>Phạm vi dữ liệu thu thập bao gồm: Họ và tên, số điện thoại, địa chỉ email, nhu cầu tư vấn hoặc các thông tin khác do khách hàng chủ động cung cấp qua biểu mẫu trực tuyến.</li>
-                <li>Mọi thông tin cung cấp phải đảm bảo tính chính xác và hợp pháp. KT Beauty Medical Centre không chịu trách nhiệm liên quan đến pháp luật của thông tin khai báo.</li>
+                <li>Mọi thông tin cung cấp phải đảm bảo tính chính xác và hợp pháp. Theq Medical Centre không chịu trách nhiệm liên quan đến pháp luật của thông tin khai báo.</li>
               </ul>
             </div>
 
@@ -33,17 +33,17 @@ export default function ChinhSachBaoMatPage() {
             <div class="mt-8">
               <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">3. Thời gian lưu trữ thông tin</h2>
               <p class="mb-4">
-                Dữ liệu cá nhân của khách hàng sẽ được lưu trữ bảo mật trên hệ thống nội bộ của KT Beauty Medical Centre cho đến khi có yêu cầu hủy bỏ từ phía khách hàng hoặc khi mục đích thu thập không còn phù hợp với quy định của pháp luật.
+                Dữ liệu cá nhân của khách hàng sẽ được lưu trữ bảo mật trên hệ thống nội bộ của Theq Medical Centre cho đến khi có yêu cầu hủy bỏ từ phía khách hàng hoặc khi mục đích thu thập không còn phù hợp với quy định của pháp luật.
               </p>
             </div>
 
             <div class="mt-8">
               <h2 class="text-xl font-serif font-bold text-dark-bg mb-4">4. Những người hoặc tổ chức có thể được tiếp cận thông tin</h2>
               <p class="mb-4">
-                KT Beauty Medical Centre cam kết không bán, chia sẻ hay trao đổi thông tin cá nhân của khách hàng cho bất kỳ bên thứ ba nào khác, ngoại trừ các trường hợp sau:
+                Theq Medical Centre cam kết không bán, chia sẻ hay trao đổi thông tin cá nhân của khách hàng cho bất kỳ bên thứ ba nào khác, ngoại trừ các trường hợp sau:
               </p>
               <ul class="list-disc list-inside pl-4 space-y-2 text-gray-600">
-                <li>Các nhân viên nội bộ thuộc hệ thống KT Beauty Medical Centre được phân công trách nhiệm chăm sóc khách hàng.</li>
+                <li>Các nhân viên nội bộ thuộc hệ thống Theq Medical Centre được phân công trách nhiệm chăm sóc khách hàng.</li>
                 <li>Cung cấp theo yêu cầu bằng văn bản của cơ quan Nhà nước có thẩm quyền theo quy định của pháp luật Việt Nam.</li>
               </ul>
             </div>
@@ -55,7 +55,7 @@ export default function ChinhSachBaoMatPage() {
                 <li><strong class="text-dark-bg font-semibold">Mã số thuế:</strong> 0318660537</li>
                 <li><strong class="text-dark-bg font-semibold">Địa chỉ trụ sở:</strong> Số 1, Đường Sương Nguyệt Ánh, Phường Bến Thành, Quận 1, Thành phố Hồ Chí Minh, Việt Nam.</li>
                 <li><strong class="text-dark-bg font-semibold">Hotline:</strong> 19005006</li>
-                <li><strong class="text-dark-bg font-semibold">Email:</strong> cskh@ktbeautycentre.com.vn</li>
+                <li><strong class="text-dark-bg font-semibold">Email:</strong> cskh@theq.vn</li>
               </ul>
             </div>
 
@@ -66,7 +66,7 @@ export default function ChinhSachBaoMatPage() {
               </p>
               <ul class="list-disc list-inside pl-4 space-y-2 text-gray-600">
                 <li>Gọi điện trực tiếp đến hotline: 19005006</li>
-                <li>Gửi email yêu cầu về địa chỉ: cskh@ktbeautycentre.com.vn. Ban quản trị website có trách nhiệm hỗ trợ khách hàng thực hiện các quyền này sớm nhất.</li>
+                <li>Gửi email yêu cầu về địa chỉ: cskh@theq.vn. Ban quản trị website có trách nhiệm hỗ trợ khách hàng thực hiện các quyền này sớm nhất.</li>
               </ul>
             </div>
 
@@ -84,7 +84,7 @@ export default function ChinhSachBaoMatPage() {
 
   return (
     <>
-      <Head title="Chính Sách Bảo Mật | KT Beauty" />
+      <Head title="Chính Sách Bảo Mật | Theq" />
       <Header />
       <main className="flex-grow font-sans bg-white">
         {/* Banner/Hero */}

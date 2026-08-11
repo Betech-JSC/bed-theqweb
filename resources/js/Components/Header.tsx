@@ -89,14 +89,14 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
             {((isWhiteHeader ? settings.site_logo_dark : settings.site_logo_light)) ? (
               <Image
                 src={isWhiteHeader ? settings.site_logo_dark : settings.site_logo_light}
-                alt="KT Beauty Logo"
+                alt="Theq Logo"
                 fill
                 className="object-contain object-left"
                 priority
               />
             ) : (
               <span className="font-serif font-bold text-lg md:text-xl text-gold uppercase tracking-wider">
-                KT+ Beauty
+                Theq
               </span>
             )}
           </Link>
@@ -147,7 +147,7 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
 
                       {/* Col 4: Cam kết y khoa */}
                       <div className="bg-gray-50 p-6 rounded-lg border border-gray-200/50">
-                        <h4 className="font-serif font-bold text-gray-800 text-sm mb-2">KT Beauty Cam Kết</h4>
+                        <h4 className="font-serif font-bold text-gray-800 text-sm mb-2">Theq Cam Kết</h4>
                         <p className="text-xs text-gray-500 font-light leading-relaxed">
                           Chất lượng điều trị được cam kết bằng văn bản. Sử dụng 100% công nghệ đạt chuẩn FDA Hoa Kỳ và các dòng tinh chất chính hãng cao cấp.
                         </p>

@@ -19,8 +19,8 @@ export default function LienHePage() {
     {
       icon: <Mail className="w-6 h-6 text-gold" />,
       title: "Email Hỗ Trợ",
-      val: "support@ktbeauty.com.vn",
-      href: "mailto:support@ktbeauty.com.vn",
+      val: "support@theq.com.vn",
+      href: "mailto:support@theq.com.vn",
     },
     {
       icon: <Clock className="w-6 h-6 text-gold" />,
@@ -33,20 +33,20 @@ export default function LienHePage() {
   const locations = [
     {
       city: "Thành phố Hồ Chí Minh",
-      name: "KT Beauty Medical Centre",
+      name: "Theq Medical Centre",
       address: "25-27-29 Đường số 4, KDC Trung Sơn, Bình Hưng, Bình Chánh, TP.HCM",
       phone: "1900 5006",
     },
     {
       city: "Thành phố Hà Nội",
-      name: "KT Beauty - Văn Phòng Hợp Tác",
+      name: "Theq - Văn Phòng Hợp Tác",
       address: "Văn phòng tư vấn và hỗ trợ khách hàng, Hoàn Kiếm, Hà Nội",
       phone: "1900 5006",
     },
   ];
 
   return (
-    <><Head title="Liên Hệ | KT Beauty" />
+    <><Head title="Liên Hệ | Theq" />
       <Header />
       <main className="flex-grow font-sans bg-white">
         {/* Banner/Hero */}
@@ -125,7 +125,7 @@ export default function LienHePage() {
                 </h2>
                 <div className="w-10 h-[2.5px] bg-gold mb-6" />
                 <p className="text-sm md:text-base text-gray-500 font-light leading-relaxed mb-8">
-                  Hệ thống KT Beauty Medical Centre chào đón quý khách hàng tại các cơ sở hiện đại nhất. Vui lòng đặt lịch hẹn trước để nhận sự đón tiếp chu đáo nhất từ đội ngũ bác sĩ chuyên khoa.
+                  Hệ thống Theq Medical Centre chào đón quý khách hàng tại các cơ sở hiện đại nhất. Vui lòng đặt lịch hẹn trước để nhận sự đón tiếp chu đáo nhất từ đội ngũ bác sĩ chuyên khoa.
                 </p>
 
                 <div className="space-y-6">
@@ -154,7 +154,7 @@ export default function LienHePage() {
               <div className="lg:col-span-7 relative aspect-[4/3] w-full rounded-lg overflow-hidden shadow-xl border border-beige-bg">
                 <Image
                   src="/images/574583363_122251875866080096_1777622189448333941_n-1.jpg"
-                  alt="KT Beauty Medical Centre Clinic Lobby"
+                  alt="Theq Medical Centre Clinic Lobby"
                   fill
                   className="object-cover"
                 />

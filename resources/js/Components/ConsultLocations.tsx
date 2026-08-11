@@ -115,7 +115,7 @@ export const ConsultLocations: React.FC = () => {
 
   const branches = [
     {
-      name: "KT Beauty Medical Centre - Sài Gòn",
+      name: "Theq Medical Centre - Sài Gòn",
       address: "386-388 Đường 3/2, Phường 12, Quận 10, TP. Hồ Chí Minh",
       hotline: hotline,
       hours: "09:00 - 20:00 (Hằng ngày)",
@@ -138,10 +138,10 @@ export const ConsultLocations: React.FC = () => {
           </span>
           <h2 className="text-3xl md:text-5xl font-bold font-serif text-gray-800 tracking-wide mb-6 leading-tight">
             Hệ Thống <br />
-            <span className="text-[#a88a5e]">KT Beauty Medical Centre</span>
+            <span className="text-[#a88a5e]">Theq Medical Centre</span>
           </h2>
           <p className="text-sm md:text-base text-gray-600 font-light max-w-xl leading-relaxed mb-8">
-            KT Beauty Medical Centre sở hữu không gian làm đẹp cao cấp, tiện nghi cùng hệ thống chi nhánh trong và ngoài nước luôn sẵn sàng phục vụ Quý khách.
+            Theq Medical Centre sở hữu không gian làm đẹp cao cấp, tiện nghi cùng hệ thống chi nhánh trong và ngoài nước luôn sẵn sàng phục vụ Quý khách.
           </p>
 
           {/* Branch detail cards */}
@@ -196,7 +196,7 @@ export const ConsultLocations: React.FC = () => {
                 </div>
                 <h4 className="font-bold text-gray-800 text-lg mb-2">Đăng Ký Thành Công!</h4>
                 <p className="text-xs text-gray-500 font-light leading-relaxed max-w-[240px] mx-auto">
-                  Cảm ơn bạn đã tin tưởng KT Beauty. Bác sĩ chuyên khoa sẽ liên hệ trực tiếp cho bạn qua số điện thoại sớm nhất có thể.
+                  Cảm ơn bạn đã tin tưởng Theq. Bác sĩ chuyên khoa sẽ liên hệ trực tiếp cho bạn qua số điện thoại sớm nhất có thể.
                 </p>
               </div>
             ) : (
@@ -307,7 +307,7 @@ export const ConsultLocations: React.FC = () => {
                       required
                     >
                       <option value="">Chọn cơ sở làm đẹp *</option>
-                      <option value="KT Beauty - Sài Gòn">KT Beauty - Sài Gòn</option>
+                      <option value="Theq - Sài Gòn">Theq - Sài Gòn</option>
                       <option value="Văn phòng hợp tác Úc Châu">Văn phòng hợp tác Úc Châu</option>
                     </select>
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">

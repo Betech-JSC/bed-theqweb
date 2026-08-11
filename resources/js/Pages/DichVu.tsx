@@ -67,7 +67,7 @@ export default function DichVu({ services = [], categoriesList = [] }: DichVuPro
 
   return (
     <>
-      <Head title="Danh Mục Dịch Vụ | KT Beauty Medical Centre" />
+      <Head title="Danh Mục Dịch Vụ | Theq Medical Centre" />
       <Header />
       <main className="flex-grow font-sans bg-[#faf8f5]">
         {/* Banner/Hero */}
@@ -75,7 +75,7 @@ export default function DichVu({ services = [], categoriesList = [] }: DichVuPro
           <div className="absolute inset-0 w-full h-full opacity-50 z-1">
             <Image
               src="/images/Ban-banner-web-3-1.png"
-              alt="KT Beauty Services Banner"
+              alt="Theq Services Banner"
               fill
               className="object-cover"
               priority
@@ -168,7 +168,7 @@ export default function DichVu({ services = [], categoriesList = [] }: DichVuPro
                       </span>
 
                       <p className="text-xs md:text-sm text-gray-500 font-light leading-relaxed mb-6 line-clamp-3">
-                        {s.description || "Liên hệ với KT Beauty Medical Centre để được chuyên khoa tư vấn phác đồ và báo giá cụ thể."}
+                        {s.description || "Liên hệ với Theq Medical Centre để được chuyên khoa tư vấn phác đồ và báo giá cụ thể."}
                       </p>
 
                       <div className="mt-auto pt-4 border-t border-gray-50 flex justify-between items-center">

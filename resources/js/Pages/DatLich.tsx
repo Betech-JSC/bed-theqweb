@@ -246,7 +246,7 @@ export default function DatLich() {
 
   return (
     <>
-      <Head title="Đặt Lịch Hẹn Khám & Tư Vấn | KT Beauty" />
+      <Head title="Đặt Lịch Hẹn Khám & Tư Vấn | Theq" />
       <Header forceWhiteBg={true} />
 
       <main className="flex-grow font-sans bg-gray-55/30 pt-44 md:pt-52 pb-24 text-left">
@@ -392,7 +392,7 @@ export default function DatLich() {
                     </div>
                     <h4 className="font-bold text-gray-800 text-base mb-1.5">Đặt Lịch Hẹn Thành Công!</h4>
                     <p className="text-xs text-gray-500 font-light leading-relaxed max-w-[240px] mx-auto">
-                      Cảm ơn bạn đã lựa chọn dịch vụ của KT Beauty. Chúng tôi sẽ gọi lại xác thực lịch của bạn trong vòng 15 phút.
+                      Cảm ơn bạn đã lựa chọn dịch vụ của Theq. Chúng tôi sẽ gọi lại xác thực lịch của bạn trong vòng 15 phút.
                     </p>
                   </div>
                 ) : (
@@ -457,7 +457,7 @@ export default function DatLich() {
                           required
                         >
                           <option value="">Chọn chi nhánh gần bạn *</option>
-                          <option value="KT Beauty - Sài Gòn">KT Beauty - Sài Gòn</option>
+                          <option value="Theq - Sài Gòn">Theq - Sài Gòn</option>
                           <option value="Văn phòng hợp tác Úc Châu">Văn phòng hợp tác Úc Châu</option>
                         </select>
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">

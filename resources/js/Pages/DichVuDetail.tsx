@@ -107,7 +107,7 @@ export default function DichVuDetail({ service }: DichVuDetailProps) {
 
   return (
     <>
-      <Head title={`${service.name} | KT Beauty`} />
+      <Head title={`${service.name} | Theq`} />
       <Header />
 
       {/* Banner/Hero */}
@@ -174,7 +174,7 @@ export default function DichVuDetail({ service }: DichVuDetailProps) {
 
               {/* Commitment highlights */}
               <div className="mt-10 p-6 bg-gold/5 rounded-2xl border border-gold/10">
-                <h4 className="font-bold text-gray-800 text-sm mb-3">KT Beauty Medical Centre Cam Kết:</h4>
+                <h4 className="font-bold text-gray-800 text-sm mb-3">Theq Medical Centre Cam Kết:</h4>
                 <ul className="space-y-2 text-xs md:text-sm text-gray-500 font-light">
                   <li className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-gold"></span>
@@ -211,7 +211,7 @@ export default function DichVuDetail({ service }: DichVuDetailProps) {
                     </div>
                     <h4 className="font-bold text-gray-800 text-base mb-1.5">Đặt Lịch Thành Công!</h4>
                     <p className="text-xs text-gray-500 font-light leading-relaxed max-w-[240px] mx-auto">
-                      Cảm ơn bạn đã lựa chọn dịch vụ của KT Beauty. Yêu cầu đặt lịch hẹn của bạn đã được ghi nhận thành công.
+                      Cảm ơn bạn đã lựa chọn dịch vụ của Theq. Yêu cầu đặt lịch hẹn của bạn đã được ghi nhận thành công.
                     </p>
                   </div>
                 ) : (
@@ -265,7 +265,7 @@ export default function DichVuDetail({ service }: DichVuDetailProps) {
                           required
                         >
                           <option value="">Chọn chi nhánh gần bạn *</option>
-                          <option value="KT Beauty - Sài Gòn">KT Beauty - Sài Gòn</option>
+                          <option value="Theq - Sài Gòn">Theq - Sài Gòn</option>
                           <option value="Văn phòng hợp tác Úc Châu">Văn phòng hợp tác Úc Châu</option>
                         </select>
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">
