@@ -121,7 +121,7 @@ export default function KetQuaPage({ faqs = [], realResults = [] }: KetQuaProps)
             {/* Title */}
             <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
               <div className="text-sm md:text-base text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
-                Tại Theq Medical Centre, mỗi kết quả là sự kết hợp giữa chuyên môn, sự tinh chỉnh đúng mức và cam kết dài hạn, nhằm mang lại vẻ đẹp tự nhiên và bền vững.
+                Tại Theq Nail Centre, mỗi kết quả là sự kết hợp giữa chuyên môn, sự tinh chỉnh đúng mức và cam kết dài hạn, nhằm mang lại vẻ đẹp tự nhiên và bền vững.
               </div>
               <h2 className="text-2xl md:text-4xl font-bold font-serif text-dark-bg">
                 Hơn 10.000 khách hàng đã lựa chọn Theq

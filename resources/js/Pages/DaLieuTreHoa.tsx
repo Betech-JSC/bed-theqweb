@@ -94,7 +94,7 @@ export default function DaLieuTreHoaPage({ doctors = [], services = [] }: DaLieu
 
               {/* Subheading */}
               <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light max-w-3xl">
-                Khôi phục nét xuân, nâng niu làn da của bạn bằng công nghệ hiện đại và phác đồ chuyên khoa cá nhân hóa tại Theq Medical Centre.
+                Khôi phục nét xuân, nâng niu làn da của bạn bằng công nghệ hiện đại và phác đồ chuyên khoa cá nhân hóa tại Theq Nail Centre.
               </p>
             </div>
           </div>
@@ -226,7 +226,7 @@ export default function DaLieuTreHoaPage({ doctors = [], services = [] }: DaLieu
                         </span>
 
                         <p className="text-xs md:text-sm text-gray-500 font-light leading-relaxed mb-6 line-clamp-3">
-                          {s.description || "Liên hệ với Theq Medical Centre để được chuyên khoa tư vấn phác đồ và báo giá cụ thể."}
+                          {s.description || "Liên hệ với Theq Nail Centre để được chuyên khoa tư vấn phác đồ và báo giá cụ thể."}
                         </p>
 
                         <div className="mt-auto pt-4 border-t border-gray-50 flex justify-between items-center">

@@ -174,7 +174,7 @@ export default function DichVuDetail({ service }: DichVuDetailProps) {
 
               {/* Commitment highlights */}
               <div className="mt-10 p-6 bg-gold/5 rounded-2xl border border-gold/10">
-                <h4 className="font-bold text-gray-800 text-sm mb-3">Theq Medical Centre Cam Kết:</h4>
+                <h4 className="font-bold text-gray-800 text-sm mb-3">Theq Nail Centre Cam Kết:</h4>
                 <ul className="space-y-2 text-xs md:text-sm text-gray-500 font-light">
                   <li className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-gold"></span>

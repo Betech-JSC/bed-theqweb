@@ -16,13 +16,13 @@ export const WhyChooseUs: React.FC = () => {
     {
       index: 1,
       title: settings.why_choose_us_1_title || "Tiêu chuẩn Úc Châu",
-      desc: settings.why_choose_us_1_desc || "Các quy trình chăm sóc sắc đẹp tại Theq Medical Centre tuân thủ theo tiêu chuẩn thẩm mỹ nghiêm ngặt của Úc Châu, đảm bảo an toàn và hiệu quả cho khách hàng",
+      desc: settings.why_choose_us_1_desc || "Các quy trình chăm sóc sắc đẹp tại Theq Nail Centre tuân thủ theo tiêu chuẩn thẩm mỹ nghiêm ngặt của Úc Châu, đảm bảo an toàn và hiệu quả cho khách hàng",
       image: settings.why_choose_us_1_image || "/images/why-choose-us/banner-web-5-1.png",
     },
     {
       index: 2,
       title: settings.why_choose_us_2_title || "Tư vấn cá nhân hóa",
-      desc: settings.why_choose_us_2_desc || "Mỗi khách hàng đều có nét đẹp riêng biệt. Theq Medical Centre luôn lắng nghe và đưa ra những lời khuyên tốt nhất để tôn lên vẻ đẹp tự nhiên của từng người, đảm bảo mỗi kết quả đều được cá nhân hóa hoàn toàn",
+      desc: settings.why_choose_us_2_desc || "Mỗi khách hàng đều có nét đẹp riêng biệt. Theq Nail Centre luôn lắng nghe và đưa ra những lời khuyên tốt nhất để tôn lên vẻ đẹp tự nhiên của từng người, đảm bảo mỗi kết quả đều được cá nhân hóa hoàn toàn",
       image: settings.why_choose_us_2_image || "/images/why-choose-us/banner-web-2-1.png",
     },
     {
@@ -34,7 +34,7 @@ export const WhyChooseUs: React.FC = () => {
     {
       index: 4,
       title: settings.why_choose_us_4_title || "Công nghệ tiên tiến",
-      desc: settings.why_choose_us_4_desc || "Ứng dụng công nghệ và kỹ thuật hiện đại, Theq Medical Centre cung cấp nhiều phương án thẩm mỹ từ phẫu thuật đến không phẫu thuật với kết quả tự nhiên, giảm tối đa biến chứng, phù hợp nhu cầu và tình trạng cá nhân",
+      desc: settings.why_choose_us_4_desc || "Ứng dụng công nghệ và kỹ thuật hiện đại, Theq Nail Centre cung cấp nhiều phương án thẩm mỹ từ phẫu thuật đến không phẫu thuật với kết quả tự nhiên, giảm tối đa biến chứng, phù hợp nhu cầu và tình trạng cá nhân",
       image: settings.why_choose_us_4_image || "/images/why-choose-us/banner-web-3-1.png",
     },
   ];
@@ -113,7 +113,7 @@ export const WhyChooseUs: React.FC = () => {
             </h2>
             <div className="w-16 h-[3px] bg-gold mb-6 rounded-full" />
             <p className="text-base text-gray-600 leading-relaxed font-light">
-              Mỗi hành trình đều bắt đầu từ một hoài bão, và hoài bão của chúng tôi chính là đánh thức vẻ đẹp tự nhiên trong mỗi khách hàng, để từ đó tạo nên một cuộc sống tràn đầy sự tự tin và niềm vui. Theq Medical Centre không chỉ là nơi thực hiện các liệu trình thẩm mỹ, mà còn là một hành trình khám phá bản thân, nơi mà mỗi khách hàng bước vào với kỳ vọng và bước ra với một phiên bản hoàn thiện hơn của chính mình.
+              Mỗi hành trình đều bắt đầu từ một hoài bão, và hoài bão của chúng tôi chính là đánh thức vẻ đẹp tự nhiên trong mỗi khách hàng, để từ đó tạo nên một cuộc sống tràn đầy sự tự tin và niềm vui. Theq Nail Centre không chỉ là nơi thực hiện các liệu trình thẩm mỹ, mà còn là một hành trình khám phá bản thân, nơi mà mỗi khách hàng bước vào với kỳ vọng và bước ra với một phiên bản hoàn thiện hơn của chính mình.
             </p>
           </div>
           <div>

@@ -13,7 +13,7 @@ return new class extends Migration
         $settings = [
             [
                 'key' => 'about_carousel_eyebrow',
-                'value' => 'THEQ MEDICAL CENTRE',
+                'value' => 'THEQ NAIL CENTRE',
                 'label' => 'Nhãn phụ phần Model Carousel (Trang Giới thiệu)',
                 'created_at' => now(),
                 'updated_at' => now(),

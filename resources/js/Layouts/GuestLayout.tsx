@@ -27,7 +27,7 @@ export default function Guest({ children }: PropsWithChildren) {
 
                 <div className="relative z-20 max-w-md my-auto space-y-6">
                     <div className="inline-block px-3 py-1 bg-gold/10 border border-gold/20 rounded-full text-gold text-xs font-semibold tracking-widest uppercase">
-                        Theq Medical Centre
+                        Theq Nail Centre
                     </div>
                     <h1 className="font-serif text-4xl xl:text-5xl text-white font-medium leading-tight tracking-wide">
                         Kiến tạo vẻ đẹp <span className="text-gold italic font-normal">độc bản</span>

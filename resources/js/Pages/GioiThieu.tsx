@@ -39,7 +39,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
   const settings = (props.settings as Record<string, string>) || {};
 
   const storyTitle = settings.intro_story_title || "Triết Lý Làm Đẹp Chuẩn Y Khoa & Vẻ Đẹp Độc Bản";
-  const storyDesc1 = settings.intro_story_desc_1 || "Tại Theq Medical Centre, chúng tôi tin rằng mỗi người đều sở hữu một vẻ đẹp độc bản riêng biệt. Sự tự tin của bạn là món quà quý giá nhất, và sứ mệnh của chúng tôi là giúp bạn khám phá và gìn giữ nét riêng đó thông qua các giải pháp y khoa thẩm mỹ tiên tiến, an toàn.";
+  const storyDesc1 = settings.intro_story_desc_1 || "Tại Theq Nail Centre, chúng tôi tin rằng mỗi người đều sở hữu một vẻ đẹp độc bản riêng biệt. Sự tự tin của bạn là món quà quý giá nhất, và sứ mệnh của chúng tôi là giúp bạn khám phá và gìn giữ nét riêng đó thông qua các giải pháp y khoa thẩm mỹ tiên tiến, an toàn.";
   const storyDesc2 = settings.intro_story_desc_2 || "Được thành lập bởi đội ngũ bác sĩ chuyên khoa I, Theq đã không ngừng nâng cấp hệ thống phòng khám, chuyển giao độc quyền các công nghệ từ Hàn Quốc, Mỹ và châu Âu. Chúng tôi coi sự an toàn và hiệu quả thực tế của khách hàng là kim chỉ nam tối thượng.";
   const storyQuote = settings.intro_story_quote || "Chúng tôi không thay đổi diện mạo của bạn, chúng tôi tôn vinh và khôi phục những nét đẹp độc bản tự nhiên nhất.";
   const storyQuoteAuthor = settings.intro_story_quote_author || "CEO Khánh Tôn";
@@ -49,7 +49,7 @@ export default function GioiThieu({ doctors = [], realResults = [] }: GioiThieuP
 
   return (
     <>
-      <Head title="Về Chúng Tôi | Theq Medical Centre" />
+      <Head title="Về Chúng Tôi | Theq Nail Centre" />
       <Header />
 
       <main className="flex-grow font-sans bg-white">

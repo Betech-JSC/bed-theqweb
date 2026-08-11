@@ -32,7 +32,7 @@ export const Footer: React.FC = () => {
             )}
           </div>
           <p className="text-xs md:text-sm text-gray-400 font-light leading-relaxed mb-4">
-            Theq Medical Centre mang đến các liệu trình làm đẹp chuẩn y khoa, giúp bạn sở hữu vẻ đẹp độc bản, chuẩn tỷ lệ vàng và an toàn tuyệt đối.
+            Theq Nail Centre mang đến các liệu trình làm đẹp chuẩn y khoa, giúp bạn sở hữu vẻ đẹp độc bản, chuẩn tỷ lệ vàng và an toàn tuyệt đối.
           </p>
           <div className="text-xs text-gray-400 space-y-2 mb-6 font-light">
             <p><span className="font-semibold text-gold">Hotline:</span> {hotline}</p>
@@ -129,7 +129,7 @@ export const Footer: React.FC = () => {
 
       {/* Copyright Bar */}
       <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/5 text-center text-xs text-gray-500 font-light flex flex-col sm:flex-row justify-between items-center gap-4">
-        <span>© {new Date().getFullYear()} Theq Medical Centre. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} Theq Nail Centre. All rights reserved.</span>
         <div className="flex flex-wrap gap-4 justify-center sm:justify-end text-xs text-gray-500 font-light mt-2 sm:mt-0">
           <Link href="/dieu-khoan-su-dung" className="hover:text-gold transition-colors">Điều khoản sử dụng</Link>
           <span className="text-white/10 hidden sm:inline">|</span>

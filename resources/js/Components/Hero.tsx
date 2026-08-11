@@ -28,10 +28,10 @@ export const Hero: React.FC<HeroProps> = ({ banners = [] }) => {
   const defaultBanners: Banner[] = [
     {
       id: 0,
-      eyebrow: "Theq Medical Centre",
+      eyebrow: "Theq Nail Centre",
       title: "Kiến tạo",
       subtitle: "Vẻ đẹp độc bản",
-      description: "Theq Medical Centre mang đến dịch vụ thẩm mỹ chuẩn y khoa hàng đầu Việt Nam, giúp bạn tự tin sở hữu vẻ đẹp độc bản, chuẩn tự nhiên.",
+      description: "Theq Nail Centre mang đến dịch vụ thẩm mỹ chuẩn y khoa hàng đầu Việt Nam, giúp bạn tự tin sở hữu vẻ đẹp độc bản, chuẩn tự nhiên.",
       image_desktop: "/images/Ban-banner-web-3-1.png",
       image_mobile: "/images/size-4x5-phone-1-1.png",
       button_primary_text: "Đặt Lịch Khám Ngay",

@@ -170,7 +170,7 @@ export const QuickForm: React.FC = () => {
             <span className="text-[#a88a5e]">Kiến Tạo Sắc Đẹp</span>
           </h2>
           <p className="text-sm md:text-base text-gray-600 font-light max-w-xl leading-relaxed mb-8">
-            Đội ngũ chuyên gia và y bác sĩ tại Theq Medical Centre luôn sẵn sàng lắng nghe, đồng hành và thiết kế phác đồ cá nhân hóa giúp bạn sở hữu vẻ đẹp tự nhiên hoàn mỹ nhất.
+            Đội ngũ chuyên gia và y bác sĩ tại Theq Nail Centre luôn sẵn sàng lắng nghe, đồng hành và thiết kế phác đồ cá nhân hóa giúp bạn sở hữu vẻ đẹp tự nhiên hoàn mỹ nhất.
           </p>
 
           {/* Key Value Badges */}

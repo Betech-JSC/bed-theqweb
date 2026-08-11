@@ -67,7 +67,7 @@ export default function DichVu({ services = [], categoriesList = [] }: DichVuPro
 
   return (
     <>
-      <Head title="Danh Mục Dịch Vụ | Theq Medical Centre" />
+      <Head title="Danh Mục Dịch Vụ | Theq Nail Centre" />
       <Header />
       <main className="flex-grow font-sans bg-[#faf8f5]">
         {/* Banner/Hero */}
@@ -168,7 +168,7 @@ export default function DichVu({ services = [], categoriesList = [] }: DichVuPro
                       </span>
 
                       <p className="text-xs md:text-sm text-gray-500 font-light leading-relaxed mb-6 line-clamp-3">
-                        {s.description || "Liên hệ với Theq Medical Centre để được chuyên khoa tư vấn phác đồ và báo giá cụ thể."}
+                        {s.description || "Liên hệ với Theq Nail Centre để được chuyên khoa tư vấn phác đồ và báo giá cụ thể."}
                       </p>
 
                       <div className="mt-auto pt-4 border-t border-gray-50 flex justify-between items-center">

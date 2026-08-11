@@ -159,7 +159,7 @@ export const AboutHeroCarousel: React.FC<AboutHeroCarouselProps> = ({ eyebrow, t
       <div className="max-w-7xl mx-auto px-4 md:px-[10%] mb-10">
         <div className="text-center md:text-left space-y-2">
           <span className="text-gold uppercase tracking-widest text-[10px] md:text-xs font-semibold block">
-            {eyebrow || "THEQ MEDICAL CENTRE"}
+            {eyebrow || "THEQ NAIL CENTRE"}
           </span>
           <h2 className="text-2xl md:text-4xl lg:text-5xl font-serif font-bold text-dark-bg tracking-wide">
             {title || "Kiến tạo - Vẻ đẹp độc bản"}

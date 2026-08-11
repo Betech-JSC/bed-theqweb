@@ -188,7 +188,7 @@ class CheckMaintenanceMode
         </div>
         <h1>Hệ Thống Đang Bảo Trì</h1>
         <p>{$message}</p>
-        <div class="footer-text">Theq Medical Centre</div>
+        <div class="footer-text">Theq Nail Centre</div>
     </div>
 </body>
 </html>

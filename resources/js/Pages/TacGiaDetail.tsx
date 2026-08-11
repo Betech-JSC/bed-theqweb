@@ -102,7 +102,7 @@ export default function TacGiaDetail({ author, articles = [] }: TacGiaDetailProp
                   />
                 ) : (
                   <p className="text-sm md:text-base text-gray-500 font-light leading-relaxed">
-                    Bác sĩ chuyên gia đồng hành cùng Theq Medical Centre cung cấp thông tin y khoa chính thống, uy tín và chuẩn mực về chăm sóc sắc đẹp thẩm mỹ.
+                    Bác sĩ chuyên gia đồng hành cùng Theq Nail Centre cung cấp thông tin y khoa chính thống, uy tín và chuẩn mực về chăm sóc sắc đẹp thẩm mỹ.
                   </p>
                 )}
               </div>

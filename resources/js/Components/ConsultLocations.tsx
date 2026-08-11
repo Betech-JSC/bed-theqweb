@@ -115,7 +115,7 @@ export const ConsultLocations: React.FC = () => {
 
   const branches = [
     {
-      name: "Theq Medical Centre - Sài Gòn",
+      name: "Theq Nail Centre - Sài Gòn",
       address: "386-388 Đường 3/2, Phường 12, Quận 10, TP. Hồ Chí Minh",
       hotline: hotline,
       hours: "09:00 - 20:00 (Hằng ngày)",
@@ -138,10 +138,10 @@ export const ConsultLocations: React.FC = () => {
           </span>
           <h2 className="text-3xl md:text-5xl font-bold font-serif text-gray-800 tracking-wide mb-6 leading-tight">
             Hệ Thống <br />
-            <span className="text-[#a88a5e]">Theq Medical Centre</span>
+            <span className="text-[#a88a5e]">Theq Nail Centre</span>
           </h2>
           <p className="text-sm md:text-base text-gray-600 font-light max-w-xl leading-relaxed mb-8">
-            Theq Medical Centre sở hữu không gian làm đẹp cao cấp, tiện nghi cùng hệ thống chi nhánh trong và ngoài nước luôn sẵn sàng phục vụ Quý khách.
+            Theq Nail Centre sở hữu không gian làm đẹp cao cấp, tiện nghi cùng hệ thống chi nhánh trong và ngoài nước luôn sẵn sàng phục vụ Quý khách.
           </p>
 
           {/* Branch detail cards */}

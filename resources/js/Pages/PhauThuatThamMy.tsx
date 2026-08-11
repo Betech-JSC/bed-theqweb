@@ -93,7 +93,7 @@ export default function PhauThuatThamMyPage({ doctors = [], services = [] }: Pha
 
               {/* Subheading */}
               <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light max-w-3xl">
-                Theq Medical Centre mang đến giải pháp phẫu thuật thẩm mỹ chuẩn y khoa, được cá nhân hóa theo từng cấu trúc gương mặt và cơ thể.
+                Theq Nail Centre mang đến giải pháp phẫu thuật thẩm mỹ chuẩn y khoa, được cá nhân hóa theo từng cấu trúc gương mặt và cơ thể.
               </p>
             </div>
           </div>
@@ -225,7 +225,7 @@ export default function PhauThuatThamMyPage({ doctors = [], services = [] }: Pha
                         </span>
 
                         <p className="text-xs md:text-sm text-gray-500 font-light leading-relaxed mb-6 line-clamp-3">
-                          {s.description || "Liên hệ với Theq Medical Centre để được chuyên khoa tư vấn phác đồ và báo giá cụ thể."}
+                          {s.description || "Liên hệ với Theq Nail Centre để được chuyên khoa tư vấn phác đồ và báo giá cụ thể."}
                         </p>
 
                         <div className="mt-auto pt-4 border-t border-gray-50 flex justify-between items-center">

@@ -13,7 +13,7 @@ return new class extends Migration
         $settings = [
             [
                 'key' => 'intro_title',
-                'value' => 'THEQ MEDICAL CENTRE',
+                'value' => 'THEQ NAIL CENTRE',
                 'label' => 'Tiêu đề khối giới thiệu',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -27,7 +27,7 @@ return new class extends Migration
             ],
             [
                 'key' => 'intro_desc_1',
-                'value' => 'Tọa lạc tại vị trí đắc địa ở Thành phố Hồ Chí Minh, Theq Medical Centre tự hào là một trong những trung tâm thẩm mỹ hàng đầu cung cấp trọn gói các dịch vụ chăm sóc sắc đẹp từ Da liễu thẩm mỹ, Thẩm mỹ nội khoa, Phẫu thuật tạo hình thẩm mỹ cho đến Phun xăm nghệ thuật.',
+                'value' => 'Tọa lạc tại vị trí đắc địa ở Thành phố Hồ Chí Minh, Theq Nail Centre tự hào là một trong những trung tâm thẩm mỹ hàng đầu cung cấp trọn gói các dịch vụ chăm sóc sắc đẹp từ Da liễu thẩm mỹ, Thẩm mỹ nội khoa, Phẫu thuật tạo hình thẩm mỹ cho đến Phun xăm nghệ thuật.',
                 'label' => 'Mô tả giới thiệu - Đoạn 1',
                 'created_at' => now(),
                 'updated_at' => now(),

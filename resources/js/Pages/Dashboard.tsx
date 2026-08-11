@@ -926,7 +926,7 @@ export default function Dashboard({
       facebook_url: settings.facebook_url || "",
       zalo_url: settings.zalo_url || "",
       youtube_url: settings.youtube_url || "",
-      intro_title: settings.intro_title || "THEQ MEDICAL CENTRE",
+      intro_title: settings.intro_title || "THEQ NAIL CENTRE",
       intro_subtitle: settings.intro_subtitle || "Về Chúng Tôi",
       intro_desc_1: settings.intro_desc_1 || "",
       intro_desc_2: settings.intro_desc_2 || "",
@@ -967,7 +967,7 @@ export default function Dashboard({
       doctors_intro_title: settings.doctors_intro_title || "Hội Đồng Bác Sĩ Đầu Ngành",
       doctors_carousel_eyebrow: settings.doctors_carousel_eyebrow || "ĐỘI NGŨ BÁC SĨ",
       doctors_carousel_title: settings.doctors_carousel_title || "Đội Ngũ Chuyên Gia Làm Đẹp",
-      about_carousel_eyebrow: settings.about_carousel_eyebrow || "THEQ MEDICAL CENTRE",
+      about_carousel_eyebrow: settings.about_carousel_eyebrow || "THEQ NAIL CENTRE",
       about_carousel_title: settings.about_carousel_title || "Kiến tạo - Vẻ đẹp độc bản",
     },
   });
@@ -1814,7 +1814,7 @@ export default function Dashboard({
             )}
             <div className="text-left">
               <h2 className="font-serif font-bold text-white text-sm tracking-widest uppercase">THEQ</h2>
-              <span className="text-[9px] text-gold tracking-widest uppercase font-semibold">Medical Centre</span>
+              <span className="text-[9px] text-gold tracking-widest uppercase font-semibold">Nail Centre</span>
             </div>
           </div>
 
@@ -6890,7 +6890,7 @@ export default function Dashboard({
                                 intro_title: e.target.value
                               })}
                               className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded text-base focus:outline-none"
-                              placeholder="Ví dụ: THEQ MEDICAL CENTRE"
+                              placeholder="Ví dụ: THEQ NAIL CENTRE"
                             />
                           </div>
                         </div>
@@ -7481,7 +7481,7 @@ export default function Dashboard({
                         <span className="text-[10px] font-black bg-gold/15 text-gold px-2.5 py-1 rounded-full uppercase">Khối Model Carousel (Kiến tạo - Vẻ đẹp độc bản)</span>
                         
                         <div>
-                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Nhãn phụ (Ví dụ: THEQ MEDICAL CENTRE)</label>
+                          <label className="text-xs md:text-sm font-semibold text-gray-600 mb-1.5 block">Nhãn phụ (Ví dụ: THEQ NAIL CENTRE)</label>
                           <input
                             type="text"
                             value={(settingsForm.data.settings as any).about_carousel_eyebrow || ""}
@@ -8209,7 +8209,7 @@ export default function Dashboard({
                     value={bannerForm.data.eyebrow}
                     onChange={(e) => bannerForm.setData("eyebrow", e.target.value)}
                     className="w-full border border-gray-200 focus:border-gold px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
-                    placeholder="Ví dụ: Theq Medical Centre"
+                    placeholder="Ví dụ: Theq Nail Centre"
                   />
                 </div>
                 <div className="min-w-0">

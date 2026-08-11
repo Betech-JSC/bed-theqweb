@@ -27,7 +27,7 @@ return new class extends Migration
             ],
             [
                 'key' => 'intro_story_desc_1',
-                'value' => 'Tại Theq Medical Centre, chúng tôi tin rằng mỗi người đều sở hữu một vẻ đẹp độc bản riêng biệt. Sự tự tin của bạn là món quà quý giá nhất, và sứ mệnh của chúng tôi là giúp bạn khám phá và gìn giữ nét riêng đó thông qua các giải pháp y khoa thẩm mỹ tiên tiến, an toàn.',
+                'value' => 'Tại Theq Nail Centre, chúng tôi tin rằng mỗi người đều sở hữu một vẻ đẹp độc bản riêng biệt. Sự tự tin của bạn là món quà quý giá nhất, và sứ mệnh của chúng tôi là giúp bạn khám phá và gìn giữ nét riêng đó thông qua các giải pháp y khoa thẩm mỹ tiên tiến, an toàn.',
                 'label' => 'Mô tả câu chuyện - Đoạn 1',
                 'created_at' => now(),
                 'updated_at' => now(),
