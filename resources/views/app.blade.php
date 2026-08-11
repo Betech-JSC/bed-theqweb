@@ -11,7 +11,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Favicon -->
-        <link rel="icon" type="image/png" href="{{ \App\Models\Setting::where('key', 'site_logo_square')->value('value') ?? '/images/Favicon_KT.png' }}">
+        <link rel="icon" type="image/png" href="{{ \App\Models\Setting::where('key', 'site_logo_square')->value('value') ?? '/images/Favicon_Theq.png' }}">
 
         <!-- Scripts -->
         @routes
