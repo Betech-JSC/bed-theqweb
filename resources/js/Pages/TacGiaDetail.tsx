@@ -70,7 +70,7 @@ export default function TacGiaDetail({ author, articles = [] }: TacGiaDetailProp
               <div className="w-full lg:w-1/3 flex justify-center lg:justify-start flex-shrink-0">
                 <div className="relative aspect-square w-64 md:w-80 rounded-[32px] overflow-hidden border-2 border-gold/25 shadow-lg bg-gray-50">
                   <Image
-                    src={author.avatar || "/images/default-avatar.png"}
+                    src={author.avatar || "/images/default-blog.svg"}
                     alt={author.name}
                     fill
                     className="object-cover"
@@ -135,7 +135,7 @@ export default function TacGiaDetail({ author, articles = [] }: TacGiaDetailProp
                     className="relative aspect-[16/10] w-full bg-gray-100 block overflow-hidden"
                   >
                     <Image
-                      src={art.image || "/images/default-blog.jpg"}
+                      src={art.image || "/images/default-blog.svg"}
                       alt={art.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"

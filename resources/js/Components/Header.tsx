@@ -5,6 +5,7 @@ import { Link, usePage } from "@inertiajs/react";
 import Image from "@/Components/Image";
 import { PhoneIcon } from "./icons";
 import { Menu, X, ChevronDown } from "lucide-react";
+import { parseBlogCategories } from "./BlogHeaderAndCategoriesEditor";
 
 interface HeaderProps {
   forceWhiteBg?: boolean;
@@ -32,42 +33,32 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: "Giới thiệu", href: "/gioi-thieu" },
-    {
-      name: "Dịch vụ",
-      href: "/dich-vu",
-      subLinks: menuCategories.map((cat) => ({
-        name: cat.name,
-        href: `/${cat.slug}`,
-      })),
-    },
-    { name: "Kết quả", href: "/ket-qua" },
-    { name: "Tin Tức", href: "/tin-tuc" },
-    { name: "Liên hệ", href: "/lien-he" },
+  const blogCats = parseBlogCategories(settings.blog_categories);
+  const topBarText = settings.blog_topbar_text ?? "Chuyên trang Kiến thức & Phân tích Chuyên sâu | Theq Blog";
+  const navLinks: Array<{ name: string; href: string; subLinks?: Array<{ name: string; href: string }> }> = [
+    { name: "Tất cả bài viết", href: "/" },
+    ...blogCats.map((cat) => ({ name: cat, href: `/?category=${encodeURIComponent(cat)}` })),
   ];
 
   const isActive = (href: string) => {
-    return url === href || url.startsWith(href);
+    if (href === "/") return url === "/" || url === "/tin-tuc";
+    return decodeURIComponent(url).includes(decodeURIComponent(href));
   };
 
   const isWhiteHeader = forceWhiteBg || isSticky || isHovered;
 
   return (
     <header className="w-full z-[999] absolute top-0 left-0">
-      {/* Top Announcement Bar */}
-      <div className="w-full bg-[#b09a7a] text-white flex justify-center items-center py-2 px-4 text-sm md:text-base font-sans tracking-wide">
-        <div className="flex items-center gap-3 font-semibold">
-          <span className="text-white tracking-wide text-xs md:text-sm">Đặt lịch khám ngay</span>
-          <a
-            href={`tel:${hotline}`}
-            className="inline-flex items-center gap-1.5 bg-[#4d443c] text-white px-3 py-1 md:py-1.5 rounded-[8px] border border-white text-xs md:text-sm font-bold hover:bg-[#3d362f] transition-colors shadow-sm"
-          >
-            <PhoneIcon size={12} className="inline-block" />
-            {hotline}
-          </a>
+      {/* Top Editorial Bar */}
+      {topBarText && (
+        <div className="w-full bg-[#b09a7a] text-white flex justify-center items-center py-2 px-4 text-xs md:text-sm font-sans tracking-wide">
+          <div className="flex items-center gap-3 font-medium">
+            <span className="text-white tracking-wider uppercase text-[11px] md:text-xs font-semibold">
+              {topBarText}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Navbar */}
       <div
@@ -183,21 +174,6 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
             })}
           </nav>
 
-          {/* Desktop Hotline CTA */}
-          <div className="hidden lg:block">
-            <a
-              href={`tel:${hotline}`}
-              className={`flex items-center gap-2 font-sans font-bold text-sm xl:text-base px-7 py-3 rounded-[10px] border transition-all duration-300 ${
-                isWhiteHeader
-                  ? "border-dark-bg text-dark-bg hover:bg-dark-bg hover:text-white"
-                  : "border-white text-white hover:bg-white hover:text-dark-bg"
-              }`}
-            >
-              <PhoneIcon size={16} />
-              <span>Gọi ngay</span>
-            </a>
-          </div>
-
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -278,13 +254,6 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
               </Link>
             );
           })}
-          <a
-            href={`tel:${hotline}`}
-            className="mt-4 border border-white hover:bg-white hover:text-dark-bg text-white w-full text-center py-3 rounded-[10px] font-bold transition-colors duration-200 flex items-center justify-center gap-2"
-          >
-            <PhoneIcon size={16} />
-            <span>Gọi ngay</span>
-          </a>
         </nav>
       </div>
     </header>

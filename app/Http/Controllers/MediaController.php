@@ -86,13 +86,15 @@ class MediaController extends Controller
     {
         try {
             $request->validate([
-                'file' => 'required|file|max:10240', // Max 10MB
+                'file' => 'required|file|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:10240',
                 'folder_id' => 'nullable|exists:media_folders,id',
             ]);
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $originalName = $file->getClientOriginalName();
-                $filename = pathinfo($originalName, PATHINFO_FILENAME) . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $safeBase = \Illuminate\Support\Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'image';
+                $ext = strtolower($file->getClientOriginalExtension());
+                $filename = $safeBase . '-' . time() . '.' . $ext;
                 
                 // Get metadata before moving
                 $mimeType = $file->getClientMimeType();

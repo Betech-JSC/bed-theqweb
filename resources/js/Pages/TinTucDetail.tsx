@@ -21,10 +21,19 @@ interface ArticleItem {
   description: string | null;
   content: string | null;
   image: string | null;
+  image_alt?: string | null;
   author: AuthorItem | null;
   legacy_author: string | null;
   published_date: string | null;
   category: string;
+  status?: string | null;
+  views?: number;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  meta_keywords?: string | null;
+  meta_robots?: string | null;
+  canonical_link?: string | null;
+  meta_image?: string | null;
   schema: string | null;
 }
 
@@ -37,6 +46,12 @@ interface TinTucDetailProps {
 export default function TinTucDetail({ article, relatedArticles = [], toc = [] }: TinTucDetailProps) {
   const [isTocExpanded, setIsTocExpanded] = React.useState(true);
   const [scrollProgress, setScrollProgress] = React.useState(0);
+
+  const wordCount = React.useMemo(() => {
+    const plain = (article.content || "").replace(/<[^>]*>/g, " ").trim();
+    return plain ? plain.split(/\s+/).length : 0;
+  }, [article.content]);
+  const readingTimeMin = Math.max(1, Math.ceil(wordCount / 220));
 
   // Track scroll progress for reading indicator
   React.useEffect(() => {
@@ -61,25 +76,56 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
   };
 
   const domain = typeof window !== "undefined" ? window.location.origin : "https://theq.vn";
-  const defaultNewsSchema = {
-    "@context": "https://schema.org",
-    "@type": "NewsArticle",
-    "headline": article.title,
-    "description": article.description || "",
-    "image": [
-      article.image ? (article.image.startsWith("http") ? article.image : `${domain}${article.image}`) : `${domain}/images/default-blog.jpg`
-    ],
-    "datePublished": article.published_date || new Date().toISOString(),
-    "author": [{
-      "@type": "Person",
-      "name": article.author?.name || article.legacy_author || "Theq",
-      "url": article.author ? `${domain}/tac-gia/${article.author.slug}` : undefined
-    }]
-  };
+  const canonicalUrl = article.canonical_link || `${domain}/tin-tuc/${article.slug}`;
+  const seoTitle = article.meta_title || `${article.title} | Theq Blog`;
+  const seoDesc = article.meta_description || article.description || article.title;
+  const rawOgImg = article.meta_image || article.image || "/images/default-blog.svg";
+  const ogImageUrl = rawOgImg.startsWith("http") ? rawOgImg : `${domain}${rawOgImg}`;
+
+  const defaultNewsSchema = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": article.meta_title || article.title,
+      "description": seoDesc,
+      "image": [ogImageUrl],
+      "wordCount": wordCount,
+      "datePublished": article.published_date || new Date().toISOString(),
+      "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
+      "author": [{
+        "@type": "Person",
+        "name": article.author?.name || article.legacy_author || "Theq",
+        "url": article.author ? `${domain}/tac-gia/${article.author.slug}` : undefined
+      }]
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Trang chủ Blog", "item": `${domain}/` },
+        { "@type": "ListItem", "position": 2, "name": article.category, "item": `${domain}/?category=${encodeURIComponent(article.category)}` },
+        { "@type": "ListItem", "position": 3, "name": article.title, "item": canonicalUrl }
+      ]
+    }
+  ];
 
   return (
     <>
-      <Head title={`${article.title} | Theq`}>
+      <Head>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDesc} />
+        {article.meta_keywords && <meta name="keywords" content={article.meta_keywords} />}
+        <meta name="robots" content={article.meta_robots || "index, follow"} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDesc} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDesc} />
+        <meta name="twitter:image" content={ogImageUrl} />
         {article.schema ? (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: article.schema }} />
         ) : (
@@ -109,10 +155,20 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
             {/* Left Side: Article Body (8/12 cols) with maximum inner padding */}
             <article className="lg:col-span-8 bg-white rounded-[40px] p-8 md:p-16 lg:p-20 border border-gold/15 shadow-sm text-left">
-              {/* Category Badge */}
-              <span className="inline-block bg-gold/10 text-gold text-[11px] uppercase font-bold tracking-widest px-4 py-2 rounded-full mb-6">
-                {article.category}
-              </span>
+              {/* Category & Draft Status Badge */}
+              <div className="flex flex-wrap items-center gap-2 mb-6">
+                <Link
+                  href={`/?category=${encodeURIComponent(article.category)}`}
+                  className="inline-block bg-gold/10 hover:bg-gold/20 text-gold text-[11px] uppercase font-bold tracking-widest px-4 py-2 rounded-full transition-colors"
+                >
+                  {article.category}
+                </Link>
+                {article.status === "draft" && (
+                  <span className="inline-block bg-amber-100 text-amber-700 border border-amber-200 text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-full">
+                    Bản nháp (Chỉ Admin xem trước)
+                  </span>
+                )}
+              </div>
 
               {/* Title - Large Format */}
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-gray-850 mb-8 leading-tight">
@@ -139,6 +195,14 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                       )}
                     </span>
                   </div>
+                  <div className="text-xs text-gray-400 font-medium">
+                    • ~{readingTimeMin} phút đọc ({wordCount} từ)
+                  </div>
+                  {typeof article.views === "number" && (
+                    <div className="text-xs text-gray-400 font-medium">
+                      • {article.views.toLocaleString("vi-VN")} lượt đọc
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -167,7 +231,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                 <div className="relative aspect-[16/9] w-full rounded-[32px] overflow-hidden mb-12 shadow-md">
                   <Image
                     src={article.image}
-                    alt={article.title}
+                    alt={article.image_alt || article.title}
                     fill
                     className="object-cover"
                   />
@@ -226,10 +290,20 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                 </div>
               )}
 
-              {/* Main Content (HTML rendered from server-parsed content with large font sizes) */}
+              {/* Main Content (HTML rendered from server-parsed content with large font sizes & [cta-form] shortcode support) */}
               <div 
                 className="text-lg md:text-[20px] text-gray-700 font-light leading-[1.8] space-y-8 rich-text-content"
-                dangerouslySetInnerHTML={{ __html: article.content || "" }}
+                dangerouslySetInnerHTML={{
+                  __html: (article.content || "").replace(
+                    /(?:<p>\s*)?\[\[?cta-form\]?\](?:\s*<\/p>)?/gi,
+                    `<div class="my-8 p-6 md:p-8 rounded-2xl bg-gradient-to-r from-[#FDFBF7] to-[#F7F1E5] border border-[#D4AF37]/30 shadow-sm text-left not-prose">
+                      <div class="text-xs font-bold uppercase tracking-widest text-[#B5942B] mb-1">Đừng bỏ lỡ bài viết mới</div>
+                      <div class="text-lg md:text-xl font-serif font-bold text-gray-900 mb-2">Khám phá thêm kiến thức chuyên sâu tại Theq Blog</div>
+                      <p class="text-sm text-gray-600 mb-4 leading-relaxed">Cập nhật những bài phân tích chuyên môn, xu hướng và kinh nghiệm thực tế mới nhất được biên soạn bởi đội ngũ biên tập viên.</p>
+                      <a href="/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#B5942B] text-white text-sm font-bold transition-colors no-underline">Khám phá chuyên mục Blog →</a>
+                    </div>`
+                  ),
+                }}
               />
 
               {/* Author Bio Box */}
@@ -237,7 +311,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                 <div className="mt-16 p-6 md:p-8 bg-gradient-to-br from-gold/5 to-gold/15 rounded-3xl border border-gold/20 flex flex-col md:flex-row gap-6 items-center md:items-start text-left">
                   <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-gold/30 shadow-sm flex-shrink-0 bg-gray-50">
                     <Image
-                      src={article.author?.avatar || "/images/default-avatar.png"}
+                      src={article.author?.avatar || "/images/default-blog.svg"}
                       alt={article.author?.name || article.legacy_author || "Theq"}
                       fill
                       className="object-cover"
@@ -297,7 +371,7 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                         {/* Much larger related article image (w-40 h-28) */}
                         <div className="relative w-40 h-28 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 shadow-sm">
                           <Image
-                            src={rel.image || "/images/default-blog.jpg"}
+                            src={rel.image || "/images/default-blog.svg"}
                             alt={rel.title}
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -317,20 +391,35 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
                 </div>
               )}
 
-              {/* CTA Booking Card */}
-              <div className="bg-gradient-to-br from-dark-bg to-gray-850 text-white rounded-[32px] p-8 border border-gold/20 shadow-xl text-center relative overflow-hidden">
+              {/* Topical Category Hub Card */}
+              <div className="bg-gradient-to-br from-dark-bg to-gray-850 text-white rounded-[32px] p-8 border border-gold/20 shadow-xl text-left relative overflow-hidden">
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-gold/10 rounded-full blur-2xl" />
                 <h3 className="font-serif font-bold text-xl mb-3 text-white">
-                  Đặt Lịch Hẹn Khám
+                  Khám Phá Chuyên Mục
                 </h3>
-                <p className="text-xs text-gray-300 font-light leading-relaxed mb-6">
-                  Liên hệ ngay với hội đồng bác sĩ chuyên gia tại Theq để đặt lịch hẹn khám trực tiếp.
+                <p className="text-xs text-gray-300 font-light leading-relaxed mb-5">
+                  Đọc thêm các bài phân tích chuyên sâu theo từng chủ đề tại Theq Blog.
                 </p>
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {["Chuyên môn", "Sự kiện", "Hoạt động"].map((cat) => (
+                    <Link
+                      key={cat}
+                      href={`/?category=${encodeURIComponent(cat)}`}
+                      className={`text-xs px-3.5 py-2 rounded-xl border transition-colors ${
+                        article.category === cat
+                          ? "bg-gold border-gold text-white font-bold"
+                          : "bg-white/5 border-white/15 text-gray-200 hover:border-gold hover:text-gold"
+                      }`}
+                    >
+                      {cat}
+                    </Link>
+                  ))}
+                </div>
                 <Link
-                  href="/dat-lich"
+                  href="/"
                   className="inline-block w-full bg-gold hover:bg-gold-dark text-white font-bold py-3 rounded-xl transition-all duration-300 text-xs uppercase tracking-widest shadow-md text-center"
                 >
-                  Đặt lịch hẹn ngay
+                  Tất cả bài viết
                 </Link>
               </div>
             </aside>

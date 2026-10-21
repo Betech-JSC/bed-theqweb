@@ -2,6 +2,10 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, useForm, router, usePage, Link } from "@inertiajs/react";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
+import { SeoAnalyzerPanel, evaluateArticleSeo } from "@/Components/SeoAnalyzerPanel";
+import { AiWriterAssistant, AltTextSeoTagsInput, RelatedAndRedirectUrlsPanel } from "@/Components/ArticleAiAndSeoTools";
+import { FooterSettingsEditor } from "@/Components/FooterSettingsEditor";
+import { BlogHeaderAndCategoriesEditor, parseBlogCategories } from "@/Components/BlogHeaderAndCategoriesEditor";
 import {
   Plus,
   Trash,
@@ -98,12 +102,18 @@ interface Article {
   description: string | null;
   content: string | null;
   image: string | null;
+  image_alt?: string | null;
   author: any | null;
   author_id?: number | null;
   legacy_author?: string | null;
   published_date: string | null;
   category: string;
   is_highlight?: boolean | number;
+  status?: string | null;
+  focus_keyword?: string | null;
+  related_urls?: string | null;
+  redirect_urls?: string | null;
+  views?: number;
   meta_title?: string;
   meta_description?: string;
   meta_keywords?: string;
@@ -236,22 +246,23 @@ function RichTextEditor({
   const editorRef = useRef<HTMLDivElement>(null);
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("https://");
-  
+  const [showHtmlCode, setShowHtmlCode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   const [showImageModal, setShowImageModal] = useState(false);
   const [imageUrl, setImageUrl] = useState("https://");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const imageFileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const savedRange = useRef<Range | null>(null);
 
-  // Sync value → editor only on initial mount / external reset (not on every keystroke)
   useEffect(() => {
     const el = editorRef.current;
-    if (!el) return;
-    if (el.innerHTML !== value) {
+    if (!el || showHtmlCode) return;
+    if (document.activeElement !== el && el.innerHTML !== (value || "")) {
       el.innerHTML = value || "";
     }
-  }, []); // intentionally only on mount
+  }, [value, showHtmlCode]);
 
   const handleInput = useCallback(() => {
     onChange(editorRef.current?.innerHTML ?? "");
@@ -288,8 +299,13 @@ function RichTextEditor({
     restoreSelection();
     if (linkUrl && linkUrl !== "https://") {
       document.execCommand("createLink", false, linkUrl);
-      // target blank all new links
-      editorRef.current?.querySelectorAll("a:not([target])").forEach(a => a.setAttribute("target", "_blank"));
+      const isInternal = linkUrl.startsWith("/") || linkUrl.includes(window.location.hostname);
+      editorRef.current?.querySelectorAll(`a[href="${linkUrl}"]`).forEach((a) => {
+        if (!isInternal) {
+          a.setAttribute("target", "_blank");
+          a.setAttribute("rel", "noopener noreferrer");
+        }
+      });
       handleInput();
     }
     setShowLinkModal(false);
@@ -299,66 +315,89 @@ function RichTextEditor({
     const el = editorRef.current;
     if (!el) return;
 
+    const customAlt = window.prompt("Nhập văn bản thay thế (Alt Text chuẩn SEO) cho hình ảnh:", "") ?? "";
+    const captionText = window.prompt("Nhập chú thích ảnh (Figcaption hiển thị dưới ảnh - để trống nếu không cần):", "") ?? "";
     el.focus();
 
-    // Try to restore selection
     const sel = window.getSelection();
     if (savedRange.current && sel) {
       sel.removeAllRanges();
       sel.addRange(savedRange.current);
     }
 
-    // Create the image element
     const img = document.createElement("img");
     img.src = url;
-    img.alt = "Hình ảnh";
+    img.alt = customAlt.trim() || captionText.trim() || "Hình ảnh bài viết";
     img.style.maxWidth = "100%";
     img.style.height = "auto";
     img.style.borderRadius = "8px";
-    img.style.margin = "8px 0";
+    img.style.margin = "8px auto";
     img.style.display = "block";
+
+    let nodeToInsert: HTMLElement = img;
+    if (captionText.trim()) {
+      const fig = document.createElement("figure");
+      fig.style.margin = "16px auto";
+      fig.style.textAlign = "center";
+      const cap = document.createElement("figcaption");
+      cap.textContent = captionText.trim();
+      cap.style.fontStyle = "italic";
+      cap.style.fontSize = "13px";
+      cap.style.color = "#4b5563";
+      cap.style.marginTop = "6px";
+      fig.appendChild(img);
+      fig.appendChild(cap);
+      nodeToInsert = fig;
+    }
 
     let inserted = false;
     if (sel && sel.rangeCount > 0) {
       try {
         const range = sel.getRangeAt(0);
-        // Ensure the range is inside our editor
         if (el.contains(range.commonAncestorContainer)) {
           range.deleteContents();
-          range.insertNode(img);
-          
-          // Place cursor after image
+          range.insertNode(nodeToInsert);
           const newRange = document.createRange();
-          newRange.setStartAfter(img);
-          newRange.setEndAfter(img);
+          newRange.setStartAfter(nodeToInsert);
+          newRange.setEndAfter(nodeToInsert);
           sel.removeAllRanges();
           sel.addRange(newRange);
           savedRange.current = newRange.cloneRange();
           inserted = true;
         }
-      } catch (e) {
-        console.warn("Failed to insert node at range, falling back to append:", e);
-      }
+      } catch {}
     }
 
     if (!inserted) {
-      // Fallback: append to the end of the editor
-      el.appendChild(img);
-      
-      // Place cursor at the end
-      try {
-        const newRange = document.createRange();
-        newRange.selectNodeContents(el);
-        newRange.collapse(false);
-        sel?.removeAllRanges();
-        sel?.addRange(newRange);
-        savedRange.current = newRange.cloneRange();
-      } catch (e) {
-        console.warn("Failed to set cursor at the end:", e);
-      }
+      el.appendChild(nodeToInsert);
     }
 
     handleInput();
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent<HTMLDivElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        e.preventDefault();
+        saveSelection();
+        const file = items[i].getAsFile();
+        if (!file) return;
+        const fd = new FormData();
+        fd.append("image", file);
+        setIsUploadingImage(true);
+        try {
+          const res = await axios.post("/admin/upload-image", fd);
+          if (res.data?.url) insertImage(res.data.url);
+        } catch {
+          alert("Không thể tải ảnh dán từ Clipboard.");
+        } finally {
+          setIsUploadingImage(false);
+        }
+        return;
+      }
+    }
   };
 
   const handleInsertImage = () => {
@@ -412,7 +451,7 @@ function RichTextEditor({
   };
 
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:border-gold transition-colors bg-white shadow-sm flex flex-col">
+    <div className={`border border-gray-200 rounded-xl overflow-hidden focus-within:border-gold transition-colors bg-white shadow-sm flex flex-col ${isFullscreen ? "fixed inset-4 z-[9999] shadow-2xl" : ""}`}>
       {/* Hidden File Input for Image Upload */}
       <input
         type="file"
@@ -448,6 +487,10 @@ function RichTextEditor({
           className="p-1.5 px-2 rounded hover:bg-gray-200 text-gray-600 font-bold text-[11px] transition-colors" title="Tiêu đề H2">H2</button>
         <button type="button" onMouseDown={(e) => { e.preventDefault(); exec("formatBlock", "h3"); }}
           className="p-1.5 px-2 rounded hover:bg-gray-200 text-gray-600 font-bold text-[11px] transition-colors" title="Tiêu đề H3">H3</button>
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); exec("formatBlock", "h4"); }}
+          className="p-1.5 px-2 rounded hover:bg-gray-200 text-gray-600 font-bold text-[11px] transition-colors" title="Tiêu đề H4">H4</button>
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); exec("formatBlock", "blockquote"); }}
+          className="p-1.5 px-2 rounded hover:bg-gray-200 text-gray-600 font-serif font-bold text-[11px] transition-colors" title="Khối trích dẫn (Blockquote)">“Quote”</button>
         <button type="button" onMouseDown={(e) => { e.preventDefault(); exec("formatBlock", "p"); }}
           className="p-1.5 px-2 rounded hover:bg-gray-200 text-gray-500 text-[11px] transition-colors" title="Đoạn văn">P</button>
         <div className="h-4 w-px bg-gray-300 mx-1" />
@@ -472,7 +515,16 @@ function RichTextEditor({
           className="p-1.5 rounded hover:bg-gray-200 text-gray-500 transition-colors" title="Căn phải">
           <AlignRight size={14} />
         </button>
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); exec("justifyFull"); }}
+          className="p-1.5 px-2 rounded hover:bg-gray-200 text-gray-500 text-[10px] font-bold transition-colors" title="Căn đều 2 bên">≡</button>
         <div className="h-4 w-px bg-gray-300 mx-1" />
+        <button type="button" onMouseDown={(e) => {
+            e.preventDefault();
+            exec("insertHTML", '<table style="width:100%;border-collapse:collapse;margin:16px 0;" border="1"><thead><tr><th style="padding:8px;border:1px solid #e5e7eb;background:#f9fafb;">Tiêu đề 1</th><th style="padding:8px;border:1px solid #e5e7eb;background:#f9fafb;">Tiêu đề 2</th></tr></thead><tbody><tr><td style="padding:8px;border:1px solid #e5e7eb;">Nội dung 1</td><td style="padding:8px;border:1px solid #e5e7eb;">Nội dung 2</td></tr></tbody></table><p></p>');
+          }}
+          className="p-1.5 px-2 rounded hover:bg-gray-200 text-gray-600 text-[11px] font-bold transition-colors" title="Chèn bảng (Table)">⊞ Bảng</button>
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); exec("removeFormat"); }}
+          className="p-1.5 px-2 rounded hover:bg-gray-200 text-gray-500 text-[11px] font-bold transition-colors" title="Xóa định dạng">Tx</button>
         <button type="button" onMouseDown={(e) => { e.preventDefault(); exec("undo"); }}
           className="p-1.5 rounded hover:bg-gray-200 text-gray-500 transition-colors" title="Hoàn tác">
           <Undo size={14} />
@@ -481,19 +533,47 @@ function RichTextEditor({
           className="p-1.5 rounded hover:bg-gray-200 text-gray-500 transition-colors" title="Làm lại">
           <Redo size={14} />
         </button>
+        <div className="ml-auto flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="px-2.5 py-1 bg-white hover:bg-gray-100 text-gray-600 text-[11px] font-bold rounded border border-gray-200 cursor-pointer"
+            title="Toàn màn hình"
+          >
+            {isFullscreen ? "Thu nhỏ" : "Toàn màn hình"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowHtmlCode(!showHtmlCode)}
+            className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold rounded flex items-center transition-colors border border-gray-200 cursor-pointer"
+          >
+            <span>{showHtmlCode ? "Xem dạng soạn thảo" : "</> Xem code HTML"}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Editable Content Area */}
-      <div
-        ref={editorRef}
-        contentEditable
-        suppressContentEditableWarning
-        onInput={handleInput}
-        onBlur={handleInput}
-        className="w-full p-4 text-sm focus:outline-none leading-relaxed text-gray-700 bg-white prose prose-sm max-w-none"
-        style={{ minHeight, maxHeight: "450px", overflowY: "auto" }}
-        data-placeholder={placeholder}
-      />
+      {/* Editable Content Area or HTML Source Editor */}
+      {showHtmlCode ? (
+        <textarea
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+          rows={18}
+          className="w-full bg-[#1e1e1e] text-green-400 font-mono text-sm p-4 focus:outline-none"
+          placeholder="<!-- Nhập mã HTML tại đây -->"
+        />
+      ) : (
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={handleInput}
+          onBlur={handleInput}
+          onPaste={handlePaste}
+          className="w-full p-4 text-sm focus:outline-none leading-relaxed text-gray-700 bg-white prose prose-sm max-w-none"
+          style={{ minHeight: isFullscreen ? "calc(100vh - 120px)" : minHeight, maxHeight: isFullscreen ? "calc(100vh - 120px)" : "520px", overflowY: "auto" }}
+          data-placeholder={placeholder}
+        />
+      )}
 
       {/* Link Modal */}
       {showLinkModal && (
@@ -726,7 +806,7 @@ export default function Dashboard({
 
   const [activeTab, setActiveTab] = useState<
     "overview" | "submissions" | "bookings" | "articles" | "services" | "serviceCategories" | "banners" | "doctors" | "faqs" | "settings" | "realResults" | "media" | "configs" | "intro" | "policies" | "authors" | "reviews" | "shifts"
-  >("overview");
+  >("articles");
 
   const [activePolicyTab, setActivePolicyTab] = useState("dieu-khoan");
 
@@ -834,19 +914,24 @@ export default function Dashboard({
     content: "",
     legacy_author: "",
     author_id: "" as string | number,
-    published_date: "",
+    published_date: new Date().toLocaleDateString("vi-VN"),
     category: "Chuyên môn",
     image_file: null as File | null,
     image: "",
+    image_alt: "",
     is_highlight: 0 as number,
+    status: "published",
+    focus_keyword: "",
     slug: "",
     meta_title: "",
     meta_description: "",
     meta_keywords: "",
-    meta_robots: "",
+    meta_robots: "index, follow",
     canonical_link: "",
     meta_image: "",
     schema: "",
+    related_urls: "",
+    redirect_urls: "",
   });
 
   const serviceForm = useForm({
@@ -969,6 +1054,17 @@ export default function Dashboard({
       doctors_carousel_title: settings.doctors_carousel_title || "Đội Ngũ Chuyên Gia Làm Đẹp",
       about_carousel_eyebrow: settings.about_carousel_eyebrow || "THEQ NAIL CENTRE",
       about_carousel_title: settings.about_carousel_title || "Kiến tạo - Vẻ đẹp độc bản",
+      footer_show_brand: settings.footer_show_brand ?? "1",
+      footer_brand_name: settings.footer_brand_name ?? "Theq",
+      footer_brand_desc: settings.footer_brand_desc ?? "Theq Nail Centre mang đến các liệu trình làm đẹp chuẩn y khoa, giúp bạn sở hữu vẻ đẹp độc bản, chuẩn tỷ lệ vàng và an toàn tuyệt đối.",
+      instagram_url: settings.instagram_url ?? "https://instagram.com",
+      footer_columns: settings.footer_columns,
+      blog_topbar_text: settings.blog_topbar_text ?? "Chuyên trang Kiến thức & Phân tích Chuyên sâu | Theq Blog",
+      blog_hero_breadcrumb: settings.blog_hero_breadcrumb ?? "Tin tức & Sự kiện",
+      blog_hero_title: settings.blog_hero_title ?? "Góc Chuyên Gia & Tin Tức",
+      blog_hero_desc: settings.blog_hero_desc ?? "Nơi hội tụ các phân tích chuyên sâu về y học thẩm mỹ, cập nhật công nghệ nâng cơ trẻ hóa thế hệ mới và các hoạt động cộng đồng nổi bật của Theq.",
+      blog_hero_image: settings.blog_hero_image ?? "",
+      blog_categories: settings.blog_categories,
     },
   });
 
@@ -1295,19 +1391,24 @@ export default function Dashboard({
       content: art.content || "",
       legacy_author: art.author ? (typeof art.author === "object" ? art.author.name : art.author) : (art.legacy_author || ""),
       author_id: art.author_id || "",
-      published_date: art.published_date || "",
+      published_date: art.published_date || new Date().toLocaleDateString("vi-VN"),
       category: art.category,
       image_file: null,
       image: art.image || "",
+      image_alt: art.image_alt || art.title || "",
       is_highlight: art.is_highlight ? 1 : 0,
+      status: art.status || "published",
+      focus_keyword: art.focus_keyword || "",
       slug: art.slug || "",
       meta_title: art.meta_title || "",
       meta_description: art.meta_description || "",
       meta_keywords: art.meta_keywords || "",
-      meta_robots: art.meta_robots || "",
+      meta_robots: art.meta_robots || "index, follow",
       canonical_link: art.canonical_link || "",
       meta_image: art.meta_image || "",
       schema: art.schema || "",
+      related_urls: art.related_urls || "",
+      redirect_urls: art.redirect_urls || "",
     });
     setArticleViewMode("edit");
   };
@@ -1813,38 +1914,39 @@ export default function Dashboard({
               </div>
             )}
             <div className="text-left">
-              <h2 className="font-serif font-bold text-white text-sm tracking-widest uppercase">THEQ</h2>
-              <span className="text-[9px] text-gold tracking-widest uppercase font-semibold">Nail Centre</span>
+              <h2 className="font-serif font-bold text-white text-sm tracking-widest uppercase">THEQ BLOG</h2>
+              <span className="text-[9px] text-gold tracking-widest uppercase font-semibold">SEO Content CMS</span>
             </div>
           </div>
 
-          {/* Nav Links */}
+          {/* Nav Links - Focused Pure Blog & SEO CMS */}
           <nav className="flex-grow p-4 space-y-4 overflow-y-auto">
-            {/* HỆ THỐNG / DASHBOARD */}
             <div className="space-y-1">
-              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Hệ thống</span>
+              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Quản trị Nội dung & SEO</span>
               <button
-                onClick={() => setActiveTab("overview")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "overview"
+                onClick={() => { setActiveTab("articles"); setArticleViewMode("list"); }}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  activeTab === "articles"
                     ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
                     : "hover:bg-white/5 hover:text-white text-gray-400"
                 }`}
               >
-                <LayoutDashboard size={16} />
-                <span>Tổng quan hệ thống</span>
+                <span className="flex items-center gap-3"><BookOpen size={16} /> Bài viết Chuẩn SEO</span>
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === "articles" ? "bg-white text-gold" : "bg-gold/15 text-gold"}`}>
+                  {articles.length}
+                </span>
               </button>
 
               <button
-                onClick={() => setActiveTab("settings")}
+                onClick={() => { setActiveTab("authors"); setAuthorViewMode("list"); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "settings"
+                  activeTab === "authors"
                     ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
                     : "hover:bg-white/5 hover:text-white text-gray-400"
                 }`}
               >
-                <Settings size={16} />
-                <span>Cấu hình chung</span>
+                <Users size={16} />
+                <span>Tác giả (Hồ sơ E-E-A-T)</span>
               </button>
 
               <button
@@ -1856,222 +1958,39 @@ export default function Dashboard({
                 }`}
               >
                 <ImageIcon size={16} />
-                <span>Thư viện Tệp tin</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("configs")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "configs"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <Sliders size={16} />
-                <span>Configs nâng cao</span>
+                <span>Thư viện Ảnh & Thumbnail</span>
               </button>
             </div>
 
-            {/* YÊU CẦU & LỊCH HẸN */}
             <div className="space-y-1 pt-3 border-t border-white/5">
-              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Yêu cầu & Lịch hẹn</span>
+              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Cấu hình & Kỹ thuật SEO</span>
               <button
-                onClick={() => setActiveTab("submissions")}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "submissions"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Phone size={16} />
-                  <span>Đăng ký tư vấn</span>
-                </div>
-                {submissions.length > 0 && (
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                    activeTab === "submissions" ? "bg-white text-gold" : "bg-gold/15 text-gold"
-                  }`}>
-                    {submissions.length}
-                  </span>
-                )}
-              </button>
-
-              <button
-                onClick={() => setActiveTab("bookings")}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "bookings"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Calendar size={16} />
-                  <span>Lịch hẹn trực tuyến</span>
-                </div>
-                {submissions.filter(sub => sub.booking_date || sub.booking_time).length > 0 && (
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                    activeTab === "bookings" ? "bg-white text-gold" : "bg-gold/15 text-gold"
-                  }`}>
-                    {submissions.filter(sub => sub.booking_date || sub.booking_time).length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* QUẢN LÝ DỊCH VỤ */}
-            <div className="space-y-1 pt-3 border-t border-white/5">
-              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Quản lý Dịch vụ</span>
-              <button
-                onClick={() => {
-                  setActiveTab("services");
-                  setServiceViewMode("list");
-                }}
+                onClick={() => setActiveTab("settings")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "services"
+                  activeTab === "settings"
                     ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
                     : "hover:bg-white/5 hover:text-white text-gray-400"
                 }`}
+              >
+                <Settings size={16} />
+                <span>Cấu hình chung Blog</span>
+              </button>
+              <a
+                href="/"
+                target="_blank"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide hover:bg-white/5 hover:text-gold text-gray-400 transition-all"
               >
                 <Sparkles size={16} />
-                <span>Danh sách Dịch vụ</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setActiveTab("serviceCategories");
-                  setServiceCategoryViewMode("list");
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "serviceCategories"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <List size={16} />
-                <span>Danh mục dịch vụ</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "reviews"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <MessageSquare size={16} />
-                <span>Quản lý đánh giá</span>
-              </button>
-            </div>
-
-            {/* BÀI VIẾT TIN TỨC */}
-            <div className="space-y-1 pt-3 border-t border-white/5">
-              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Tin tức & Bài viết</span>
-              <button
-                onClick={() => setActiveTab("articles")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "articles"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <BookOpen size={16} />
-                <span>Bài viết tin tức</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("authors")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "authors"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <Users size={16} />
-                <span>Tác giả bài viết</span>
-              </button>
-            </div>
-
-            {/* ĐỘI NGŨ CHUYÊN GIA */}
-            <div className="space-y-1 pt-3 border-t border-white/5">
-              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Bác sĩ & Chuyên môn</span>
-              <button
-                onClick={() => setActiveTab("doctors")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "doctors"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <Users size={16} />
-                <span>Đội ngũ bác sĩ</span>
-              </button>
-
-
-            </div>
-
-            {/* GIAO DIỆN & NỘI DUNG */}
-            <div className="space-y-1 pt-3 border-t border-white/5">
-              <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-2 px-3 block select-none">Nội dung website</span>
-              <button
-                onClick={() => setActiveTab("banners")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "banners"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <Sliders size={16} />
-                <span>Quản lý banners</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("realResults")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "realResults"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <CheckCircle size={16} />
-                <span>Kết quả thực tế</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("intro")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "intro"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <Info size={16} />
-                <span>Quản lý giới thiệu</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("faqs")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "faqs"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
-              >
-                <HelpCircle size={16} />
-                <span>Hỏi đáp FAQ</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("policies")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  activeTab === "policies"
-                    ? "bg-gold text-white font-bold shadow-md shadow-gold/15"
-                    : "hover:bg-white/5 hover:text-white text-gray-400"
-                }`}
+                <span>Xem Trang Chủ Blog ↗</span>
+              </a>
+              <a
+                href="/sitemap.xml"
+                target="_blank"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide hover:bg-white/5 hover:text-gold text-gray-400 transition-all"
               >
                 <FileText size={16} />
-                <span>Quản lý chính sách</span>
-              </button>
+                <span>XML Sitemap SEO ↗</span>
+              </a>
             </div>
           </nav>
 
@@ -3140,16 +3059,30 @@ export default function Dashboard({
                                   <th className="py-4 px-4 w-12 text-center">ID</th>
                                   <th className="py-4 px-4 w-28">Hình ảnh</th>
                                   <th className="py-4 px-4">Tiêu đề</th>
-                                  <th className="py-4 px-4 text-center w-28">Is Featured</th>
+                                  <th className="py-4 px-4 text-center w-28">Nổi bật</th>
                                   <th className="py-4 px-4 text-center w-28">Trạng thái</th>
                                   <th className="py-4 px-4 text-center w-20">Lượt xem</th>
-                                  <th className="py-4 px-4 text-center w-36">Ngày tạo</th>
-                                  <th className="py-4 px-4 text-center w-36">Cập nhật cuối</th>
-                                  <th className="py-4 px-4 text-right w-24">Thao tác</th>
+                                  <th className="py-4 px-4 text-center w-28">Điểm SEO</th>
+                                  <th className="py-4 px-4 text-center w-36">Ngày đăng</th>
+                                  <th className="py-4 px-4 text-right w-28">Thao tác</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-gray-50 text-xs text-gray-600 bg-white">
-                                {currentArticles.map((art) => (
+                                {currentArticles.map((art) => {
+                                  const seoScore = evaluateArticleSeo({
+                                    title: art.title || "",
+                                    slug: art.slug || "",
+                                    description: art.description || "",
+                                    content: art.content || "",
+                                    image: art.image || "",
+                                    imageAlt: art.image_alt || art.title || "",
+                                    authorId: art.author_id,
+                                    legacyAuthor: art.legacy_author || "",
+                                    focusKeyword: art.focus_keyword || "",
+                                    metaTitle: art.meta_title || "",
+                                    metaDescription: art.meta_description || "",
+                                  }).score;
+                                  return (
                                   <tr key={art.id} className="hover:bg-gray-50/50 transition-colors">
                                     {/* ID */}
                                     <td className="py-4 px-4 text-center font-bold text-gray-400 align-middle">
@@ -3160,7 +3093,7 @@ export default function Dashboard({
                                     <td className="py-4 px-4 align-middle">
                                       <div className="relative w-20 h-12 bg-gray-100 border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                                         {art.image ? (
-                                          <img src={art.image} alt={art.title} className="object-cover w-full h-full" />
+                                          <img src={art.image} alt={art.image_alt || art.title} className="object-cover w-full h-full" />
                                         ) : (
                                           <div className="w-full h-full flex items-center justify-center text-gray-300">No Img</div>
                                         )}
@@ -3172,11 +3105,14 @@ export default function Dashboard({
                                       <div className="line-clamp-2 uppercase leading-snug tracking-normal">
                                         {art.title}
                                       </div>
-                                      <div className="text-[10px] text-gray-400 font-light mt-1 flex items-center gap-2">
+                                      <div className="text-[10px] text-gray-400 font-light mt-1 flex flex-wrap items-center gap-2">
                                         <span className="bg-gold/10 text-gold font-bold px-1.5 py-0.5 rounded text-[8px] tracking-wider uppercase">
                                           {art.category}
                                         </span>
                                         <span>Tác giả: {art.author ? (typeof art.author === "object" ? art.author.name : art.author) : (art.legacy_author || "Theq")}</span>
+                                        {art.focus_keyword && (
+                                          <span className="text-blue-600 font-medium">• KW: {art.focus_keyword}</span>
+                                        )}
                                       </div>
                                     </td>
 
@@ -3191,36 +3127,56 @@ export default function Dashboard({
                                         {art.is_highlight ? (
                                           <span className="w-3 h-3 rounded-full bg-[#f97316] inline-block shadow-sm transition-all hover:scale-110"></span>
                                         ) : (
-                                          <span className="w-3 h-3 rounded-full bg-[#10b981] inline-block shadow-sm transition-all hover:scale-110"></span>
+                                          <span className="w-3 h-3 rounded-full bg-gray-300 inline-block shadow-sm transition-all hover:scale-110"></span>
                                         )}
                                       </button>
                                     </td>
 
                                     {/* TRẠNG THÁI */}
                                     <td className="py-4 px-4 text-center align-middle">
-                                      <span className="bg-[#10b981]/10 text-[#10b981] text-[9px] font-bold px-2 py-0.5 rounded border border-[#10b981]/10 uppercase tracking-wider">
-                                        Hiển thị
-                                      </span>
+                                      {art.status === "draft" ? (
+                                        <span className="bg-amber-50 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded border border-amber-200 uppercase tracking-wider">
+                                          Bản nháp
+                                        </span>
+                                      ) : (
+                                        <span className="bg-[#10b981]/10 text-[#10b981] text-[9px] font-bold px-2 py-0.5 rounded border border-[#10b981]/10 uppercase tracking-wider">
+                                          Xuất bản
+                                        </span>
+                                      )}
                                     </td>
 
                                     {/* LƯỢT XEM */}
-                                    <td className="py-4 px-4 text-center align-middle font-medium text-gray-400">
-                                      {art.id * 7 + 13}
+                                    <td className="py-4 px-4 text-center align-middle font-medium text-gray-500">
+                                      {(art.views || 0).toLocaleString("vi-VN")}
                                     </td>
 
-                                    {/* NGÀY TẠO */}
-                                    <td className="py-4 px-4 text-center align-middle text-gray-400 font-light text-[10px]">
-                                      {art.published_date || "08/07/2026 10:20"}
+                                    {/* ĐIỂM SEO */}
+                                    <td className="py-4 px-4 text-center align-middle">
+                                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                        seoScore >= 80 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : seoScore >= 55 ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-red-50 text-red-600 border-red-200"
+                                      }`}>
+                                        {seoScore}/100
+                                      </span>
                                     </td>
 
-                                    {/* CẬP NHẬT CUỐI */}
+                                    {/* NGÀY ĐĂNG */}
                                     <td className="py-4 px-4 text-center align-middle text-gray-400 font-light text-[10px]">
-                                      {art.published_date || "08/07/2026 10:20"}
+                                      {art.published_date || "—"}
                                     </td>
 
                                     {/* THAO TÁC */}
                                     <td className="py-4 px-4 text-right align-middle">
                                       <div className="flex justify-end gap-1">
+                                        {art.slug && (
+                                          <a
+                                            href={`/tin-tuc/${art.slug}`}
+                                            target="_blank"
+                                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-colors text-xs font-bold"
+                                            title="Xem bài viết trên Blog"
+                                          >
+                                            ↗
+                                          </a>
+                                        )}
                                         <button
                                           onClick={() => handleOpenEditArticle(art)}
                                           className="text-gold hover:text-gold-dark p-2 hover:bg-gold/5 rounded-lg transition-colors"
@@ -3238,7 +3194,8 @@ export default function Dashboard({
                                       </div>
                                     </td>
                                   </tr>
-                                ))}
+                                  );
+                                })}
                               </tbody>
                             </table>
                           </div>
@@ -3328,7 +3285,7 @@ export default function Dashboard({
                   <div>
                     {/* Breadcrumbs */}
                     <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-6 font-semibold select-none text-left">
-                      <span className="cursor-pointer hover:text-gold transition-colors" onClick={() => setArticleViewMode("list")}>🏠</span>
+                      <span className="cursor-pointer hover:text-gold transition-colors" onClick={() => setArticleViewMode("list")}>Trang quản trị</span>
                       <span className="text-gray-300">/</span>
                       <span className="cursor-pointer hover:text-gold transition-colors" onClick={() => setArticleViewMode("list")}>Bài Viết</span>
                       <span className="text-gray-300">/</span>
@@ -3347,6 +3304,23 @@ export default function Dashboard({
                           <button type="button" className="px-5 py-2.5 text-xs font-bold text-gray-800 border-b-2 border-gold -mb-px">VN Tiếng Việt</button>
                         </div>
 
+                        {/* Gemini AI Writer Assistant (DongNaiFord style) */}
+                        <AiWriterAssistant
+                          onApply={(res) => {
+                            articleForm.setData((prev) => ({
+                              ...prev,
+                              title: res.title,
+                              slug: res.slug,
+                              description: res.description,
+                              content: res.content,
+                              focus_keyword: res.keywords ? res.keywords.split(",")[0].trim() : prev.focus_keyword,
+                              meta_title: res.title,
+                              meta_description: res.description,
+                              meta_keywords: res.keywords || prev.meta_keywords,
+                            }));
+                          }}
+                        />
+
                         {/* Title */}
                         <div className="space-y-1.5">
                           <div className="flex justify-between items-center">
@@ -3364,15 +3338,42 @@ export default function Dashboard({
                               articleForm.setData((prev) => ({
                                 ...prev,
                                 title: newTitle,
-                                slug: slugify(newTitle),
+                                slug: !editingArticle ? slugify(newTitle) : (prev.slug || slugify(newTitle)),
                               }));
                             }}
                             className="w-full border border-gray-200 focus:border-gold px-4 py-3 rounded-lg text-sm focus:outline-none text-gray-800 font-bold placeholder-gray-300 bg-white"
                             placeholder="Nhập tiêu đề bài viết"
                           />
+                        </div>
+
+                        {/* Editable URL Slug (DongNaiFord style) */}
+                        <div className="space-y-1.5">
+                          <label className="text-xs uppercase font-bold text-gray-400 tracking-wider block">
+                            Đường dẫn bài viết (URL Slug)
+                          </label>
+                          <div className="flex items-center">
+                            <span className="text-gray-400 text-xs bg-gray-100 border border-gray-200 rounded-l-lg px-3 py-2.5 border-r-0 select-none font-mono">
+                              /tin-tuc/
+                            </span>
+                            <input
+                              type="text"
+                              value={articleForm.data.slug}
+                              onChange={(e) => articleForm.setData("slug", slugify(e.target.value))}
+                              className="w-full bg-white border border-gray-200 focus:border-gold rounded-r-lg px-3 py-2 text-sm font-mono focus:outline-none text-gray-700"
+                              placeholder={slugify(articleForm.data.title) || "duong-dan-bai-viet"}
+                            />
+                          </div>
                           {articleForm.data.slug && (
-                            <div className="text-[10px] text-blue-600 font-light select-all break-all mt-1 bg-blue-50/50 border border-blue-100/50 px-3 py-1.5 rounded-md inline-block">
-                              Đường dẫn (URL): <span className="font-semibold underline">https://theq.vn/tin-tuc/{articleForm.data.slug}</span>
+                            <div className="text-[11px] text-blue-600 font-light mt-1 bg-blue-50/50 border border-blue-100/50 px-3 py-1.5 rounded-md inline-flex items-center gap-1.5">
+                              <span>Xem đường dẫn:</span>
+                              <a
+                                href={`/tin-tuc/${articleForm.data.slug}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-mono font-semibold underline hover:text-blue-800"
+                              >
+                                /tin-tuc/{articleForm.data.slug} ↗
+                              </a>
                             </div>
                           )}
                         </div>
@@ -3390,7 +3391,7 @@ export default function Dashboard({
                                   articleForm.setData((prev) => ({
                                     ...prev,
                                     author_id: selectedId,
-                                    author: matched.name,
+                                    legacy_author: matched.name,
                                   }));
                                 } else {
                                   articleForm.setData((prev) => ({
@@ -3446,7 +3447,55 @@ export default function Dashboard({
                             minHeight="320px"
                             onOpenMediaLibrary={openMediaLibraryForEditor}
                           />
+
+                          {/* Shortcode CTA Guide Helper Box (DongNaiFord style) */}
+                          <div className="mt-3 p-3.5 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 flex items-start justify-between gap-3">
+                            <div className="space-y-1">
+                              <div className="font-bold text-gray-800">Hướng dẫn chèn Khung Đăng ký Nhận tin / Tư vấn (CTA):</div>
+                              <div className="leading-relaxed text-gray-600">
+                                Để chèn khung CTA vào bất kỳ vị trí nào trong nội dung bài viết, bạn chỉ cần gõ từ khóa{" "}
+                                <code className="bg-gray-200/80 text-gray-800 px-1.5 py-0.5 rounded font-mono font-bold select-all">[cta-form]</code> (hoặc{" "}
+                                <code className="bg-gray-200/80 text-gray-800 px-1.5 py-0.5 rounded font-mono font-bold select-all">[[cta-form]]</code>) trên một dòng riêng biệt. Hệ thống ngoài Blog sẽ tự động nhận diện và hiển thị khung CTA tại vị trí đó.
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const nextContent = `${articleForm.data.content || ""}\n<p>[cta-form]</p>`;
+                                articleForm.setData("content", nextContent);
+                              }}
+                              className="shrink-0 px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-lg text-[11px] transition-colors cursor-pointer shadow-sm"
+                            >
+                              + Chèn [cta-form]
+                            </button>
+                          </div>
                         </div>
+
+                        {/* Real-time On-Page SEO Score & SERP Preview Panel */}
+                        <SeoAnalyzerPanel
+                          title={articleForm.data.title}
+                          slug={articleForm.data.slug}
+                          description={articleForm.data.description}
+                          content={articleForm.data.content}
+                          image={articleForm.data.image_file ? URL.createObjectURL(articleForm.data.image_file) : articleForm.data.image}
+                          imageAlt={articleForm.data.image_alt}
+                          authorId={articleForm.data.author_id}
+                          legacyAuthor={articleForm.data.legacy_author}
+                          focusKeyword={articleForm.data.focus_keyword}
+                          metaTitle={articleForm.data.meta_title}
+                          metaDescription={articleForm.data.meta_description}
+                          onChangeFocusKeyword={(kw) => articleForm.setData("focus_keyword", kw)}
+                        />
+
+                        {/* Related URLs & 301 Redirects (DongNaiFord style) */}
+                        <RelatedAndRedirectUrlsPanel
+                          relatedUrls={articleForm.data.related_urls}
+                          redirectUrls={articleForm.data.redirect_urls}
+                          currentSlug={articleForm.data.slug}
+                          allArticles={articles.map((a) => ({ id: a.id, title: a.title, slug: a.slug || "" }))}
+                          onChangeRelated={(val) => articleForm.setData("related_urls", val)}
+                          onChangeRedirect={(val) => articleForm.setData("redirect_urls", val)}
+                        />
 
                         {/* Meta Title */}
                         <div className="space-y-1.5 pt-4">
@@ -3578,27 +3627,27 @@ export default function Dashboard({
                         <div className="bg-white border border-gray-150 rounded-xl p-5 shadow-sm space-y-5">
                           {/* Trạng thái */}
                           <div>
-                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-2.5 block">Trạng thái</label>
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-2.5 block">Trạng thái xuất bản</label>
                             <div className="space-y-2">
                               <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-gray-800">
                                 <input
                                   type="radio"
                                   name="status"
-                                  checked={true}
-                                  readOnly
+                                  checked={articleForm.data.status !== "draft"}
+                                  onChange={() => articleForm.setData("status", "published")}
                                   className="text-gold focus:ring-gold border-gray-300 w-4 h-4"
                                 />
-                                <span>Hiển thị</span>
+                                <span>Xuất bản (Hiển thị công khai)</span>
                               </label>
-                              <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-gray-400">
+                              <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-gray-500">
                                 <input
                                   type="radio"
                                   name="status"
-                                  checked={false}
-                                  readOnly
+                                  checked={articleForm.data.status === "draft"}
+                                  onChange={() => articleForm.setData("status", "draft")}
                                   className="text-gold focus:ring-gold border-gray-300 w-4 h-4"
                                 />
-                                <span>Tạm ẩn</span>
+                                <span>Lưu bản nháp (Tạm ẩn trên Blog)</span>
                               </label>
                             </div>
                           </div>
@@ -3731,32 +3780,74 @@ export default function Dashboard({
                                 </div>
                               )}
                             </div>
+                            <div className="mt-3 space-y-2.5">
+                              <label className="block">
+                                <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider block mb-1">Hoặc tải ảnh Thumbnail trực tiếp từ máy:</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0] || null;
+                                    if (file) {
+                                      articleForm.setData((prev) => ({
+                                        ...prev,
+                                        image_file: file,
+                                        image_alt: prev.image_alt || prev.title,
+                                      }));
+                                    }
+                                  }}
+                                  className="block w-full text-[11px] text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-gold/10 file:text-gold hover:file:bg-gold/20 cursor-pointer"
+                                />
+                              </label>
+                              <AltTextSeoTagsInput
+                                value={articleForm.data.image_alt}
+                                onChange={(newVal) => articleForm.setData("image_alt", newVal)}
+                              />
+                            </div>
                           </div>
 
                         </div>
 
-                        {/* Box 2: Categorization */}
+                        {/* Box 2: Categorization & Internal Linking */}
                         <div className="bg-white border border-gray-150 rounded-xl p-5 shadow-sm space-y-4">
                           <div>
-                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-2 block">Danh mục</label>
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-2 block">Chuyên mục bài viết</label>
                             <select
+                              value={parseBlogCategories(settingsForm.data.settings.blog_categories).includes(articleForm.data.category) ? articleForm.data.category : "custom"}
+                              onChange={(e) => {
+                                if (e.target.value !== "custom") articleForm.setData("category", e.target.value);
+                              }}
+                              className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-xs focus:outline-none text-gray-700 bg-white mb-2"
+                            >
+                              {parseBlogCategories(settingsForm.data.settings.blog_categories).map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                              ))}
+                              <option value="custom">-- Tự nhập chuyên mục mới --</option>
+                            </select>
+                            <input
+                              type="text"
                               value={articleForm.data.category}
                               onChange={(e) => articleForm.setData("category", e.target.value)}
-                              className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-xs focus:outline-none text-gray-700 bg-white"
-                            >
-                              <option value="Chuyên môn">Chuyên môn</option>
-                              <option value="Sự kiện">Sự kiện</option>
-                              <option value="Hoạt động">Hoạt động</option>
-                            </select>
+                              placeholder="Hoặc tự nhập tên chuyên mục..."
+                              className="w-full border border-gray-200 focus:border-gold px-3.5 py-2 rounded-lg text-xs focus:outline-none text-gray-700 bg-gray-50/50"
+                            />
                           </div>
 
                           <div>
-                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-2 block">Bài viết liên quan</label>
+                            <label className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-2 block">Chèn nhanh Internal Link (Đi link nội bộ)</label>
                             <select
-                              className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-xs focus:outline-none text-gray-400 bg-white"
+                              className="w-full border border-gray-200 focus:border-gold px-3.5 py-2.5 rounded-lg text-xs focus:outline-none text-gray-700 bg-white"
                               defaultValue=""
+                              onChange={(e) => {
+                                const targetArt = articles.find((a) => String(a.id) === e.target.value);
+                                if (targetArt && targetArt.slug) {
+                                  const linkHtml = `<p>Xem thêm: <a href="/tin-tuc/${targetArt.slug}">${targetArt.title}</a></p>`;
+                                  articleForm.setData("content", (articleForm.data.content || "") + linkHtml);
+                                  e.target.value = "";
+                                }
+                              }}
                             >
-                              <option value="">Chọn bài viết liên quan</option>
+                              <option value="">+ Chọn bài viết để chèn link vào cuối bài...</option>
                               {articles.filter(a => a.id !== editingArticle?.id).map(a => (
                                 <option key={a.id} value={a.id}>{a.title}</option>
                               ))}
@@ -6836,7 +6927,29 @@ export default function Dashboard({
                     </div>
                   </div>
 
+                  <BlogHeaderAndCategoriesEditor
+                    settings={settingsForm.data.settings}
+                    onUpdate={(patch) =>
+                      settingsForm.setData("settings", {
+                        ...settingsForm.data.settings,
+                        ...patch,
+                      })
+                    }
+                    onSelectBannerImage={(cb) => {
+                      setOnMediaSelect(() => cb);
+                      setMediaSelectorOpen(true);
+                    }}
+                  />
 
+                  <FooterSettingsEditor
+                    settings={settingsForm.data.settings}
+                    onUpdate={(patch) =>
+                      settingsForm.setData("settings", {
+                        ...settingsForm.data.settings,
+                        ...patch,
+                      })
+                    }
+                  />
 
                   <div className="flex justify-end pt-4 border-t border-gray-100">
                     <button

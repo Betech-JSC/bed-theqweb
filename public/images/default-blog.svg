@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#181715"/>
+  <rect x="40" y="40" width="1120" height="550" rx="16" stroke="#B09A7A" stroke-opacity="0.25" stroke-width="2"/>
+  <circle cx="600" cy="275" r="44" stroke="#B09A7A" stroke-opacity="0.5" stroke-width="2"/>
+  <path d="M582 283L595 268L608 281L616 272L624 283H582Z" fill="#B09A7A" fill-opacity="0.5"/>
+  <text x="600" y="365" text-anchor="middle" fill="#B09A7A" font-family="Georgia, serif" font-size="22" letter-spacing="4">CHUYÊN TRANG BÀI VIẾT</text>
+</svg>

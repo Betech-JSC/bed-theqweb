@@ -1,95 +1,38 @@
 import React from "react";
 import Image from "@/Components/Image";
-import { Link, Head } from "@inertiajs/react";
+import { Link, Head, usePage } from "@inertiajs/react";
 import { Header } from "@/Components/Header";
 import { Footer } from "@/Components/Footer";
-import { ConsultLocations } from "@/Components/ConsultLocations";
-import { FAQ } from "@/Components/FAQ";
-import { ChevronRight, Calendar, User, ArrowRight } from "lucide-react";
+import { parseBlogCategories } from "@/Components/BlogHeaderAndCategoriesEditor";
+import { ChevronRight, Calendar, User, ArrowRight, Search, Eye } from "lucide-react";
 
 interface DbArticle {
   title: string;
   slug?: string | null;
   description?: string;
   image?: string;
+  image_alt?: string | null;
   published_date?: string;
   author?: any;
   legacy_author?: string | null;
   category?: string;
+  views?: number;
 }
 
-export default function TinTucPage({ initialArticles }: { initialArticles?: DbArticle[] }) {
-  const staticArticles = [
-    {
-      title: "Điều gì tạo nên một trải nghiệm trẻ hóa thực sự khác biệt?",
-      desc: "Tìm hiểu các tiêu chí quan trọng để đánh giá một dịch vụ trẻ hóa toàn diện chuẩn y khoa hiện đại.",
-      img: "/images/740467726_122234365430447416_4726582498491420090_n.jpg",
-      date: "08/07/2026",
-      author: "Bác Sĩ CKI Ngọc Nữ",
-    },
-    {
-      title: "Thẩm mỹ vùng mắt: Khi nào cần can thiệp? Giải pháp phù hợp",
-      desc: "Phân tích khoa học về lão hóa vùng mắt, sụp mí mắt và các công nghệ can thiệp mí hiện đại nhất.",
-      img: "/images/725593428_122164685762677110_2827496772101167778_n.jpg",
-      date: "05/07/2026",
-      author: "Hội Đồng Bác Sĩ Theq",
-    },
-    {
-      title: "Theq chào đón công nghệ trẻ hóa thế hệ mới trong tháng 07/2026",
-      desc: "Chuyển giao độc quyền công nghệ nâng cơ trẻ hóa Ultherapy Prime thế hệ mới đem lại hiệu quả vượt trội.",
-      img: "/images/web.png",
-      date: "01/07/2026",
-      author: "Ban Biên Tập Theq",
-    },
-    {
-      title: "Theq đồng hành thiện nguyện “Yêu thương cho em”, trao tặng 300 triệu",
-      desc: "Hoạt động thiện nguyện ý nghĩa hỗ trợ các bệnh nhân có hoàn cảnh khó khăn điều trị tại bệnh viện.",
-      img: "/images/DNG_3069.png",
-      date: "28/06/2026",
-      author: "Đoàn Thiện Nguyện Theq",
-    },
-    {
-      title: "Private VIP Workshop “The Science of Youth” – Luxury Wellness",
-      desc: "Không gian workshop kết nối khoa học làm đẹp độc bản và trải nghiệm chăm sóc sức khỏe thượng lưu.",
-      img: "/images/Workshop-1.png",
-      date: "22/06/2026",
-      author: "Ban Tổ Chức Theq",
-    },
-    {
-      title: "CEO Khánh Tôn tham dự Ultherapy Prime APAC 2026 tại Malaysia",
-      desc: "Cập nhật xu hướng trẻ hóa nâng cơ thế hệ mới cùng các chuyên gia đầu ngành khu vực Châu Á - Thái Bình Dương.",
-      img: "/images/ultherapy-APAC.jpg",
-      date: "15/06/2026",
-      author: "CEO Khánh Tôn",
-    },
-    {
-      title: "Đại diện Theq tham dự Hội thảo Enhancing Safety & Precision",
-      desc: "Nâng cao độ an toàn và độ chính xác trong tạo hình thẩm mỹ nội khoa cùng các chuyên gia quốc tế.",
-      img: "/images/1-size-web-1.png",
-      date: "08/06/2026",
-      author: "Hội Đồng Bác Sĩ Theq",
-    },
-    {
-      title: "MasterClass: Nâng cao chuyên môn cùng các bác sĩ đầu ngành",
-      desc: "Chương trình đào tạo chuyên sâu nội bộ định kỳ nhằm cập nhật các kỹ thuật tiên tiến nhất thế giới.",
-      img: "/images/Masterclass-1.jpg",
-      date: "02/06/2026",
-      author: "Hội Đồng Chuyên Môn Theq",
-    },
-    {
-      title: "3 lý do cần bác sĩ chuyên khoa thực hiện thẩm mỹ nội khoa",
-      desc: "Tại sao tay nghề bác sĩ và kiến thức giải phẫu học quyết định sự thành bại của các ca tiêm Filler/Botox.",
-      img: "/images/Untitled-2.png",
-      date: "25/05/2026",
-      author: "Bác Sĩ CKI Hoàng Nga",
-    },
-  ];
-
+export default function TinTucPage({
+  initialArticles,
+  initialCategory = "Tất cả",
+  initialSearch = "",
+}: {
+  initialArticles?: DbArticle[];
+  initialCategory?: string;
+  initialSearch?: string;
+}) {
   const articles = (initialArticles && initialArticles.length > 0)
     ? initialArticles.map(a => {
-        let displayAuthor = "Theq";
+        let displayAuthor = "Ban Biên Tập";
         if (a.author && typeof a.author === "object") {
-          displayAuthor = a.author.name || "Theq";
+          displayAuthor = a.author.name || "Ban Biên Tập";
         } else if (typeof a.author === "string" && a.author.trim() !== "") {
           displayAuthor = a.author;
         } else if (a.legacy_author) {
@@ -98,54 +41,60 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
         return {
           title: a.title,
           desc: a.description || "",
-          img: a.image || "/images/default-blog.jpg",
+          img: a.image || "/images/default-blog.svg",
+          imgAlt: a.image_alt || a.title,
           date: a.published_date || "",
           author: displayAuthor,
           slug: a.slug || "",
           category: a.category || "Chuyên môn",
+          views: a.views || 0,
         };
       })
-    : staticArticles.map((s, idx) => ({
-        title: s.title,
-        desc: s.desc,
-        img: s.img,
-        date: s.date,
-        author: s.author,
-        slug: s.title.includes("mắt") 
-          ? "tham-my-vung-mat-khi-nao-can-can-thiep-giai-phap-phu-hop"
-          : (s.title.includes("trải nghiệm trẻ hóa") 
-             ? "dieu-gi-tao-nen-mot-trai-nghiem-tre-hoa-thuc-su-khac-biet" 
-             : "theq-chao-don-cong-nghe-tre-hoa-the-he-moi-trong-thang-072026"),
-        category: s.title.includes("thiện nguyện") || s.title.includes("MasterClass") ? "Hoạt động" : (s.title.includes("Workshop") || s.title.includes("Ultherapy") || s.title.includes("Hội thảo") ? "Sự kiện" : "Chuyên môn")
-      }));
+    : [];
 
-  const [selectedCategory, setSelectedCategory] = React.useState("Tất cả");
+  const { props } = usePage();
+  const settings = (props.settings as Record<string, string>) || {};
+  const [selectedCategory, setSelectedCategory] = React.useState(initialCategory || "Tất cả");
+  const [searchTerm, setSearchTerm] = React.useState(initialSearch || "");
 
-  const filteredArticles = selectedCategory === "Tất cả"
-    ? articles
-    : articles.filter(a => a.category === selectedCategory);
+  React.useEffect(() => {
+    setSelectedCategory(initialCategory || "Tất cả");
+  }, [initialCategory]);
+
+  const categories = React.useMemo(() => {
+    return ["Tất cả", ...parseBlogCategories(settings.blog_categories)];
+  }, [settings.blog_categories]);
+
+  const filteredArticles = articles.filter((a) => {
+    const matchCat = selectedCategory === "Tất cả" || a.category === selectedCategory;
+    const q = searchTerm.trim().toLowerCase();
+    const matchSearch = !q || a.title.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q) || a.author.toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
 
   const featuredPost = filteredArticles.length > 0 ? filteredArticles[0] : null;
   const regularArticles = filteredArticles.length > 1 ? filteredArticles.slice(1) : [];
 
   return (
     <>
-      <Head title="Tin Tức & Hoạt Động | Theq" />
+      <Head>
+        <title>{selectedCategory === "Tất cả" ? "Chuyên Trang Bài Viết & Kiến Thức Chuyên Sâu | Theq Blog" : `${selectedCategory} - Bài Viết Chuyên Sâu | Theq Blog`}</title>
+        <meta name="description" content="Chuyên trang Blog chia sẻ các bài viết phân tích chuyên môn, kiến thức y khoa, sự kiện và góc nhìn chuyên gia từ đội ngũ Theq." />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Chuyên Trang Bài Viết & Kiến Thức Chuyên Sâu | Theq Blog" />
+        <meta property="og:description" content="Chuyên trang Blog chia sẻ các bài viết phân tích chuyên môn, kiến thức y khoa, sự kiện và góc nhìn chuyên gia từ đội ngũ Theq." />
+      </Head>
       <Header />
       
       <main className="flex-grow font-sans bg-gray-55/40">
         {/* Banner/Hero Banner */}
-        <section className="relative w-full flex items-start bg-black overflow-hidden pt-40 md:pt-48 pb-20 md:pb-24">
-          <div className="absolute inset-0 w-full h-full opacity-40 z-1">
-            <Image
-              src="/images/Ban-banner-web-3-1.png"
-              alt="Tin tức thẩm mỹ banner"
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-55/40 via-dark-bg/60 to-transparent z-10" />
+        <section className="relative w-full flex items-start bg-gradient-to-br from-[#141311] via-[#1f1c18] to-[#2c251d] overflow-hidden pt-40 md:pt-48 pb-20 md:pb-24">
+          {settings.blog_hero_image && (
+            <img src={settings.blog_hero_image} alt={settings.blog_hero_title || "Banner Blog"} className="absolute inset-0 w-full h-full object-cover opacity-35 z-0" />
+          )}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(176,154,122,0.18),transparent_60%)] z-1" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent z-10" />
 
           <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-[10%] w-full text-white text-left">
             <div className="max-w-5xl">
@@ -153,15 +102,15 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
               <div className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-gold mb-4 font-semibold">
                 <Link href="/" className="hover:underline">Trang chủ</Link>
                 <ChevronRight size={12} className="text-gray-400" />
-                <span className="text-white">Tin tức & Sự kiện</span>
+                <span className="text-white">{settings.blog_hero_breadcrumb ?? "Tin tức & Sự kiện"}</span>
               </div>
               {/* Title */}
               <h1 className="text-4xl md:text-6xl font-serif font-bold text-white mb-6 leading-tight tracking-wide">
-                Góc Chuyên Gia & Tin Tức
+                {settings.blog_hero_title ?? "Góc Chuyên Gia & Tin Tức"}
               </h1>
               {/* Subheading */}
               <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light max-w-3xl">
-                Nơi hội tụ các phân tích chuyên sâu về y học thẩm mỹ, cập nhật công nghệ nâng cơ trẻ hóa thế hệ mới và các hoạt động cộng đồng nổi bật của Theq.
+                {settings.blog_hero_desc ?? "Nơi hội tụ các phân tích chuyên sâu về y học thẩm mỹ, cập nhật công nghệ nâng cơ trẻ hóa thế hệ mới và các hoạt động cộng đồng nổi bật của Theq."}
               </p>
             </div>
           </div>
@@ -171,24 +120,37 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
         <section className="py-16 px-4 md:px-[10%]">
           <div className="max-w-7xl mx-auto">
             
-            {/* Category Navigation Tabs */}
-            <div className="flex flex-wrap justify-center gap-2 md:gap-8 mb-16 border-b border-gray-200/60 pb-3 select-none">
-              {["Tất cả", "Chuyên môn", "Sự kiện", "Hoạt động"].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`relative px-4 py-2 text-xs md:text-sm font-serif font-bold uppercase tracking-wider transition-all duration-300 pb-4 -mb-[13px] ${
-                    selectedCategory === cat
-                      ? "text-gold font-bold"
-                      : "text-gray-400 hover:text-gray-700"
-                  }`}
-                >
-                  <span>{cat}</span>
-                  {selectedCategory === cat && (
-                    <span className="absolute bottom-0 left-0 w-full h-[3px] bg-gold rounded-full transition-all duration-300" />
-                  )}
-                </button>
-              ))}
+            {/* Category Navigation Tabs & Search Bar */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-16 border-b border-gray-200/60 pb-4 select-none">
+              <div className="flex flex-wrap justify-center md:justify-start gap-2 md:gap-6">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`relative px-4 py-2 text-xs md:text-sm font-serif font-bold uppercase tracking-wider transition-all duration-300 pb-4 -mb-[17px] ${
+                      selectedCategory === cat
+                        ? "text-gold font-bold"
+                        : "text-gray-400 hover:text-gray-700"
+                    }`}
+                  >
+                    <span>{cat}</span>
+                    {selectedCategory === cat && (
+                      <span className="absolute bottom-0 left-0 w-full h-[3px] bg-gold rounded-full transition-all duration-300" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative w-full md:w-80">
+                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Tìm kiếm bài viết, chủ đề, tác giả..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 focus:border-gold rounded-full text-xs text-gray-700 placeholder-gray-400 focus:outline-none shadow-sm transition-colors"
+                />
+              </div>
             </div>
 
             {/* Featured Post (Hero Layout) */}
@@ -202,7 +164,7 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
                   >
                     <Image
                       src={featuredPost.img}
-                      alt={featuredPost.title}
+                      alt={featuredPost.imgAlt || featuredPost.title}
                       fill
                       className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
                     />
@@ -313,18 +275,12 @@ export default function TinTucPage({ initialArticles }: { initialArticles?: DbAr
             {/* Empty State */}
             {filteredArticles.length === 0 && (
               <div className="py-20 text-center text-gray-400 bg-white rounded-3xl border border-dashed border-gray-300">
-                <p className="text-sm font-light">Hiện chưa có bài viết nào thuộc chuyên mục này.</p>
+                <p className="text-sm font-light">Không tìm thấy bài viết nào phù hợp với bộ lọc hiện tại.</p>
               </div>
             )}
 
           </div>
         </section>
-
-        {/* FAQs */}
-        <FAQ />
-
-        {/* Locations and Signups */}
-        <ConsultLocations />
       </main>
       <Footer />
     </>

@@ -46,9 +46,14 @@ class ContentController extends Controller
             'author_id' => 'nullable|exists:authors,id',
             'published_date' => 'required|string|max:100',
             'category' => 'required|string|max:255',
-            'image_file' => 'nullable|image|max:2048',
+            'image_file' => 'nullable|image|max:5120',
             'image' => 'nullable|string|max:255',
+            'image_alt' => 'nullable|string|max:255',
             'is_highlight' => 'nullable|integer',
+            'status' => 'nullable|string|in:published,draft',
+            'focus_keyword' => 'nullable|string|max:255',
+            'related_urls' => 'nullable|string',
+            'redirect_urls' => 'nullable|string',
             'slug' => 'nullable|string|max:255',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
@@ -59,29 +64,35 @@ class ContentController extends Controller
             'schema' => 'nullable|string',
         ]);
 
-        $imagePath = '/images/default-blog.jpg';
+        $slug = $this->uniqueSlug(Article::class, $validated['slug'] ?? $validated['title']);
+
+        $imagePath = '/images/default-blog.svg';
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $ext = strtolower($file->getClientOriginalExtension());
+            $filename = $slug . '-' . time() . '.' . $ext;
             $file->move(public_path('images'), $filename);
             $imagePath = '/images/' . $filename;
         } elseif ($request->filled('image')) {
             $imagePath = $request->input('image');
         }
 
-        $slug = $this->uniqueSlug(Article::class, $validated['slug'] ?? $validated['title']);
-
         Article::create([
             'title' => $validated['title'],
             'slug' => $slug,
             'description' => $validated['description'],
             'content' => $validated['content'],
-            'legacy_author' => $validated['legacy_author'] ?? 'Theq',
+            'legacy_author' => $validated['legacy_author'] ?? 'Ban Biên Tập',
             'author_id' => $validated['author_id'] ?? null,
             'published_date' => $validated['published_date'],
             'category' => $validated['category'],
             'image' => $imagePath,
+            'image_alt' => $validated['image_alt'] ?? $validated['title'],
             'is_highlight' => $request->boolean('is_highlight'),
+            'status' => $validated['status'] ?? 'published',
+            'focus_keyword' => $validated['focus_keyword'] ?? null,
+            'related_urls' => $validated['related_urls'] ?? null,
+            'redirect_urls' => $validated['redirect_urls'] ?? null,
             'meta_title' => $validated['meta_title'] ?? null,
             'meta_description' => $validated['meta_description'] ?? null,
             'meta_keywords' => $validated['meta_keywords'] ?? null,
@@ -104,9 +115,14 @@ class ContentController extends Controller
             'author_id' => 'nullable|exists:authors,id',
             'published_date' => 'required|string|max:100',
             'category' => 'required|string|max:255',
-            'image_file' => 'nullable|image|max:2048',
+            'image_file' => 'nullable|image|max:5120',
             'image' => 'nullable|string|max:255',
+            'image_alt' => 'nullable|string|max:255',
             'is_highlight' => 'nullable|integer',
+            'status' => 'nullable|string|in:published,draft',
+            'focus_keyword' => 'nullable|string|max:255',
+            'related_urls' => 'nullable|string',
+            'redirect_urls' => 'nullable|string',
             'slug' => 'nullable|string|max:255',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
@@ -124,11 +140,16 @@ class ContentController extends Controller
             'slug' => $slug,
             'description' => $validated['description'],
             'content' => $validated['content'],
-            'legacy_author' => $validated['legacy_author'] ?? 'Theq',
+            'legacy_author' => $validated['legacy_author'] ?? 'Ban Biên Tập',
             'author_id' => $validated['author_id'] ?? null,
             'published_date' => $validated['published_date'],
             'category' => $validated['category'],
+            'image_alt' => $validated['image_alt'] ?? $validated['title'],
             'is_highlight' => $request->boolean('is_highlight'),
+            'status' => $validated['status'] ?? ($article->status ?: 'published'),
+            'focus_keyword' => $validated['focus_keyword'] ?? null,
+            'related_urls' => $validated['related_urls'] ?? null,
+            'redirect_urls' => $validated['redirect_urls'] ?? null,
             'meta_title' => $validated['meta_title'] ?? null,
             'meta_description' => $validated['meta_description'] ?? null,
             'meta_keywords' => $validated['meta_keywords'] ?? null,
@@ -140,11 +161,14 @@ class ContentController extends Controller
 
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $ext = strtolower($file->getClientOriginalExtension());
+            $filename = $slug . '-' . time() . '.' . $ext;
             $file->move(public_path('images'), $filename);
             $data['image'] = '/images/' . $filename;
         } elseif ($request->filled('image')) {
             $data['image'] = $request->input('image');
+        } elseif ($request->exists('image')) {
+            $data['image'] = '/images/default-blog.svg';
         }
 
         $article->update($data);
@@ -763,7 +787,7 @@ class ContentController extends Controller
             'meta_image' => 'nullable|string|max:255',
         ]);
 
-        $avatarPath = '/images/default-avatar.png';
+        $avatarPath = '/images/default-blog.svg';
         if ($request->hasFile('avatar_file')) {
             $file = $request->file('avatar_file');
             $filename = time() . '_author_' . $file->getClientOriginalName();
@@ -834,6 +858,8 @@ class ContentController extends Controller
             $data['avatar'] = '/images/' . $filename;
         } elseif ($request->filled('avatar')) {
             $data['avatar'] = $request->input('avatar');
+        } elseif ($request->exists('avatar')) {
+            $data['avatar'] = '/images/default-blog.svg';
         }
 
         $author->update($data);
@@ -855,7 +881,10 @@ class ContentController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $originalName = $file->getClientOriginalName();
+            $safeBase = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'blog-image';
+            $ext = strtolower($file->getClientOriginalExtension());
+            $filename = $safeBase . '-' . time() . '.' . $ext;
             $file->move(public_path('images'), $filename);
             $url = '/images/' . $filename;
             return response()->json(['url' => $url]);
@@ -974,5 +1003,87 @@ class ContentController extends Controller
 
         $category->delete();
         return back()->with('success', 'Xóa danh mục dịch vụ thành công.');
+    }
+
+    /**
+     * Generate SEO article content via Gemini AI (with built-in structured SEO fallback).
+     */
+    public function generateArticleByAi(Request $request)
+    {
+        $validated = $request->validate([
+            'topic' => 'required|string|max:1000',
+            'tone' => 'nullable|string|max:100',
+            'language' => 'nullable|string|max:10',
+            'keywords' => 'nullable|string|max:500',
+            'outline' => 'nullable|string|max:2000',
+        ]);
+
+        $topic = trim($validated['topic']);
+        $tone = $validated['tone'] ?? 'chuyên nghiệp';
+        $language = $validated['language'] ?? 'vi';
+        $keywords = trim($validated['keywords'] ?? '');
+        $outline = trim($validated['outline'] ?? '');
+        $apiKey = env('GEMINI_API_KEY') ?: (\App\Models\Setting::where('key', 'gemini_api_key')->value('value') ?? '');
+
+        if (!empty($apiKey)) {
+            $prompt = "Bạn là chuyên gia nội dung SEO. Hãy viết bài blog chuẩn SEO bằng tiếng " . ($language === 'vi' ? 'Việt' : 'Anh') . " về chủ đề: \"{$topic}\". Giọng điệu: {$tone}.";
+            if ($keywords !== '') $prompt .= " Từ khóa SEO cần lồng ghép tự nhiên: {$keywords}.";
+            if ($outline !== '') $prompt .= " Bám sát dàn ý:\n{$outline}\n";
+            $prompt .= "\nTrả về JSON thuần túy gồm: {\"title\":\"...\",\"description\":\"...(140-160 ký tự)\",\"content\":\"...(HTML dùng h2, h3, p, strong, ul, li, blockquote)\"}";
+
+            try {
+                $res = \Illuminate\Support\Facades\Http::timeout(45)->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}",
+                    [
+                        'contents' => [['role' => 'user', 'parts' => [['text' => $prompt]]]],
+                        'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 2048, 'responseMimeType' => 'application/json'],
+                    ]
+                );
+                if ($res->successful()) {
+                    $json = json_decode(trim($res->json('candidates.0.content.parts.0.text', '')), true);
+                    if ($json && isset($json['content'])) {
+                        return response()->json(['success' => true, 'data' => $json]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Fall through to structured local SEO generator
+            }
+        }
+        return $this->buildFallbackAiArticle($topic, $tone, $language, $keywords, $outline);
+    }
+
+    private function buildFallbackAiArticle(string $topic, string $tone, string $language, string $keywords, string $outline)
+    {
+        $kwList = array_values(array_filter(array_map('trim', explode(',', $keywords))));
+        $primaryKw = $kwList[0] ?? $topic;
+        $outlineLines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $outline))));
+
+        if ($language === 'en') {
+            $title = ucfirst($topic) . ' – Comprehensive Guide & Expert Insights';
+            $desc = "Explore an in-depth analysis on {$primaryKw}. Discover key strategies, practical applications, and expert recommendations in this complete guide.";
+            $html = "<p>In today's fast-evolving landscape, understanding <strong>{$primaryKw}</strong> is essential for achieving sustainable results. This article provides a {$tone} breakdown of <strong>{$topic}</strong>.</p>";
+            $sections = !empty($outlineLines) ? $outlineLines : ["Core Fundamentals of {$primaryKw}", "Key Benefits & Practical Applications", "Best Practices & Expert Recommendations"];
+            foreach ($sections as $idx => $sec) {
+                $html .= "<h2>" . ($idx + 1) . ". " . e($sec) . "</h2><p>When evaluating <strong>{$primaryKw}</strong>, focusing on " . e($sec) . " ensures clarity, high efficiency, and measurable impact.</p><ul><li>Structured methodology tailored to real-world needs.</li><li>Optimization based on verified data and industry standards.</li></ul>";
+            }
+            $html .= "<blockquote>Key Takeaway: Mastering {$primaryKw} requires consistent execution and evidence-based decision-making.</blockquote>";
+        } else {
+            $title = ucfirst($topic) . ': Phân Tích Chuyên Sâu & Hướng Dẫn Toàn Diện';
+            $desc = "Tìm hiểu chi tiết về {$primaryKw} với góc nhìn {$tone}. Tổng hợp kiến thức trọng tâm, quy trình thực hiện và kinh nghiệm thực tế chuẩn SEO.";
+            $html = "<p>Trong bối cảnh thông tin ngày càng đa dạng, việc nắm vững kiến thức về <strong>{$primaryKw}</strong> đóng vai trò quan trọng giúp người đọc đưa ra quyết định chính xác. Bài viết dưới đây sẽ phân tích toàn diện chủ đề <strong>{$topic}</strong> theo phong cách {$tone}.</p>";
+            $sections = !empty($outlineLines) ? $outlineLines : ["Tổng quan và tầm quan trọng của {$primaryKw}", "Các yếu tố cốt lõi cần lưu ý khi triển khai", "Kinh nghiệm tối ưu hiệu quả và lưu ý thực tế"];
+            foreach ($sections as $idx => $sec) {
+                $html .= "<h2>" . ($idx + 1) . ". " . e($sec) . "</h2><p>Khi tìm hiểu sâu về <strong>{$primaryKw}</strong>, khía cạnh <em>" . e($sec) . "</em> luôn được các chuyên gia đánh giá cao nhờ tính ứng dụng thực tiễn.</p><h3>Điểm nhấn quan trọng</h3><ul><li>Đảm bảo tính chính xác, minh bạch và bám sát nhu cầu thực tế về <strong>{$primaryKw}</strong>.</li><li>Tối ưu hóa quy trình giúp tiết kiệm thời gian và nâng cao chất lượng đầu ra.</li></ul>";
+            }
+            if (count($kwList) > 1) {
+                $html .= "<p>Bên cạnh <strong>{$primaryKw}</strong>, bạn cũng nên kết hợp đồng bộ với các yếu tố như <strong>" . e(implode(', ', array_slice($kwList, 1))) . "</strong> để đạt hiệu quả tối đa.</p>";
+            }
+            $html .= "<blockquote>Tóm lại: Việc áp dụng đúng phương pháp đối với {$primaryKw} sẽ mang lại giá trị bền vững và lâu dài cho người thực hiện.</blockquote>";
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => ['title' => $title, 'description' => $desc, 'content' => $html],
+        ]);
     }
 }

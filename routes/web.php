@@ -10,74 +10,49 @@ use App\Models\Submission;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// 1. Client-facing Spa Routes
-Route::get('/', function () {
-    return Inertia::render('Home', [
-        'articles' => Article::where('is_highlight', true)->latest()->get(),
-        'services' => Service::latest()->get(),
-        'banners' => \App\Models\Banner::where('is_active', true)->orderBy('order')->get(),
-        'doctors' => \App\Models\Doctor::orderBy('order')->get(),
-        'faqs' => \App\Models\Faq::orderBy('order')->get(),
-        'realResults' => \App\Models\RealResult::latest()->get(),
-    ]);
-});
+// 1. Pure Blog Frontend Routes
+$renderBlogHome = function (\Illuminate\Http\Request $request) {
+    $articles = Article::where(function ($q) {
+        $q->where('status', 'published')->orWhereNull('status');
+    })
+        ->orderByDesc('is_highlight')
+        ->latest()
+        ->get();
 
-Route::get('/dich-vu', function () {
-    return Inertia::render('DichVu', [
-        'services' => \App\Models\Service::latest()->get(),
-        'categoriesList' => \App\Models\ServiceCategory::orderBy('order')->pluck('name')->toArray(),
-    ]);
-});
-
-Route::get('/gioi-thieu', function () {
-    return Inertia::render('GioiThieu', [
-        'doctors' => \App\Models\Doctor::orderBy('order')->get(),
-        'realResults' => \App\Models\RealResult::orderBy('order')->latest()->get(),
-    ]);
-});
-
-Route::get('/phau-thuat-tham-my', function () {
-    $category = \App\Models\ServiceCategory::where('slug', 'phau-thuat-tham-my')->first();
-    return Inertia::render('PhauThuatThamMy', [
-        'doctors' => \App\Models\Doctor::orderBy('order')->get(),
-        'services' => $category ? $category->services()->latest()->get() : collect(),
-    ]);
-});
-
-Route::get('/da-lieu-tre-hoa', function () {
-    $category = \App\Models\ServiceCategory::where('slug', 'da-lieu-tre-hoa')->first();
-    return Inertia::render('DaLieuTreHoa', [
-        'doctors' => \App\Models\Doctor::orderBy('order')->get(),
-        'services' => $category ? $category->services()->latest()->get() : collect(),
-    ]);
-});
-
-Route::get('/cay-toc-y-khoa', function () {
-    $service = \App\Models\Service::where('slug', 'cay-toc-y-khoa')->firstOrFail();
-    $reviews = $service->serviceReviews()->where('is_approved', true)->latest()->get();
-    return Inertia::render('DichVuDetail', [
-        'service' => array_merge($service->toArray(), [
-            'db_reviews' => $reviews
-        ])
-    ]);
-});
-
-Route::get('/ket-qua', function () {
-    return Inertia::render('KetQua', [
-        'faqs' => \App\Models\Faq::orderBy('order')->get(),
-        'realResults' => \App\Models\RealResult::latest()->get(),
-    ]);
-});
-
-Route::get('/tin-tuc', function () {
     return Inertia::render('TinTuc', [
-        'initialArticles' => Article::latest()->get()
+        'initialArticles' => $articles,
+        'initialCategory' => $request->query('category', 'Tất cả'),
+        'initialSearch' => $request->query('q', ''),
     ]);
-});
+};
 
-Route::get('/tin-tuc/{slug}', function ($slug) {
-    $article = Article::where('slug', $slug)->firstOrFail();
-    
+Route::get('/', $renderBlogHome)->name('blog.home');
+Route::get('/tin-tuc', $renderBlogHome)->name('tin-tuc.index');
+
+// Redirect legacy clinic routes to Blog Home
+foreach (['/dich-vu', '/gioi-thieu', '/phau-thuat-tham-my', '/da-lieu-tre-hoa', '/cay-toc-y-khoa', '/ket-qua'] as $legacyPath) {
+    Route::redirect($legacyPath, '/', 301);
+}
+
+$renderArticleDetail = function ($slug) {
+    $query = Article::where('slug', $slug);
+    if (!auth()->check()) {
+        $query->where(function ($q) {
+            $q->where('status', 'published')->orWhereNull('status');
+        });
+    }
+    $article = $query->first();
+    if (!$article) {
+        $redirected = Article::whereNotNull('redirect_urls')
+            ->where('redirect_urls', 'like', '%' . $slug . '%')
+            ->first();
+        if ($redirected && $redirected->slug !== $slug) {
+            return redirect('/tin-tuc/' . $redirected->slug, 301);
+        }
+        abort(404);
+    }
+    $article->increment('views');
+
     // Parse TOC in PHP
     $content = $article->content;
     $toc = [];
@@ -88,32 +63,52 @@ Route::get('/tin-tuc/{slug}', function ($slug) {
             $text = strip_tags($matches[3]);
             $id = "toc-heading-{$index}";
             $index++;
-            
+
             $level = ($tag === 'h2') ? 2 : 3;
             $toc[] = [
                 'id' => $id,
                 'text' => $text,
                 'level' => $level
             ];
-            
-            $class = ($tag === 'h2') 
-                ? 'text-2xl md:text-3xl font-serif font-bold text-gray-800 mt-12 mb-6 border-l-4 border-gold pl-4 scroll-mt-28' 
+
+            $class = ($tag === 'h2')
+                ? 'text-2xl md:text-3xl font-serif font-bold text-gray-800 mt-12 mb-6 border-l-4 border-gold pl-4 scroll-mt-28'
                 : 'text-xl md:text-2xl font-serif font-bold text-gray-800 mt-8 mb-4 scroll-mt-28';
-                
+
             return "<{$tag} id=\"{$id}\" class=\"{$class}\">{$matches[3]}</{$tag}>";
         }, $content);
-        
-        $content = preg_replace('/<p(.*?)>/i', '<p class="text-lg md:text-[20px] text-gray-700 leading-[1.8] font-light mb-6">', $content);
-        $content = preg_replace('/<ul(.*?)>/i', '<ul class="list-disc pl-6 mb-6 space-y-3 text-lg md:text-[20px] text-gray-700 font-light leading-[1.8]">', $content);
-        $content = preg_replace('/<ol(.*?)>/i', '<ol class="list-decimal pl-6 mb-6 space-y-3 text-lg md:text-[20px] text-gray-700 font-light leading-[1.8]">', $content);
+
+        $content = preg_replace('/<p(\s+[^>]*)?>/i', '<p$1 class="text-lg md:text-[20px] text-gray-700 leading-[1.8] font-light mb-6">', $content);
+        $content = preg_replace('/<ul(\s+[^>]*)?>/i', '<ul$1 class="list-disc pl-6 mb-6 space-y-3 text-lg md:text-[20px] text-gray-700 font-light leading-[1.8]">', $content);
+        $content = preg_replace('/<ol(\s+[^>]*)?>/i', '<ol$1 class="list-decimal pl-6 mb-6 space-y-3 text-lg md:text-[20px] text-gray-700 font-light leading-[1.8]">', $content);
         $content = preg_replace_callback('/<img(.*?)src=["\'](.*?)["\'](.*?)>/i', function ($m) {
-            return "<img class=\"rounded-[24px] shadow-md my-8 w-full object-cover max-h-[550px]\" src=\"{$m[2]}\" {$m[3]}>";
+            return "<img class=\"rounded-[24px] shadow-md my-8 w-full object-cover max-h-[550px]\" {$m[1]} src=\"{$m[2]}\" {$m[3]}>";
         }, $content);
         $content = preg_replace('/<blockquote(.*?)>/i', '<blockquote class="border-l-4 border-gold pl-5 py-3 my-8 italic text-xl md:text-2xl text-gray-650 bg-gold/5 rounded-r-2xl font-serif font-light leading-relaxed">', $content);
     }
-    
-    $related = Article::where('id', '!=', $article->id)->latest()->take(3)->get();
-    
+
+    $customSlugs = [];
+    if (!empty($article->related_urls)) {
+        foreach (preg_split('/\r\n|\r|\n/', $article->related_urls) as $line) {
+            $path = trim(parse_url(trim($line), PHP_URL_PATH) ?: '', '/');
+            $cleanSlug = basename($path);
+            if ($cleanSlug && $cleanSlug !== $article->slug) {
+                $customSlugs[] = $cleanSlug;
+            }
+        }
+    }
+
+    $related = !empty($customSlugs)
+        ? Article::whereIn('slug', $customSlugs)->where('id', '!=', $article->id)->get()
+        : Article::where('id', '!=', $article->id)
+            ->where(function ($q) {
+                $q->where('status', 'published')->orWhereNull('status');
+            })
+            ->orderByRaw('CASE WHEN category = ? THEN 0 ELSE 1 END', [$article->category])
+            ->latest()
+            ->take(4)
+            ->get();
+
     return Inertia::render('TinTucDetail', [
         'article' => array_merge($article->toArray(), [
             'content' => $content
@@ -121,27 +116,13 @@ Route::get('/tin-tuc/{slug}', function ($slug) {
         'toc' => $toc,
         'relatedArticles' => $related
     ]);
-})->name('tin-tuc.detail');
+};
 
-Route::get('/dich-vu/{slug}', function ($slug) {
-    $service = Service::where('slug', $slug)->firstOrFail();
-    $reviews = $service->serviceReviews()->where('is_approved', true)->latest()->get();
-    return Inertia::render('DichVuDetail', [
-        'service' => array_merge($service->toArray(), [
-            'db_reviews' => $reviews
-        ])
-    ]);
-})->name('dich-vu.detail');
+Route::get('/tin-tuc/{slug}', $renderArticleDetail)->name('tin-tuc.detail');
+Route::get('/bai-viet/{slug}', $renderArticleDetail)->name('bai-viet.detail');
 
-Route::get('/lien-he', function () {
-    return Inertia::render('LienHe');
-});
-
-Route::get('/chinh-sach-bao-mat', function () { return Inertia::render('ChinhSachBaoMat'); });
-Route::get('/dieu-khoan-su-dung', function () { return Inertia::render('DieuKhoanSuDung'); });
-Route::get('/chinh-sach-thanh-toan', function () { return Inertia::render('ChinhSachThanhToan'); });
-Route::get('/chinh-sach-hoan-tien', function () { return Inertia::render('ChinhSachHoanTien'); });
-Route::get('/tuyen-bo-mien-tru-trach-nhiem', function () { return Inertia::render('TuyenBoMienTruTrachNhiem'); });
+Route::redirect('/dich-vu/{slug}', '/', 301);
+Route::redirect('/lien-he', '/', 301);
 
 // Consultation signup POST route
 Route::post('/consult', [ConsultController::class, 'store'])->name('consult.store');
@@ -151,18 +132,43 @@ Route::get('/api/doctor-schedule', [ConsultController::class, 'getDoctorSchedule
 
 Route::get('/tac-gia/{slug}', function ($slug) {
     $author = \App\Models\Author::where('slug', $slug)->firstOrFail();
-    $articles = Article::where('author_id', $author->id)->latest()->get();
+    $articles = Article::where('author_id', $author->id)
+        ->where(function ($q) {
+            $q->where('status', 'published')->orWhereNull('status');
+        })
+        ->latest()
+        ->get();
     return Inertia::render('TacGiaDetail', [
         'author' => $author,
         'articles' => $articles
     ]);
 })->name('author.detail');
 
-Route::get('/dat-lich', function () {
-    return Inertia::render('DatLich', [
-        'doctors' => \App\Models\Doctor::where('is_active', true)->orderBy('order')->get(),
-    ]);
-})->name('booking.page');
+Route::get('/sitemap.xml', function () {
+    $baseUrl = rtrim(url('/'), '/');
+    $articles = Article::where(function ($q) {
+        $q->where('status', 'published')->orWhereNull('status');
+    })->latest('updated_at')->get();
+    $authors = \App\Models\Author::latest('updated_at')->get();
+
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    $xml .= "  <url><loc>{$baseUrl}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>\n";
+    $xml .= "  <url><loc>{$baseUrl}/tin-tuc</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n";
+    foreach ($articles as $art) {
+        $lastmod = optional($art->updated_at)->toAtomString() ?? now()->toAtomString();
+        $xml .= "  <url><loc>{$baseUrl}/tin-tuc/{$art->slug}</loc><lastmod>{$lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>\n";
+    }
+    foreach ($authors as $aut) {
+        $lastmod = optional($aut->updated_at)->toAtomString() ?? now()->toAtomString();
+        $xml .= "  <url><loc>{$baseUrl}/tac-gia/{$aut->slug}</loc><lastmod>{$lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>\n";
+    }
+    $xml .= '</urlset>';
+
+    return response($xml, 200)->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
+Route::redirect('/dat-lich', '/', 301)->name('booking.page');
 
 // 2. Admin CMS Dashboard Routes (Protected)
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -215,6 +221,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/submissions/export', [ContentController::class, 'exportSubmissionsCsv'])->name('admin.submissions.export');
 
     // Article management CRUD
+    Route::post('/admin/articles/generate-ai', [ContentController::class, 'generateArticleByAi'])->name('admin.articles.generate-ai');
     Route::post('/admin/articles', [ContentController::class, 'storeArticle'])->name('admin.articles.store');
     Route::post('/admin/articles/{article}', [ContentController::class, 'updateArticle'])->name('admin.articles.update'); // POST due to multipart/form-data upload bugs in PUT
     Route::delete('/admin/articles/{article}', [ContentController::class, 'destroyArticle'])->name('admin.articles.destroy');
@@ -286,13 +293,23 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Dynamic fallback route for service category slugs
-Route::get('/{slug}', function ($slug) {
-    $category = \App\Models\ServiceCategory::where('slug', $slug)->first();
-    if ($category) {
-        return redirect()->to('/dich-vu?category=' . urlencode($category->name));
+require __DIR__.'/auth.php';
+
+Route::fallback(function () {
+    $reqPath = trim(request()->path(), '/');
+    if ($reqPath !== '') {
+        $articlesWithRedirects = Article::whereNotNull('redirect_urls')->where('redirect_urls', '!=', '')->get();
+        foreach ($articlesWithRedirects as $art) {
+            $lines = array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $art->redirect_urls)));
+            foreach ($lines as $oldPath) {
+                $cleanOld = trim(parse_url($oldPath, PHP_URL_PATH) ?: $oldPath, '/');
+                if ($cleanOld !== '' && strcasecmp($cleanOld, $reqPath) === 0 && $art->slug !== basename($cleanOld)) {
+                    return redirect('/tin-tuc/' . $art->slug, 301);
+                }
+            }
+        }
     }
     abort(404);
 });
 
-require __DIR__.'/auth.php';
+

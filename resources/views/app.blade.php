@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
@@ -11,7 +12,10 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Favicon -->
-        <link rel="icon" type="image/png" href="{{ \App\Models\Setting::where('key', 'site_logo_square')->value('value') ?? '/images/Favicon_Theq.png' }}">
+        @php $faviconUrl = \App\Models\Setting::where('key', 'site_logo_square')->value('value'); @endphp
+        @if(!empty($faviconUrl))
+        <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
+        @endif
 
         <!-- Scripts -->
         @routes
