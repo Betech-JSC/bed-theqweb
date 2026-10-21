@@ -93,30 +93,16 @@ class MediaController extends Controller
                 $file = $request->file('file');
                 $originalName = $file->getClientOriginalName();
                 $safeBase = \Illuminate\Support\Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'image';
-                $ext = strtolower($file->getClientOriginalExtension());
-                $filename = $safeBase . '-' . time() . '.' . $ext;
-                
-                // Get metadata before moving
-                $mimeType = $file->getClientMimeType();
-                $size = $file->getSize();
-
-                // Put in public/uploads/media
                 $destinationPath = public_path('uploads/media');
-                if (!File::exists($destinationPath)) {
-                    if (!File::makeDirectory($destinationPath, 0755, true)) {
-                        throw new \Exception("Không thể tạo thư mục public/uploads/media. Vui lòng kiểm tra quyền ghi của thư mục.");
-                    }
-                }
-                
-                $file->move($destinationPath, $filename);
-                $path = '/uploads/media/' . $filename;
+                $saved = self::saveUploadedImageAsWebp($file, $destinationPath, $safeBase);
+                $path = '/uploads/media/' . $saved['filename'];
 
                 $mediaFile = MediaFile::create([
                     'folder_id' => $request->get('folder_id') ?: null,
-                    'name' => $originalName,
+                    'name' => $saved['name'],
                     'path' => $path,
-                    'mime_type' => $mimeType,
-                    'size' => $size,
+                    'mime_type' => $saved['mime'],
+                    'size' => $saved['size'],
                 ]);
 
                 return response()->json([
@@ -193,5 +179,38 @@ class MediaController extends Controller
         foreach ($folder->children as $subfolder) {
             $this->deletePhysicalFolderContents($subfolder);
         }
+    }
+
+    // Tự động chuyển đổi ảnh PNG/JPG sang định dạng WebP nhẹ chuẩn SEO bằng PHP GD
+    public static function saveUploadedImageAsWebp(\Illuminate\Http\UploadedFile $file, string $destDir, string $baseSlug): array
+    {
+        if (!File::exists($destDir)) {
+            File::makeDirectory($destDir, 0755, true);
+        }
+        $ext = strtolower($file->getClientOriginalExtension());
+        $origBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $stamp = $baseSlug . '-' . time();
+
+        if (in_array($ext, ['jpg', 'jpeg', 'png'], true) && function_exists('imagewebp')) {
+            $tmpPath = $file->getRealPath();
+            $img = $ext === 'png' ? @imagecreatefrompng($tmpPath) : @imagecreatefromjpeg($tmpPath);
+            if ($img !== false) {
+                imagepalettetotruecolor($img);
+                imagealphablending($img, true);
+                imagesavealpha($img, true);
+                $webpName = $stamp . '.webp';
+                $fullPath = rtrim($destDir, '/\\') . DIRECTORY_SEPARATOR . $webpName;
+                if (@imagewebp($img, $fullPath, 82)) {
+                    imagedestroy($img);
+                    return ['filename' => $webpName, 'name' => $origBase . '.webp', 'mime' => 'image/webp', 'size' => (int) @filesize($fullPath)];
+                }
+                imagedestroy($img);
+            }
+        }
+        $fallbackName = $stamp . '.' . $ext;
+        $mime = $file->getClientMimeType();
+        $size = (int) $file->getSize();
+        $file->move($destDir, $fallbackName);
+        return ['filename' => $fallbackName, 'name' => $file->getClientOriginalName(), 'mime' => $mime, 'size' => $size];
     }
 }

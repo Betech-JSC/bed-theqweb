@@ -68,11 +68,8 @@ class ContentController extends Controller
 
         $imagePath = '/images/default-blog.svg';
         if ($request->hasFile('image_file')) {
-            $file = $request->file('image_file');
-            $ext = strtolower($file->getClientOriginalExtension());
-            $filename = $slug . '-' . time() . '.' . $ext;
-            $file->move(public_path('images'), $filename);
-            $imagePath = '/images/' . $filename;
+            $saved = MediaController::saveUploadedImageAsWebp($request->file('image_file'), public_path('images'), $slug);
+            $imagePath = '/images/' . $saved['filename'];
         } elseif ($request->filled('image')) {
             $imagePath = $request->input('image');
         }
@@ -160,11 +157,8 @@ class ContentController extends Controller
         ];
 
         if ($request->hasFile('image_file')) {
-            $file = $request->file('image_file');
-            $ext = strtolower($file->getClientOriginalExtension());
-            $filename = $slug . '-' . time() . '.' . $ext;
-            $file->move(public_path('images'), $filename);
-            $data['image'] = '/images/' . $filename;
+            $saved = MediaController::saveUploadedImageAsWebp($request->file('image_file'), public_path('images'), $slug);
+            $data['image'] = '/images/' . $saved['filename'];
         } elseif ($request->filled('image')) {
             $data['image'] = $request->input('image');
         } elseif ($request->exists('image')) {
@@ -787,17 +781,15 @@ class ContentController extends Controller
             'meta_image' => 'nullable|string|max:255',
         ]);
 
+        $slug = $this->uniqueSlug(\App\Models\Author::class, $validated['slug'] ?? $validated['name']);
+
         $avatarPath = '/images/default-blog.svg';
         if ($request->hasFile('avatar_file')) {
-            $file = $request->file('avatar_file');
-            $filename = time() . '_author_' . $file->getClientOriginalName();
-            $file->move(public_path('images'), $filename);
-            $avatarPath = '/images/' . $filename;
+            $saved = MediaController::saveUploadedImageAsWebp($request->file('avatar_file'), public_path('images'), 'author-' . $slug);
+            $avatarPath = '/images/' . $saved['filename'];
         } elseif ($request->filled('avatar')) {
             $avatarPath = $request->input('avatar');
         }
-
-        $slug = $this->uniqueSlug(\App\Models\Author::class, $validated['slug'] ?? $validated['name']);
 
         \App\Models\Author::create([
             'name' => $validated['name'],
@@ -852,10 +844,8 @@ class ContentController extends Controller
         ];
 
         if ($request->hasFile('avatar_file')) {
-            $file = $request->file('avatar_file');
-            $filename = time() . '_author_' . $file->getClientOriginalName();
-            $file->move(public_path('images'), $filename);
-            $data['avatar'] = '/images/' . $filename;
+            $saved = MediaController::saveUploadedImageAsWebp($request->file('avatar_file'), public_path('images'), 'author-' . $slug);
+            $data['avatar'] = '/images/' . $saved['filename'];
         } elseif ($request->filled('avatar')) {
             $data['avatar'] = $request->input('avatar');
         } elseif ($request->exists('avatar')) {
@@ -881,13 +871,9 @@ class ContentController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $originalName = $file->getClientOriginalName();
-            $safeBase = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'blog-image';
-            $ext = strtolower($file->getClientOriginalExtension());
-            $filename = $safeBase . '-' . time() . '.' . $ext;
-            $file->move(public_path('images'), $filename);
-            $url = '/images/' . $filename;
-            return response()->json(['url' => $url]);
+            $safeBase = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) ?: 'blog-image';
+            $saved = MediaController::saveUploadedImageAsWebp($file, public_path('images'), $safeBase);
+            return response()->json(['url' => '/images/' . $saved['filename']]);
         }
 
         return response()->json(['error' => 'File not found'], 400);
