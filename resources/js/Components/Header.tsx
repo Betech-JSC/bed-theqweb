@@ -34,7 +34,6 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
   }, []);
 
   const blogCats = parseBlogCategories(settings.blog_categories);
-  const topBarText = settings.blog_topbar_text ?? "Chuyên trang Kiến thức & Phân tích Chuyên sâu | Theq Blog";
   const navLinks: Array<{ name: string; href: string; subLinks?: Array<{ name: string; href: string }> }> = [
     { name: "Tất cả bài viết", href: "/" },
     ...blogCats.map((cat) => ({ name: cat, href: `/?category=${encodeURIComponent(cat)}` })),
@@ -49,17 +48,6 @@ export const Header: React.FC<HeaderProps> = ({ forceWhiteBg = false }) => {
 
   return (
     <header className="w-full z-[999] absolute top-0 left-0">
-      {/* Top Editorial Bar */}
-      {topBarText && (
-        <div className="w-full bg-[#b09a7a] text-white flex justify-center items-center py-2 px-4 text-xs md:text-sm font-sans tracking-wide">
-          <div className="flex items-center gap-3 font-medium">
-            <span className="text-white tracking-wider uppercase text-[11px] md:text-xs font-semibold">
-              {topBarText}
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* Main Navbar */}
       <div
         onMouseEnter={() => setIsHovered(true)}

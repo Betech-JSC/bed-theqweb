@@ -30,15 +30,9 @@ export const BlogHeaderAndCategoriesEditor: React.FC<Props> = ({ settings, onUpd
     <div className="border-t border-gray-100 pt-6 space-y-6">
       <div className="bg-gray-50/70 border border-gray-200 rounded-xl p-5 space-y-4">
         <h4 className="text-xs uppercase font-bold text-gray-700 tracking-wider border-b border-gray-200/70 pb-2">Banner & Tiêu đề Trang Chủ Blog</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-semibold text-gray-500 mb-1 block">Thanh thông báo trên cùng (Topbar)</label>
-            <input type="text" value={settings.blog_topbar_text ?? "Chuyên trang Kiến thức & Phân tích Chuyên sâu | Theq Blog"} onChange={(e) => onUpdate({ blog_topbar_text: e.target.value })} className="w-full border border-gray-200 focus:border-gold px-3 py-2 rounded text-sm bg-white focus:outline-none" placeholder="Để trống nếu muốn ẩn thanh trên cùng" />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-gray-500 mb-1 block">Nhãn phụ (Breadcrumb)</label>
-            <input type="text" value={settings.blog_hero_breadcrumb ?? "Tin tức & Sự kiện"} onChange={(e) => onUpdate({ blog_hero_breadcrumb: e.target.value })} className="w-full border border-gray-200 focus:border-gold px-3 py-2 rounded text-sm bg-white focus:outline-none" />
-          </div>
+        <div>
+          <label className="text-xs font-semibold text-gray-500 mb-1 block">Nhãn phụ (Breadcrumb)</label>
+          <input type="text" value={settings.blog_hero_breadcrumb ?? "Tin tức & Sự kiện"} onChange={(e) => onUpdate({ blog_hero_breadcrumb: e.target.value })} className="w-full border border-gray-200 focus:border-gold px-3 py-2 rounded text-sm bg-white focus:outline-none" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
