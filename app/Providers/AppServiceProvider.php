@@ -19,10 +19,8 @@ class AppServiceProvider extends ServiceProvider
             $parsed = parse_url($neonUrl);
             if (!empty($parsed['host'])) {
                 $host = $parsed['host'];
+                // Giữ nguyên mật khẩu gốc vì FrankenPHP dùng libpq hiện đại hỗ trợ SNI + SCRAM-SHA-256
                 $pass = isset($parsed['pass']) ? rawurldecode($parsed['pass']) : '';
-                if (preg_match('/^(ep-[a-z0-9-]+?)(?:-pooler)?\./i', $host, $m) && !str_starts_with($pass, 'endpoint=')) {
-                    $pass = "endpoint={$m[1]}\${$pass}";
-                }
                 config([
                     'database.connections.pgsql.url' => null,
                     'database.connections.pgsql.host' => $host,
