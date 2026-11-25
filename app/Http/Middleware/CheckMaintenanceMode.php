@@ -30,11 +30,14 @@ class CheckMaintenanceMode
             return $next($request);
         }
 
-        // 2. Fetch the system status from settings
-        $status = Setting::getValue('system_status', 'active');
+        // 2. Đọc bảng settings 1 lần duy nhất mỗi request để HandleInertiaRequests tái sử dụng
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $request->attributes->set('site_settings', $settings);
+
+        $status = $settings['system_status'] ?? 'active';
 
         if ($status === 'maintenance') {
-            $message = Setting::getValue('maintenance_message', 'Hệ thống đang bảo trì định kỳ. Quý khách vui lòng quay lại sau ít phút!');
+            $message = $settings['maintenance_message'] ?? 'Hệ thống đang bảo trì định kỳ. Quý khách vui lòng quay lại sau ít phút!';
             return response($this->renderMaintenancePage($message), 503)
                 ->header('Content-Type', 'text/html; charset=utf-8');
         }

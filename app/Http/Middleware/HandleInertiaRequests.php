@@ -29,23 +29,29 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+        // Tái sử dụng settings đã nạp ở CheckMaintenanceMode để tránh query trùng
+        $settings = $request->attributes->get('site_settings')
+            ?? \App\Models\Setting::pluck('value', 'key')->toArray();
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
-            'settings' => \App\Models\Setting::pluck('value', 'key')->toArray(),
-            'doctors_count' => \App\Models\Doctor::count(),
-            'crm_submissions_count' => \App\Models\Submission::where('status', 'Đã liên hệ')->count(),
-            'doctors' => \App\Models\Doctor::where('is_active', true)->orderBy('order')->get(),
-            'authors' => \App\Models\Author::orderBy('name')->get(),
-            'doctor_shifts' => $request->user() ? \App\Models\DoctorShift::with('doctor')->get() : [],
-            'service_reviews' => $request->user() ? \App\Models\ServiceReview::with('service')->latest()->get() : [],
-            'menu_categories' => \App\Models\ServiceCategory::orderBy('order')->with('services')->get(),
+            'settings' => $settings,
+            // Chỉ truy vấn dữ liệu quản trị/phòng khám khi admin đã đăng nhập để tối ưu tốc độ blog công khai
+            'doctors_count' => $user ? \App\Models\Doctor::count() : 0,
+            'crm_submissions_count' => $user ? \App\Models\Submission::where('status', 'Đã liên hệ')->count() : 0,
+            'doctors' => $user ? \App\Models\Doctor::where('is_active', true)->orderBy('order')->get() : [],
+            'authors' => $user ? \App\Models\Author::orderBy('name')->get() : [],
+            'doctor_shifts' => $user ? \App\Models\DoctorShift::with('doctor')->get() : [],
+            'service_reviews' => $user ? \App\Models\ServiceReview::with('service')->latest()->get() : [],
+            'menu_categories' => $user ? \App\Models\ServiceCategory::orderBy('order')->with('services')->get() : [],
         ];
     }
 }

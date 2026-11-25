@@ -1,13 +1,14 @@
 {
   "version": 2,
   "framework": "container",
+  "regions": ["sin1"],
   "env": {
     "APP_ENV": "production",
     "APP_DEBUG": "false",
     "DB_CONNECTION": "pgsql",
     "DB_SSLMODE": "require",
     "CACHE_STORE": "database",
-    "SESSION_DRIVER": "database",
+    "SESSION_DRIVER": "cookie",
     "LOG_CHANNEL": "stderr"
   }
 }
