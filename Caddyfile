@@ -1,0 +1,12 @@
+{
+	# Tắt tự động cấp SSL vì Vercel Edge đã xử lý HTTPS ở lớp ngoài container
+	auto_https off
+	admin off
+	frankenphp
+}
+
+:{$PORT:80} {
+	root * /app/public
+	encode zstd br gzip
+	php_server
+}
