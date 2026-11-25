@@ -395,13 +395,13 @@ export default function TinTucDetail({ article, relatedArticles = [], toc = [] }
               <div className="bg-gradient-to-br from-dark-bg to-gray-850 text-white rounded-[32px] p-8 border border-gold/20 shadow-xl text-left relative overflow-hidden">
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-gold/10 rounded-full blur-2xl" />
                 <h3 className="font-serif font-bold text-xl mb-3 text-white">
-                  Khám Phá Chuyên Mục
+                  Chuyên Mục Đào Tạo Spa
                 </h3>
                 <p className="text-xs text-gray-300 font-light leading-relaxed mb-5">
-                  Đọc thêm các bài phân tích chuyên sâu theo từng chủ đề tại Theq Blog.
+                  Khám phá kiến thức nghề và lộ trình học theo 4 chuyên mục tại Học Viện Đào Tạo Spa TheQ.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {["Chuyên môn", "Sự kiện", "Hoạt động"].map((cat) => (
+                  {["Đào tạo Chăm sóc da", "Đào tạo Massage Trị liệu", "Đào tạo Phun xăm thẩm mỹ", "Kinh nghiệm & Quản lý Spa"].map((cat) => (
                     <Link
                       key={cat}
                       href={`/?category=${encodeURIComponent(cat)}`}

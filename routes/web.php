@@ -23,6 +23,12 @@ $renderBlogHome = function (\Illuminate\Http\Request $request) {
         'initialArticles' => $articles,
         'initialCategory' => $request->query('category', 'Tất cả'),
         'initialSearch' => $request->query('q', ''),
+    ])->withViewData([
+        'seo' => [
+            'title' => 'Học Viện Đào Tạo Spa & Thẩm Mỹ Quốc Tế TheQ | Cẩm Nang Nghề Spa',
+            'description' => 'Học Viện Đào Tạo Spa & Thẩm Mỹ Quốc Tế TheQ chuyên đào tạo nghề Chăm sóc da, Phun xăm thẩm mỹ, Massage trị liệu và Quản lý Spa chuẩn y khoa, cam kết 100% việc làm.',
+            'canonical' => $request->is('tin-tuc') ? url('/tin-tuc') : url('/'),
+        ],
     ]);
 };
 
@@ -109,12 +115,19 @@ $renderArticleDetail = function ($slug) {
             ->take(4)
             ->get();
 
+    // Truyền dữ liệu SEO xuống app.blade.php để hỗ trợ Googlebot đọc HTML tĩnh
     return Inertia::render('TinTucDetail', [
         'article' => array_merge($article->toArray(), [
             'content' => $content
         ]),
         'toc' => $toc,
         'relatedArticles' => $related
+    ])->withViewData([
+        'seo' => [
+            'title' => $article->meta_title ?: ($article->title . ' | Học Viện Đào Tạo Spa TheQ'),
+            'description' => $article->meta_description ?: ($article->description ?: $article->title),
+            'canonical' => $article->canonical_link ?: url('/tin-tuc/' . $article->slug),
+        ],
     ]);
 };
 
@@ -167,6 +180,21 @@ Route::get('/sitemap.xml', function () {
 
     return response($xml, 200)->header('Content-Type', 'application/xml');
 })->name('sitemap');
+
+// Sinh động robots.txt kèm Full URL của sitemap.xml để Google Search Console đọc chuẩn xác trên mọi tên miền
+Route::get('/robots.txt', function () {
+    $sitemapUrl = rtrim(url('/'), '/') . '/sitemap.xml';
+    $lines = [
+        'User-agent: *',
+        'Disallow: /dashboard',
+        'Disallow: /admin',
+        'Disallow: /login',
+        'Disallow: /register',
+        '',
+        "Sitemap: {$sitemapUrl}",
+    ];
+    return response(implode("\n", $lines) . "\n", 200)->header('Content-Type', 'text/plain; charset=UTF-8');
+})->name('robots');
 
 Route::redirect('/dat-lich', '/', 301)->name('booking.page');
 

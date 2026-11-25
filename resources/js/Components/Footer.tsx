@@ -8,8 +8,9 @@ export const Footer: React.FC = () => {
   const { props } = usePage();
   const settings = (props.settings as Record<string, string>) || {};
   const showBrand = settings.footer_show_brand !== "0";
-  const brandName = settings.footer_brand_name ?? "Theq";
-  const brandDesc = settings.footer_brand_desc ?? "Theq Nail Centre mang đến các liệu trình làm đẹp chuẩn y khoa, giúp bạn sở hữu vẻ đẹp độc bản, chuẩn tỷ lệ vàng và an toàn tuyệt đối.";
+  // Chuẩn hóa NAP đồng bộ giữa Website và Social Entity
+  const brandName = settings.footer_brand_name ?? "Học Viện Đào Tạo Spa TheQ";
+  const brandDesc = settings.footer_brand_desc ?? "Học Viện Đào Tạo Spa & Thẩm Mỹ Quốc Tế TheQ chuyên đào tạo nghề Chăm sóc da, Phun xăm thẩm mỹ, Massage trị liệu và Quản lý Spa chuẩn y khoa, cam kết 100% việc làm.";
   const hotline = settings.site_hotline ?? "1900 5006";
   const email = settings.site_email ?? "contact@theq.vn";
   const address = settings.site_address ?? "386-388 Đường 3/2, Phường 12, Quận 10, TP. Hồ Chí Minh";

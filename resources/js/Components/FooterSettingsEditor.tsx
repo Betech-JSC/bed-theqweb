@@ -14,26 +14,26 @@ export interface FooterColumnItem {
 
 export const DEFAULT_FOOTER_COLUMNS: FooterColumnItem[] = [
   {
-    title: "Chuyên Mục Bài Viết",
+    title: "Chuyên Mục Đào Tạo Spa",
     description: "",
     links: [
-      { label: "Tất cả bài viết mới nhất", url: "/" },
-      { label: "Góc phân tích chuyên môn", url: "/?category=Chuyên%20môn" },
-      { label: "Sự kiện & Hội thảo khoa học", url: "/?category=Sự%20kiện" },
-      { label: "Hoạt động cộng đồng", url: "/?category=Hoạt%20động" },
+      { label: "Đào tạo Chăm sóc da", url: "/?category=Đào%20tạo%20Chăm%20sóc%20da" },
+      { label: "Đào tạo Massage Trị liệu", url: "/?category=Đào%20tạo%20Massage%20Trị%20liệu" },
+      { label: "Đào tạo Phun xăm thẩm mỹ", url: "/?category=Đào%20tạo%20Phun%20xăm%20thẩm%20mỹ" },
+      { label: "Kinh nghiệm & Quản lý Spa", url: "/?category=Kinh%20nghiệm%20%26%20Quản%20lý%20Spa" },
     ],
   },
   {
     title: "Sơ Đồ Trang Web",
     description: "",
     links: [
-      { label: "Danh sách bài viết", url: "/tin-tuc" },
+      { label: "Cẩm nang nghề Spa", url: "/tin-tuc" },
       { label: "Sơ đồ trang web (XML Sitemap)", url: "/sitemap.xml" },
     ],
   },
   {
-    title: "Tiêu Chuẩn Biên Tập",
-    description: "Chuyên trang chia sẻ kiến thức chuyên môn, góc nhìn chuyên gia và thông tin được biên tập chuẩn mực, minh bạch và chính xác.",
+    title: "Cam Kết Đào Tạo",
+    description: "Chương trình đào tạo thực hành 80% trên mẫu thật, cấp chứng chỉ hành nghề Sở LĐTBXH và cam kết 100% việc làm sau tốt nghiệp.",
     links: [],
   },
 ];

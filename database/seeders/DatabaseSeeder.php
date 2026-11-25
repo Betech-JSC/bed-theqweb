@@ -716,5 +716,8 @@ class DatabaseSeeder extends Seeder
                 ['start_time' => '08:30', 'end_time' => '17:30', 'branch' => 'Theq - Sài Gòn']
             );
         }
+
+        // 10. Đồng bộ chuẩn NAP Học Viện Đào Tạo Spa TheQ & 10 bài viết chuẩn SEO On-page
+        $this->call(SpaSeoArticlesSeeder::class);
     }
 }

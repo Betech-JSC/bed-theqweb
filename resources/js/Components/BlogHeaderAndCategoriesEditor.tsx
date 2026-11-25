@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { Trash, Image as ImageIcon } from "lucide-react";
 
-export const DEFAULT_BLOG_CATEGORIES = ["Chuyên môn", "Sự kiện", "Hoạt động"];
+// 4 chuyên mục trụ cột chuẩn SEO cho Học Viện Đào Tạo Spa TheQ
+export const DEFAULT_BLOG_CATEGORIES = [
+  "Đào tạo Chăm sóc da",
+  "Đào tạo Massage Trị liệu",
+  "Đào tạo Phun xăm thẩm mỹ",
+  "Kinh nghiệm & Quản lý Spa",
+];
 
 // Giải mã danh sách danh mục chủ đề bài viết từ JSON trong settings
 export function parseBlogCategories(raw?: string): string[] {

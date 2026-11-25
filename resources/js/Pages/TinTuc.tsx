@@ -78,12 +78,12 @@ export default function TinTucPage({
   return (
     <>
       <Head>
-        <title>{selectedCategory === "Tất cả" ? "Chuyên Trang Bài Viết & Kiến Thức Chuyên Sâu | Theq Blog" : `${selectedCategory} - Bài Viết Chuyên Sâu | Theq Blog`}</title>
-        <meta name="description" content="Chuyên trang Blog chia sẻ các bài viết phân tích chuyên môn, kiến thức y khoa, sự kiện và góc nhìn chuyên gia từ đội ngũ Theq." />
+        <title>{selectedCategory === "Tất cả" ? "Học Viện Đào Tạo Spa & Thẩm Mỹ Quốc Tế TheQ | Cẩm Nang Nghề Spa" : `${selectedCategory} | Học Viện Đào Tạo Spa TheQ`}</title>
+        <meta name="description" content="Học Viện Đào Tạo Spa & Thẩm Mỹ Quốc Tế TheQ chuyên đào tạo nghề Chăm sóc da, Phun xăm thẩm mỹ, Massage trị liệu và Quản lý Spa chuẩn y khoa, cam kết 100% việc làm." />
         <meta name="robots" content="index, follow" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Chuyên Trang Bài Viết & Kiến Thức Chuyên Sâu | Theq Blog" />
-        <meta property="og:description" content="Chuyên trang Blog chia sẻ các bài viết phân tích chuyên môn, kiến thức y khoa, sự kiện và góc nhìn chuyên gia từ đội ngũ Theq." />
+        <meta property="og:title" content="Học Viện Đào Tạo Spa & Thẩm Mỹ Quốc Tế TheQ | Cẩm Nang Nghề Spa" />
+        <meta property="og:description" content="Học Viện Đào Tạo Spa & Thẩm Mỹ Quốc Tế TheQ chuyên đào tạo nghề Chăm sóc da, Phun xăm thẩm mỹ, Massage trị liệu và Quản lý Spa chuẩn y khoa, cam kết 100% việc làm." />
       </Head>
       <Header />
       
@@ -91,7 +91,7 @@ export default function TinTucPage({
         {/* Banner/Hero Banner */}
         <section className="relative w-full flex items-start bg-gradient-to-br from-[#141311] via-[#1f1c18] to-[#2c251d] overflow-hidden pt-40 md:pt-48 pb-20 md:pb-24">
           {settings.blog_hero_image && (
-            <img src={settings.blog_hero_image} alt={settings.blog_hero_title || "Banner Blog"} className="absolute inset-0 w-full h-full object-cover opacity-35 z-0" />
+            <img src={settings.blog_hero_image} alt={settings.blog_hero_title || "Học Viện Đào Tạo Spa TheQ"} className="absolute inset-0 w-full h-full object-cover opacity-35 z-0" />
           )}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(176,154,122,0.18),transparent_60%)] z-1" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent z-10" />
@@ -102,15 +102,15 @@ export default function TinTucPage({
               <div className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-gold mb-4 font-semibold">
                 <Link href="/" className="hover:underline">Trang chủ</Link>
                 <ChevronRight size={12} className="text-gray-400" />
-                <span className="text-white">{settings.blog_hero_breadcrumb ?? "Tin tức & Sự kiện"}</span>
+                <span className="text-white">{settings.blog_hero_breadcrumb ?? "Cẩm Nang Đào Tạo Nghề Spa"}</span>
               </div>
               {/* Title */}
               <h1 className="text-4xl md:text-6xl font-serif font-bold text-white mb-6 leading-tight tracking-wide">
-                {settings.blog_hero_title ?? "Góc Chuyên Gia & Tin Tức"}
+                {settings.blog_hero_title ?? "Học Viện Đào Tạo Spa & Thẩm Mỹ Quốc Tế TheQ"}
               </h1>
               {/* Subheading */}
               <p className="text-sm md:text-base text-gray-200 leading-relaxed font-light max-w-3xl">
-                {settings.blog_hero_desc ?? "Nơi hội tụ các phân tích chuyên sâu về y học thẩm mỹ, cập nhật công nghệ nâng cơ trẻ hóa thế hệ mới và các hoạt động cộng đồng nổi bật của Theq."}
+                {settings.blog_hero_desc ?? "Chuyên trang chia sẻ lộ trình học nghề Spa, kỹ thuật Chăm sóc da, Massage trị liệu, Phun xăm thẩm mỹ và Kinh nghiệm mở Spa chuẩn y khoa cam kết 100% việc làm."}
               </p>
             </div>
           </div>
