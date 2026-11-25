@@ -7,7 +7,7 @@
     "APP_DEBUG": "false",
     "DB_CONNECTION": "pgsql",
     "DB_SSLMODE": "require",
-    "CACHE_STORE": "database",
+    "CACHE_STORE": "file",
     "SESSION_DRIVER": "cookie",
     "LOG_CHANNEL": "stderr"
   }
